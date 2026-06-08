@@ -1,0 +1,15 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1E3A8A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="600" y="210" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="72" font-weight="bold" fill="#f8fafc">Le Crible Politique</text>
+  <text x="600" y="285" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="34" font-style="italic" fill="#94a3b8">Un miroir, pas un juge</text>
+  <text x="600" y="390" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="31" fill="#e2e8f0">Vos convictions au crible.</text>
+  <text x="600" y="438" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="31" fill="#e2e8f0">Les programmes au crible du droit.</text>
+  <rect x="415" y="510" width="370" height="56" rx="28" fill="#38bdf8"/>
+  <text x="600" y="547" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="26" font-weight="bold" fill="#0f172a">Faire le test - 3 minutes</text>
+</svg>
