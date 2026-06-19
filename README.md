@@ -304,6 +304,9 @@ formula ([METHODOLOGY.md](METHODOLOGY.md) and `/methodology`), governance
 
 ## License
 
-Data, methodology, governance and AI-transparency material: CC BY 4.0. Source
-code: see [LICENSE](LICENSE) (to be confirmed before public release). Required
-attribution: "Le Crible Politique".
+This repository uses a split license.
+
+- **Source code** is under the **MIT License** (see [LICENSE](LICENSE)). You may reuse it freely as long as you keep the copyright notice, which credits Olivier Dehareng.
+- **Data** in [`data/`](data) (party positions, statements and measures) is under **CC BY 4.0** (see [data/LICENSE](data/LICENSE)). If you reuse the data you must give appropriate credit to Olivier Dehareng and link back to this repository.
+
+Suggested attribution. Le Crible Politique by Olivier Dehareng, https://github.com/DeharengOlivier/crible-politique
