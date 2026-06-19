@@ -69,6 +69,74 @@ score(party)         = mean of agreements over the statements where
 computation: they are never counted against the user nor against the party. The
 engine is fully deterministic: the same answers always produce the same result.
 
+## Architecture
+
+The whole app is a Next.js front end with a deterministic engine that runs client side. There is no AI at runtime, no account, and no server-side storage of answers.
+
+### System overview
+
+```mermaid
+flowchart TB
+    User[User] --> Test["Test (questionnaire)"]
+    Test --> Engine["Deterministic scoring engine, client side"]
+    Data[("Static data: statements, parties")] --> Engine
+    Engine --> Result["Profile, compass, per-party proximity"]
+    Result --> Share["Share and compare, URL encoded"]
+    Result --> Embed["Embeddable widget"]
+    Observatory["Measures observatory"] --> User
+```
+
+### Scoring pipeline
+
+```mermaid
+flowchart LR
+    Answers["Likert answers across 7 dimensions"] --> Filter["Drop no-opinion and undocumented positions"]
+    Filter --> Agree["agreement = 1 - abs(user - party) / 4"]
+    Agree --> Mean["Mean per party over shared statements"]
+    Mean --> Proximity["Per-party proximity, explained statement by statement"]
+    Answers --> Compass["Per-dimension profile"]
+    Compass --> Archetype["Synthetic profile and dominant archetype"]
+```
+
+### Stateless profile sharing
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant App as App (client)
+    participant URL as Shareable link
+    U->>App: complete the test
+    App->>App: encode profile into a short code
+    App->>URL: build link with the code
+    Note over URL: the profile lives entirely in the URL, no server storage
+    U->>URL: share the link
+    URL->>App: decode code back into a profile
+    App->>U: render the profile or compare two profiles
+```
+
+### Data model
+
+```mermaid
+erDiagram
+    DIMENSION ||--o{ STATEMENT : groups
+    STATEMENT ||--o{ PARTY_POSITION : documented_for
+    PARTY ||--o{ PARTY_POSITION : holds
+    PARTY ||--o{ MEASURE : proposes
+    STATEMENT {
+        string id
+        string text
+        string dimension
+    }
+    PARTY_POSITION {
+        int position
+        string source_status
+    }
+    PARTY {
+        string id
+        string name
+    }
+```
+
 ## Stack
 
 - **Next.js 16** (App Router) and **React 19**, **TypeScript**.
