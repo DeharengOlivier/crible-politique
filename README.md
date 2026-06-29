@@ -1,3 +1,15 @@
+<p align="center">
+  <img src="public/icons/icon-512.svg" alt="Le Crible Politique" width="120">
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/code-MIT-yellow.svg" alt="Code: MIT"></a>
+  <a href="data/LICENSE"><img src="https://img.shields.io/badge/data-CC%20BY%204.0-blue.svg" alt="Data: CC BY 4.0"></a>
+  <img src="https://img.shields.io/badge/Next.js-16-000000.svg" alt="Next.js 16">
+  <img src="https://img.shields.io/badge/React-19-149eca.svg" alt="React 19">
+  <img src="https://img.shields.io/badge/tests-44%20passing-brightgreen.svg" alt="Tests: 44 passing">
+</p>
+
 # Le Crible Politique
 
 **A mirror, not a judge.** A French/Belgian political self-assessment tool that
@@ -10,13 +22,10 @@ material (party manifestos, statements, legal analyses). The codebase, comments
 and developer documentation are in English; the user-facing copy and the
 political data stay in French on purpose.
 
-> Note on naming and licensing: the product is "Le Crible Politique" (the prior
-> working name was "Political Reality Check"). The repository ships data,
-> methodology and governance under CC BY 4.0 (see [LICENSE](LICENSE)). The
-> source code license should be confirmed before any public release: the current
-> [LICENSE](LICENSE) file still marks the code as all-rights-reserved, which is
-> inconsistent with an open-source publication and needs an explicit decision
-> (for example MIT or AGPL) from the rights holder.
+> Naming: the product is "Le Crible Politique" (the prior working name was
+> "Political Reality Check", which is why the logo reads `PC`). Licensing is
+> split: the source code is under the MIT License and the political data under
+> CC BY 4.0. See [License](#license) for details.
 
 ## What the app does
 
@@ -286,9 +295,6 @@ two prototypes. It is honest about what is solid and what still needs hardening.
   primary sources before any public claim of accuracy (this is exactly what the
   `a_verifier` status and [GOVERNANCE.md](GOVERNANCE.md) encode). The
   AI-usage charter and prompts live in `transparence-ia/`.
-- **Code license.** As noted above, the [LICENSE](LICENSE) still marks the code
-  as proprietary. That must be reconciled with the intent to open-source before
-  publishing.
 - **Pre-launch checklist (human).** Fill the publisher-identity placeholders on
   the `/a-propos` page (legally required in France), connect the production
   domains, and document the cookieless analytics choice on the privacy page.
@@ -301,6 +307,40 @@ formula ([METHODOLOGY.md](METHODOLOGY.md) and `/methodology`), governance
 ([GOVERNANCE.md](GOVERNANCE.md)), the data change log
 ([CHANGELOG-DONNEES.md](CHANGELOG-DONNEES.md)), and the AI-usage record
 (`transparence-ia/`).
+
+## Contributing
+
+Contributions are welcome, under one rule above all: **political neutrality**.
+This is a mirror, not a megaphone. The most valuable help here is usually not
+code, it is sourcing. Read [GOVERNANCE.md](GOVERNANCE.md) first; it defines the
+non-negotiable commitments (independence, transparency, neutrality) that every
+contribution must respect.
+
+**Data corrections and sourcing (highest priority).** Most party positions are at
+status `a_verifier`: coded from manifestos and statements, and waiting for
+adversarial double-coding by reviewers of different sensibilities. If you can
+document or correct a position with a dated, linked primary source:
+
+1. open an issue with the statement, the party, the proposed position and the
+   source, or
+2. send a PR editing [`data/partyPositions.ts`](data/partyPositions.ts) and
+   logging the change in [CHANGELOG-DONNEES.md](CHANGELOG-DONNEES.md). Only set
+   `source_status: "verifie"` when you attach a real citation.
+
+**Code contributions.**
+
+- Keep the engine deterministic: no AI call at runtime, no server-side storage of
+  answers. Anything that changes a result must be a published, hand-recomputable
+  formula ([METHODOLOGY.md](METHODOLOGY.md)).
+- `npm test` must stay green (44 tests lock determinism, data integrity and the
+  CHES external-consistency check). Ship a test with any behaviour change.
+- Match the existing style. User-facing copy and political data stay in French;
+  code and comments are in English.
+
+**Good first issues.** The items under [Limitations](#limitations-and-how-i-would-improve-this)
+are deliberately scoped entry points: removing the unused scaffolded
+dependencies, an accessibility pass on the survey flow, and component or
+end-to-end tests for the results and share/compare views.
 
 ## License
 
