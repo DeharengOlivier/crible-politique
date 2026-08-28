@@ -26,60 +26,82 @@ export default function LegalPage() {
             <h2 className="text-2xl font-bold">2. Politique de confidentialité (RGPD)</h2>
 
             <h3 className="mt-4 text-lg font-semibold">Données collectées</h3>
+            <p className="text-sm">
+              <strong>Aucune.</strong> Le site n&apos;a ni compte, ni base de données, ni API: il
+              n&apos;existe aucun endroit où une réponse pourrait être enregistrée. Vos réponses sont
+              calculées dans votre navigateur et restent sur votre appareil.
+            </p>
+
+            <h3 className="mt-4 text-lg font-semibold">Ce qui est stocké sur votre appareil</h3>
             <ul className="text-sm">
-              <li><strong>Mode anonyme (par défaut)</strong> : Aucune donnée personnelle n&apos;est collectée.
-              Vos réponses au questionnaire sont traitées localement dans votre navigateur (localStorage)
-              et ne sont jamais envoyées à un serveur, sauf si vous utilisez l&apos;enrichissement IA.</li>
-              <li><strong>Enrichissement IA</strong> : Vos réponses anonymisées sont envoyées au modèle IA
-              (OpenAI ou Anthropic) pour générer l&apos;interprétation sociologique. Ces données ne sont pas
-              stockées par notre serveur après le traitement.</li>
-              <li><strong>Opt-in statistiques</strong> : Si vous acceptez de contribuer aux statistiques,
-              un profil anonymisé (classe sociale, idéologie, fondations morales, territoire — PAS votre nom,
-              email, adresse ou revenus exacts) est stocké dans notre base de données.</li>
-              <li><strong>Compte utilisateur</strong> : Si vous créez un compte, votre adresse email est stockée
-              par Supabase Auth pour l&apos;authentification uniquement. Votre historique d&apos;analyses est lié à
-              votre compte.</li>
+              <li><strong>Réponses en cours</strong> (<code>localStorage</code>, clé
+              <code>crible_test_v1</code>) : pour reprendre un test interrompu et revoir vos
+              résultats.</li>
+              <li><strong>Invitation à comparer</strong> (<code>sessionStorage</code>) : le profil
+              d&apos;un proche qui vous a envoyé un lien de comparaison, le temps de l&apos;onglet.</li>
+              <li><strong>Pages hors ligne</strong> (Cache Storage) : une copie des pages ordinaires
+              du site, pour qu&apos;il reste consultable sans connexion. Les profils partagés et les
+              comparaisons ne sont jamais mis en cache.</li>
             </ul>
+            <p className="text-sm">
+              Le bouton &laquo;&nbsp;effacer mes données locales&nbsp;&raquo; de la page{' '}
+              <Link href="/confidentialite" className="text-blue-600">confidentialité</Link> vide les
+              trois d&apos;un coup.
+            </p>
+
+            <h3 className="mt-4 text-lg font-semibold">Ce qui circule quand vous partagez</h3>
+            <p className="text-sm">
+              Un lien de partage contient votre profil sous deux formes. L&apos;identité affichée (le
+              nom du profil et les sept courants dominants) est dans le chemin de l&apos;adresse, et
+              c&apos;est ce que le serveur reçoit: elle ne permet pas de retrouver vos réponses. Vos
+              réponses elles-mêmes sont placées après le &laquo;&nbsp;#&nbsp;&raquo;, la partie de
+              l&apos;adresse que le navigateur ne transmet jamais: elles n&apos;apparaissent dans aucun
+              journal de serveur et ne sont lues que par le navigateur de la personne à qui vous avez
+              envoyé le lien.
+            </p>
 
             <h3 className="mt-4 text-lg font-semibold">Base légale</h3>
             <p className="text-sm">
-              Le traitement des données repose sur votre <strong>consentement explicite</strong> (art. 6§1a RGPD)
-              pour les statistiques et le compte, et sur l&apos;<strong>intérêt légitime</strong> (art. 6§1f RGPD)
-              pour le fonctionnement technique du site.
+              Sans collecte, il n&apos;y a pas de traitement de données personnelles au sens du RGPD,
+              donc pas de base légale à invoquer. Les opinions politiques relèvent de
+              l&apos;article&nbsp;9: la réponse de ce site est de ne pas les recueillir.
             </p>
 
             <h3 className="mt-4 text-lg font-semibold">Vos droits</h3>
             <p className="text-sm">
-              Conformément au RGPD (articles 15 à 22), vous disposez des droits suivants :
-            </p>
-            <ul className="text-sm">
-              <li>Droit d&apos;accès, de rectification et d&apos;effacement de vos données</li>
-              <li>Droit à la portabilité de vos données</li>
-              <li>Droit d&apos;opposition et de limitation du traitement</li>
-              <li>Droit de retirer votre consentement à tout moment</li>
-            </ul>
-            <p className="text-sm">
-              Pour exercer ces droits, contactez-nous par email (adresse à ajouter).
+              Les droits d&apos;accès, de rectification, d&apos;effacement, de portabilité et
+              d&apos;opposition (articles 15 à 22 du RGPD) portent sur des données détenues par un
+              responsable de traitement. Il n&apos;y en a aucune ici: l&apos;effacement se fait
+              entièrement de votre côté, avec le bouton de la page confidentialité ou en vidant les
+              données du site dans votre navigateur. Pour toute question, le dépôt public du projet
+              est le canal:{' '}
+              <a
+                href="https://github.com/DeharengOlivier/crible-politique/issues"
+                className="text-blue-600"
+              >
+                github.com/DeharengOlivier/crible-politique
+              </a>.
             </p>
 
             <h3 className="mt-4 text-lg font-semibold">Cookies</h3>
             <p className="text-sm">
-              Ce site n&apos;utilise <strong>aucun cookie tiers</strong>, aucun tracker publicitaire,
-              aucun pixel de suivi. Le seul stockage local est le localStorage utilisé par l&apos;application
-              pour sauvegarder vos réponses pendant votre session.
+              Ce site n&apos;utilise <strong>aucun cookie</strong>, aucun tracker publicitaire, aucun
+              pixel de suivi. Le stockage local décrit plus haut n&apos;est pas un cookie et n&apos;est
+              jamais transmis.
             </p>
-            {/* Plausible is cookie-free and doesn't require consent */}
 
             <h3 className="mt-4 text-lg font-semibold">Sous-traitants</h3>
             <table className="mt-2 w-full text-sm">
               <thead><tr className="border-b"><th className="py-2 text-left">Service</th><th className="py-2 text-left">Usage</th><th className="py-2 text-left">Localisation</th></tr></thead>
               <tbody>
-                <tr className="border-b"><td className="py-2">Vercel</td><td>Hébergement</td><td>USA (Privacy Shield)</td></tr>
-                <tr className="border-b"><td className="py-2">Supabase</td><td>Base de données, authentification</td><td>EU (Francfort)</td></tr>
-                <tr className="border-b"><td className="py-2">OpenAI / Anthropic</td><td>Enrichissement IA (opt-in)</td><td>USA</td></tr>
-                <tr><td className="py-2">Plausible</td><td>Analytics (sans cookies)</td><td>EU</td></tr>
+                <tr className="border-b"><td className="py-2">Vercel</td><td>Hébergement</td><td>USA</td></tr>
+                <tr><td className="py-2">Plausible</td><td>Mesure d&apos;audience sans cookie ni identifiant</td><td>UE</td></tr>
               </tbody>
             </table>
+            <p className="text-sm">
+              Il n&apos;y en a pas d&apos;autre. Le site n&apos;appelle aucune API, aucun modèle
+              d&apos;IA et aucune base de données pendant votre visite.
+            </p>
           </section>
 
           <section className="mb-10">
@@ -95,8 +117,11 @@ export default function LegalPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-bold">4. Propriété intellectuelle</h2>
             <p>
-              Le code source de cette application est disponible sous licence ouverte.
-              Les données INSEE, CHES et les programmes des partis sont des données publiques.
+              Le code de cette application est publié sous licence MIT, et les données qui
+              déterminent les résultats sous licence CC BY 4.0:{' '}
+              <a href="https://github.com/DeharengOlivier/crible-politique" className="text-blue-600">
+                github.com/DeharengOlivier/crible-politique
+              </a>. Les données INSEE, CHES et les programmes des partis sont des données publiques.
               Le Moral Foundations Questionnaire (MFQ) est libre de droits pour la recherche.
             </p>
           </section>

@@ -58,10 +58,15 @@ export default function ConfidentialitePage() {
                             </li>
                             <li>
                                 <strong className="text-[var(--color-text)]">Le partage est un choix explicite.</strong>{' '}
-                                Les liens de partage et de comparaison encodent vos réponses dans l&apos;URL
-                                elle-même: ils ne sont stockés nulle part et n&apos;existent que si vous
-                                décidez de les envoyer. Ne les partagez qu&apos;avec des personnes de
-                                confiance, comme une conversation politique privée.
+                                Un lien de partage n&apos;est stocké nulle part et n&apos;existe que si vous
+                                décidez de l&apos;envoyer. Il contient deux choses. L&apos;identité affichée,
+                                dans le chemin de l&apos;adresse: c&apos;est tout ce que le serveur reçoit, et
+                                elle ne permet pas de remonter à vos réponses. Vos réponses, après le
+                                &laquo;&nbsp;#&nbsp;&raquo;: cette partie de l&apos;adresse n&apos;est jamais
+                                transmise par le navigateur, elle n&apos;apparaît donc dans aucun journal de
+                                serveur et n&apos;est lue que par le navigateur de votre destinataire. Ne
+                                partagez le lien qu&apos;avec des personnes de confiance, comme une
+                                conversation politique privée.
                             </li>
                             <li>
                                 <strong className="text-[var(--color-text)]">Le simulateur d&apos;impact aussi.</strong>{' '}
@@ -73,7 +78,9 @@ export default function ConfidentialitePage() {
                                 <strong className="text-[var(--color-text)]">Sauvegarde locale, effaçable.</strong>{' '}
                                 Pour reprendre un test interrompu et revoir vos résultats, vos réponses sont
                                 conservées dans le stockage local de votre navigateur, sur cet appareil
-                                uniquement. Effaçables en un clic:
+                                uniquement. Le site garde aussi une copie de ses pages ordinaires pour rester
+                                consultable hors connexion, jamais celle d&apos;un profil partagé ni d&apos;une
+                                comparaison. Le bouton efface les deux et désinstalle le mode hors ligne:
                             </li>
                         </ul>
                         <ClearLocalDataButton />
@@ -84,13 +91,19 @@ export default function ConfidentialitePage() {
                             Vérifiable sans nous croire sur parole
                         </h3>
                         <p>
-                            Le code source du site n&apos;est pas public, et nous préférons le dire clairement.
-                            Mais l&apos;affirmation &quot;rien ne quitte votre appareil&quot; se vérifie sans le
-                            code: ouvrez les outils de développement de votre navigateur (F12, onglet
-                            &quot;Réseau&quot;) pendant le test, et constatez qu&apos;aucune requête ne transmet
-                            vos réponses. N&apos;importe qui peut faire cette vérification, ou la demander à
-                            quelqu&apos;un de confiance. Et tout ce qui détermine vos résultats (énoncés,
-                            positions des partis, formule) est publié:{' '}
+                            Le code source est public, sous licence MIT:{' '}
+                            <a
+                                href="https://github.com/DeharengOlivier/crible-politique"
+                                className="font-semibold text-[var(--color-primary)] hover:underline"
+                            >
+                                github.com/DeharengOlivier/crible-politique
+                            </a>
+                            . Vous pouvez y lire exactement ce que fait le site, et vous n&apos;avez même pas
+                            besoin du code pour vérifier l&apos;essentiel: ouvrez les outils de développement de
+                            votre navigateur (F12, onglet &quot;Réseau&quot;) pendant le test, et constatez
+                            qu&apos;aucune requête ne transmet vos réponses. N&apos;importe qui peut faire cette
+                            vérification, ou la demander à quelqu&apos;un de confiance. Et tout ce qui détermine
+                            vos résultats (énoncés, positions des partis, formule) est publié:{' '}
                             <Link href="/methodology" className="font-semibold text-[var(--color-primary)] hover:underline">
                                 méthodologie complète
                             </Link>

@@ -194,13 +194,12 @@ score(parti)   = moyenne des accords sur les énoncés où
 
                     <Section title="8. Transparence et contestation">
                         <p>
-                            Le code source n&apos;est pas public, et nous le disons clairement. En revanche,
-                            tout ce qui détermine vos résultats l&apos;est: les énoncés, les positions des
-                            partis avec sources et statuts, les signatures des courants, la formule (assez
+                            Tout est public: le code sous licence MIT, et tout ce qui détermine vos
+                            résultats sous licence CC BY 4.0. Les énoncés, les positions des partis avec
+                            leurs sources et leurs statuts, les signatures des courants, la formule (assez
                             simple pour être recalculée à la main) et le journal des modifications de
                             données. Toute position, énoncé ou fiche peut être contesté, source à
                             l&apos;appui: réponse motivée sous 14 jours, correction consignée publiquement.
-                            Données et méthodologie sont publiées sous licence CC BY 4.0.
                         </p>
                         <p className="text-xs text-[var(--color-text-muted)]">
                             Dernière revue éditoriale des données:{' '}
