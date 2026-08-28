@@ -296,8 +296,28 @@ properties of the share links.
   erase button, clicked for real.
 
 Current status: **123 tests passing across 10 files**. They run in CI on every
-push and pull request, alongside ESLint, `tsc --noEmit`, the production build
-and `npm audit`.
+push and pull request, alongside ESLint, `tsc --noEmit`, the production build,
+`npm audit` and the privacy check below. Both jobs are required to merge into
+`main`.
+
+### The privacy check
+
+```sh
+npm run check:privacy
+```
+
+The property this application exists to hold, that a set of answers never
+reaches a server, is not visible to a unit test: it is a property of what a
+browser transmits, not of what a function returns. So
+[`scripts/privacy-check.mjs`](scripts/privacy-check.mjs) starts the production
+build behind a proxy that records the exact request line the server receives,
+drives a real headless browser to the three share links, and fails if an
+answer code appears in one. It also asserts each page rendered, because a
+check that passes because nothing loaded is worse than no check.
+
+It runs in CI, and it catches a real regression: adding a single
+`fetch('/?leaked=' + code)` to the hook fails all three cases and prints the
+offending request line.
 
 ## Limitations and how I would improve this
 
@@ -318,10 +338,9 @@ two prototypes. It is honest about what is solid and what still needs hardening.
   cover is the larger components: there is no rendering test for the survey
   flow, the results view or the embed widget. The share-link behaviour has been
   verified end to end in a real browser, by recording the request line the
-  server receives, but that was a measurement and not a test that runs again
-  tomorrow. Next step: React Testing Library coverage of the results view, and
-  a Playwright smoke test of `/test` that asserts no request carries an answer
-  code.
+  server receives, and `npm run check:privacy` now runs that measurement in CI.
+  Next step: React Testing Library coverage of the results view and the survey
+  flow.
 - **Accessibility.** Icons are decorative (`aria-hidden`) and the Likert scale
   uses real buttons rather than a slider, which helps, but there is no audited
   keyboard path through the whole survey, no focus-management review, and the
@@ -375,7 +394,8 @@ document or correct a position with a dated, linked primary source:
   URL). Ship a test with any behaviour change.
 - Never put an answer code anywhere the server sees it: not in a path, not in a
   query string. The fragment is the only place. See
-  [Stateless profile sharing](#stateless-profile-sharing).
+  [Stateless profile sharing](#stateless-profile-sharing); `npm run
+  check:privacy` enforces it.
 - `data/badgeAlphabet.ts` is append only. Reordering it changes what every
   already shared link means.
 - Match the existing style. User-facing copy and political data stay in French;

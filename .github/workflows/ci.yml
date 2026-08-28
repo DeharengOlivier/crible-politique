@@ -35,6 +35,13 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: No answer code reaches the server
+        # Drives a real browser at the production build, through a proxy that
+        # records the request line the server receives, and fails if a set of
+        # answers appears in one. It is the only check that can see the
+        # difference between a fragment and a query string, because that
+        # difference exists in the browser and not in any function.
+        run: npm run check:privacy
 
   audit:
     name: Dependency advisories

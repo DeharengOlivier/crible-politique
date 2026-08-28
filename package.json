@@ -11,7 +11,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "check:privacy": "node scripts/privacy-check.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.17.0",
