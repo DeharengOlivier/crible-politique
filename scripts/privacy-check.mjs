@@ -48,6 +48,14 @@ const CASES = [
         url: `/p/${BADGE}#p=${ANSWERS}`,
         expect: 'Profil partagé',
         why: 'a shared profile renders from its badge'
+    },
+    {
+        // The embed runs inside an iframe on someone else's site, and its way
+        // out to the full test is a link it builds itself. It is the easiest
+        // place for an answer code to end up in a query string again.
+        url: '/embed',
+        expect: 'énoncés',
+        why: 'the embeddable widget loads'
     }
 ];
 

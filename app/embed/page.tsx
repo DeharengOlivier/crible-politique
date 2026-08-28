@@ -5,6 +5,7 @@ import { EXPRESS_STATEMENTS } from '@/data/statements';
 import { AnswerRecord } from '@/types/positions';
 import { computeProfile, computePartyMatches } from '@/lib/scoringEngine';
 import { encodeAnswers } from '@/lib/profileCode';
+import { shareFragment } from '@/lib/shareLink';
 import { ProfileIcon } from '@/lib/icons';
 import StatementSurvey from '@/components/test/StatementSurvey';
 
@@ -12,7 +13,10 @@ import StatementSurvey from '@/components/test/StatementSurvey';
  * Embeddable widget for partner media: the express test (12 statements)
  * on the deterministic engine, inside an iframe.
  * Usage: <iframe src="https://criblepolitique.fr/embed" width="100%" height="720" />
- * Same doctrine as the site: local computation, no data collected.
+ * Same doctrine as the site: local computation, no data collected. The link
+ * out to the full test carries the answers in the fragment, like every other
+ * share link: this widget runs on somebody else's page, so the one thing it
+ * must never do is turn a reader's answers into a request to ours.
  */
 
 function EmbedResults({ answers }: { answers: AnswerRecord }) {
@@ -49,7 +53,7 @@ function EmbedResults({ answers }: { answers: AnswerRecord }) {
                 ))}
             </div>
             <a
-                href={`/test?p=${code}`}
+                href={`/test${shareFragment({ p: code })}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block rounded-xl bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-white hover:bg-[var(--color-primary-light)]"
