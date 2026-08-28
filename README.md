@@ -289,8 +289,13 @@ properties of the share links.
 - `__tests__/localData.test.ts`: that "effacer mes données locales" reaches
   local storage, session storage, the caches and the service worker, and keeps
   going when one of them refuses.
+- `__tests__/useShareCodes.test.tsx`: the browser half of the same path, in
+  jsdom. That the hook reports nothing until it has read the location rather
+  than reporting "no profile", that it rewrites a legacy query URL in place,
+  and that it keeps up when the fragment changes under the page. Plus the
+  erase button, clicked for real.
 
-Current status: **117 tests passing across 9 files**. They run in CI on every
+Current status: **123 tests passing across 10 files**. They run in CI on every
 push and pull request, alongside ESLint, `tsc --noEmit`, the production build
 and `npm audit`.
 
@@ -309,13 +314,14 @@ two prototypes. It is honest about what is solid and what still needs hardening.
   and surface the coverage ratio prominently.
 - **Test coverage.** The suite locks the scoring invariants, the data
   integrity and the privacy properties of the share links, all as pure
-  functions. What it does not cover is the components that call them: there is
-  no rendering test for the survey flow, the results view or the embed widget.
-  The share-link behaviour has been verified end to end in a real browser, by
-  recording the request line the server receives, but that was a measurement
-  and not a test that runs again tomorrow. Next step: React Testing Library
-  coverage of the results view, and a Playwright smoke test of `/test` that
-  asserts no request carries an answer code.
+  functions, plus the hook and the erase button in jsdom. What it does not
+  cover is the larger components: there is no rendering test for the survey
+  flow, the results view or the embed widget. The share-link behaviour has been
+  verified end to end in a real browser, by recording the request line the
+  server receives, but that was a measurement and not a test that runs again
+  tomorrow. Next step: React Testing Library coverage of the results view, and
+  a Playwright smoke test of `/test` that asserts no request carries an answer
+  code.
 - **Accessibility.** Icons are decorative (`aria-hidden`) and the Likert scale
   uses real buttons rather than a slider, which helps, but there is no audited
   keyboard path through the whole survey, no focus-management review, and the
