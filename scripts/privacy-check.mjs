@@ -92,10 +92,20 @@ async function waitForPort(port, timeoutMs = 60_000) {
     throw new Error(`nothing answered on port ${port} within ${timeoutMs}ms`);
 }
 
+// A request line is written by whatever made the request, so it reaches this
+// script as untrusted text. It is later printed in a failure report, and a
+// newline in it would let one request line look like several. Control
+// characters are escaped, and the line is capped, before it is ever stored.
+function readable(requestLine) {
+    return requestLine
+        .replace(/[\u0000-\u001f\u007f]/g, (c) => `\\x${c.charCodeAt(0).toString(16).padStart(2, '0')}`)
+        .slice(0, 400);
+}
+
 function startLoggingProxy(lines) {
     return new Promise((resolve) => {
         const server = createServer((req, res) => {
-            lines.push(`${req.method} ${req.url}`);
+            lines.push(readable(`${req.method} ${req.url}`));
             const upstream = httpRequest(
                 {
                     host: '127.0.0.1',
