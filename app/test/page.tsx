@@ -192,7 +192,7 @@ function IntroView({
                 <button
                     type="button"
                     onClick={onStartVoice}
-                    className="inline-flex items-center justify-center gap-2 text-sm text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-primary)] hover:underline"
+                    className="inline-flex min-h-[44px] items-center justify-center gap-2 text-sm text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-primary)] hover:underline"
                 >
                     <Mic className="h-4 w-4" aria-hidden="true" />
                     Préférer l&apos;entretien vocal (28 énoncés lus à voix haute, ~10 min)
@@ -324,7 +324,7 @@ export default function TestPage() {
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                     <Link
                         href="/"
-                        className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
+                        className="inline-flex min-h-[44px] items-center text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)] sm:min-h-0"
                     >
                         ← Le Crible Politique
                     </Link>

@@ -34,7 +34,7 @@ export default function SharedProfileActions() {
             </Link>
             <Link
                 href={`/test${shareFragment({ p: code ?? '' })}`}
-                className="block text-xs text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-primary)] hover:underline"
+                className="flex min-h-[44px] items-center justify-center text-xs text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-primary)] hover:underline"
             >
                 C&apos;est mon profil: voir mes résultats complets
             </Link>

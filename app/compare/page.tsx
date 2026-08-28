@@ -231,7 +231,7 @@ export default function ComparePage() {
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                     <Link
                         href="/"
-                        className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
+                        className="inline-flex min-h-[44px] items-center text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)] sm:min-h-0"
                     >
                         ← Le Crible Politique
                     </Link>

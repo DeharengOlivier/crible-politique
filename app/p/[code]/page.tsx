@@ -48,7 +48,7 @@ export default async function SharedProfilePage({ params }: PageProps) {
                 <div className="mx-auto flex max-w-7xl items-center justify-center px-6 py-4">
                     <Link
                         href="/"
-                        className="font-[family-name:var(--font-heading)] text-lg font-semibold text-[var(--color-primary)]"
+                        className="inline-flex min-h-[44px] items-center font-[family-name:var(--font-heading)] text-lg font-semibold text-[var(--color-primary)] sm:min-h-0"
                     >
                         Le Crible Politique
                     </Link>

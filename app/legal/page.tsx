@@ -5,7 +5,7 @@ export default function LegalPage() {
     <div className="min-h-screen bg-white text-gray-900">
       <header className="border-b border-gray-200 bg-gray-50">
         <div className="mx-auto max-w-3xl px-6 py-8">
-          <Link href="/" className="mb-4 inline-block text-sm text-blue-600">&larr; Retour</Link>
+          <Link href="/" className="mb-4 inline-flex min-h-[44px] items-center text-sm text-blue-600 sm:min-h-0">&larr; Retour</Link>
           <h1 className="text-3xl font-extrabold">Mentions légales &amp; Politique de confidentialité</h1>
         </div>
       </header>

@@ -73,7 +73,7 @@ export default function Home() {
           <div className="mt-8 text-center">
             <Link
               href="/test"
-              className="inline-flex items-center gap-2 font-semibold text-[var(--color-primary)] hover:underline"
+              className="inline-flex min-h-[44px] items-center gap-2 font-semibold text-[var(--color-primary)] hover:underline"
             >
               Découvrir le mien
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -145,7 +145,7 @@ export default function Home() {
                 {' '}{MEASURES.length} mesures phares du débat analysées norme par norme: ce qui est
                 établi, ce qui est débattu, les voies possibles. Jamais de verdict.
               </p>
-              <Link href="/crible" className="inline-flex items-center gap-2 font-semibold text-[var(--color-accent)] hover:gap-3">
+              <Link href="/crible" className="inline-flex min-h-[44px] items-center gap-2 font-semibold text-[var(--color-accent)] hover:gap-3">
                 Explorer les analyses
                 <ArrowRight className="h-5 w-5" aria-hidden="true" />
               </Link>
@@ -200,12 +200,12 @@ export default function Home() {
             </div>
             <div>
               <h4 className="mb-3 font-[family-name:var(--font-heading)] font-semibold text-[var(--color-text)]">Ressources</h4>
-              <ul className="mb-4 space-y-2 text-sm">
-                <li><Link href="/methodology" className="text-[var(--color-primary)] hover:text-[var(--color-primary-light)] transition-colors">Méthodologie complète</Link></li>
-                <li><Link href="/a-propos" className="text-[var(--color-primary)] hover:text-[var(--color-primary-light)] transition-colors">Qui sommes-nous</Link></li>
-                <li><Link href="/concepts" className="text-[var(--color-primary)] hover:text-[var(--color-primary-light)] transition-colors">Les profils &amp; concepts</Link></li>
-                <li><Link href="/confidentialite" className="text-[var(--color-primary)] hover:text-[var(--color-primary-light)] transition-colors">Confidentialité</Link></li>
-                <li><Link href="/partners" className="text-[var(--color-primary)] hover:text-[var(--color-primary-light)] transition-colors">Médias &amp; partenaires</Link></li>
+              <ul className="mb-4 text-sm sm:space-y-2">
+                <li><Link href="/methodology" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Méthodologie complète</Link></li>
+                <li><Link href="/a-propos" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Qui sommes-nous</Link></li>
+                <li><Link href="/concepts" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Les profils &amp; concepts</Link></li>
+                <li><Link href="/confidentialite" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Confidentialité</Link></li>
+                <li><Link href="/partners" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Médias &amp; partenaires</Link></li>
               </ul>
               <h4 className="mb-3 font-[family-name:var(--font-heading)] font-semibold text-[var(--color-text)]">Pays couverts</h4>
               <div className="flex flex-wrap gap-2 text-sm text-[var(--color-text-secondary)]">
@@ -214,12 +214,15 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <p className="border-t border-[var(--color-border-light)] pt-8 text-center text-sm text-[var(--color-text-muted)]">
-            &copy; 2026 Le Crible Politique &bull;{' '}
-            <Link href="/legal" className="underline hover:text-[var(--color-text)]">Mentions légales</Link> &bull;{' '}
-            <Link href="/methodology" className="underline hover:text-[var(--color-text)]">Méthodologie</Link> &bull;{' '}
-            <Link href="/confidentialite" className="underline hover:text-[var(--color-text)]">Confidentialité</Link>
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-2 border-t border-[var(--color-border-light)] pt-8 text-center text-sm text-[var(--color-text-muted)]">
+            <span className="inline-flex min-h-[44px] items-center sm:min-h-0">&copy; 2026 Le Crible Politique</span>
+            <span aria-hidden="true">&bull;</span>
+            <Link href="/legal" className="inline-flex min-h-[44px] items-center underline hover:text-[var(--color-text)] sm:min-h-0">Mentions légales</Link>
+            <span aria-hidden="true">&bull;</span>
+            <Link href="/methodology" className="inline-flex min-h-[44px] items-center underline hover:text-[var(--color-text)] sm:min-h-0">Méthodologie</Link>
+            <span aria-hidden="true">&bull;</span>
+            <Link href="/confidentialite" className="inline-flex min-h-[44px] items-center underline hover:text-[var(--color-text)] sm:min-h-0">Confidentialité</Link>
+          </div>
         </div>
       </footer>
     </div>

@@ -36,7 +36,7 @@ export default async function FichePage({ params }: PageProps) {
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                     <Link
                         href="/crible"
-                        className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
+                        className="inline-flex min-h-[44px] items-center text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)] sm:min-h-0"
                     >
                         ← Toutes les analyses
                     </Link>

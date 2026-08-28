@@ -61,7 +61,7 @@ export default function FicheCard({ measure, standalone = false }: FicheCardProp
                         type="button"
                         onClick={copyLink}
                         title="Copier le lien de cette analyse"
-                        className="rounded-lg border border-[var(--color-border)] px-2 py-1 text-xs text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)]"
+                        className="inline-flex min-h-[44px] items-center rounded-lg border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-text-muted)] hover:border-[var(--color-primary)]/40 hover:text-[var(--color-primary)] sm:min-h-0 sm:px-2"
                     >
                         {copied ? 'Copié !' : 'Lien'}
                     </button>
