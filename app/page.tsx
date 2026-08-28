@@ -175,14 +175,14 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-6 py-12">
           <div className="mb-8 grid gap-8 md:grid-cols-3">
             <div>
-              <h4 className="mb-3 font-[family-name:var(--font-heading)] text-lg font-bold text-[var(--color-primary)]">Le Crible Politique</h4>
+              <h3 className="mb-3 font-[family-name:var(--font-heading)] text-lg font-bold text-[var(--color-primary)]">Le Crible Politique</h3>
               <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
                 Initiative citoyenne indépendante. Vos convictions au crible, les programmes au
                 crible du droit. Méthodologie ouverte, aucune consigne de vote.
               </p>
             </div>
             <div>
-              <h4 className="mb-3 font-[family-name:var(--font-heading)] font-semibold text-[var(--color-text)]">Nos engagements</h4>
+              <h3 className="mb-3 font-[family-name:var(--font-heading)] font-semibold text-[var(--color-text)]">Nos engagements</h3>
               <ul className="space-y-2 text-sm text-[var(--color-text-secondary)]">
                 {[
                   'Jamais de consigne de vote',
@@ -199,7 +199,7 @@ export default function Home() {
               </ul>
             </div>
             <div>
-              <h4 className="mb-3 font-[family-name:var(--font-heading)] font-semibold text-[var(--color-text)]">Ressources</h4>
+              <h3 className="mb-3 font-[family-name:var(--font-heading)] font-semibold text-[var(--color-text)]">Ressources</h3>
               <ul className="mb-4 text-sm sm:space-y-2">
                 <li><Link href="/methodology" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Méthodologie complète</Link></li>
                 <li><Link href="/a-propos" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Qui sommes-nous</Link></li>
@@ -207,7 +207,7 @@ export default function Home() {
                 <li><Link href="/confidentialite" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Confidentialité</Link></li>
                 <li><Link href="/partners" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Médias &amp; partenaires</Link></li>
               </ul>
-              <h4 className="mb-3 font-[family-name:var(--font-heading)] font-semibold text-[var(--color-text)]">Pays couverts</h4>
+              <h3 className="mb-3 font-[family-name:var(--font-heading)] font-semibold text-[var(--color-text)]">Pays couverts</h3>
               <div className="flex flex-wrap gap-2 text-sm text-[var(--color-text-secondary)]">
                 <span className="inline-flex items-center rounded-md border border-[var(--color-border)] bg-white px-3 py-1.5 font-medium">France</span>
                 <span className="inline-flex items-center rounded-md border border-[var(--color-border)] bg-white px-3 py-1.5 font-medium">Belgique</span>
