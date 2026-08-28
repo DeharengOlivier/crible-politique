@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { decodeAnswers } from '@/lib/profileCode';
+import { shareFragment } from '@/lib/shareLink';
 import { computeProfile } from '@/lib/scoringEngine';
 import { DIMENSION_LABELS, DIMENSION_ORDER } from '@/types/positions';
 import { ProfileIcon } from '@/lib/icons';
@@ -92,13 +93,13 @@ export default async function SharedProfilePage({ params }: PageProps) {
                             Et toi, où te situes-tu ? Fais le test (3 min)
                         </Link>
                         <Link
-                            href={`/compare?a=${code}`}
+                            href={`/compare${shareFragment({ a: code })}`}
                             className="block w-full rounded-xl border-2 border-[var(--color-border)] bg-white px-6 py-3.5 text-sm font-semibold text-[var(--color-text)] transition-colors hover:border-[var(--color-primary)]/40"
                         >
                             Faire le test et comparer nos profils
                         </Link>
                         <Link
-                            href={`/test?p=${code}`}
+                            href={`/test${shareFragment({ p: code })}`}
                             className="block text-xs text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-primary)] hover:underline"
                         >
                             C&apos;est mon profil: voir mes résultats complets

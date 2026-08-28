@@ -1,16 +1,21 @@
 'use client';
 
-import { Suspense, useMemo } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { decodeAnswers } from '@/lib/profileCode';
+import { useShareCodes } from '@/lib/useShareCodes';
 import { computeProfile } from '@/lib/scoringEngine';
 import { STATEMENTS } from '@/data/statements';
 import { AnswerRecord, DimensionKey, DIMENSION_LABELS, DIMENSION_ORDER, LIKERT_LABELS } from '@/types/positions';
 import { ProfileIcon } from '@/lib/icons';
 
-// Duo comparison, 100% client-side: both profiles live in the URL,
-// nothing is stored. Central use case: couples, family, friends.
+// Duo comparison, 100% client-side: both profiles live in the URL fragment,
+// nothing is stored and nothing is transmitted. Central use case: couples,
+// family, friends.
+
+// The two codes this page reads, in the fragment: "#a=...&b=...".
+const SHARE_KEYS = ['a', 'b'] as const;
 
 
 function compareAnswers(a: AnswerRecord, b: AnswerRecord) {
@@ -49,10 +54,10 @@ const likertLabel = (v: number) => LIKERT_LABELS[String(v)] ?? String(v);
 
 function CompareContent() {
     const router = useRouter();
-    const searchParams = useSearchParams();
+    const shared = useShareCodes(SHARE_KEYS);
 
-    const codeA = searchParams.get('a');
-    const codeB = searchParams.get('b');
+    const codeA = shared?.a ?? null;
+    const codeB = shared?.b ?? null;
     const answersA = useMemo(() => (codeA ? decodeAnswers(codeA) : null), [codeA]);
     const answersB = useMemo(() => (codeB ? decodeAnswers(codeB) : null), [codeB]);
     const profileA = useMemo(() => (answersA ? computeProfile(answersA) : null), [answersA]);
@@ -61,6 +66,11 @@ function CompareContent() {
         () => (answersA && answersB ? compareAnswers(answersA, answersB) : null),
         [answersA, answersB]
     );
+
+    // The fragment is only readable after mount, so there is a first render
+    // where no verdict is possible yet. Rendering the invalid-link message
+    // then would flash an error over a perfectly good link.
+    if (shared === null) return null;
 
     // Invitation: a single profile in the link -> take the test then compare.
     if (codeA && answersA && !answersB) {
@@ -232,9 +242,7 @@ export default function ComparePage() {
                 </div>
             </header>
             <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-                <Suspense fallback={null}>
-                    <CompareContent />
-                </Suspense>
+                <CompareContent />
             </main>
         </div>
     );

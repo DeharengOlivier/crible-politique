@@ -1,12 +1,12 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { STATEMENTS, EXPRESS_STATEMENTS } from '@/data/statements';
 import { AnswerRecord } from '@/types/positions';
 import { computeProfile, computePartyMatches } from '@/lib/scoringEngine';
 import { decodeAnswers, sanitizeAnswers } from '@/lib/profileCode';
+import { useShareCodes } from '@/lib/useShareCodes';
 import StatementSurvey from '@/components/test/StatementSurvey';
 import VoiceSurvey from '@/components/test/VoiceSurvey';
 import ResultsView from '@/components/test/ResultsView';
@@ -202,6 +202,9 @@ function IntroView({
     );
 }
 
+// The code a "keep my results" link carries, in the fragment: "#p=...".
+const SHARE_KEYS = ['p'] as const;
+
 // Global flow state, updated atomically (a single state transition per
 // action) to avoid cascading renders. `saved` is the possibly resumable
 // session, frozen at restoration.
@@ -218,28 +221,34 @@ function restoreFlow(code: string | null): FlowState {
 }
 
 function TestFlow() {
-    const searchParams = useSearchParams();
-    const [flow, setFlow] = useState<FlowState | null>(null);
+    const shared = useShareCodes(SHARE_KEYS);
 
-    // Restoration from client-only sources (?p=code link or local
-    // storage): must run after mount to avoid an SSR hydration mismatch.
-    // A single atomic setState, so no cascade.
-    useEffect(() => {
-        setFlow(restoreFlow(searchParams.get('p')));
-    }, [searchParams]);
+    // Restoration reads client-only sources: the "#p=code" fragment of a
+    // "keep my results" link, and local storage. Neither exists during the
+    // server render, so the hook reports null until mount and this stays
+    // null with it, which renders nothing rather than a wrong first frame.
+    const restored = useMemo(
+        () => (shared === null ? null : restoreFlow(shared.p)),
+        [shared]
+    );
 
-    const ready = flow !== null;
+    // Everything the user does afterwards replaces the restored state. Two
+    // separate values rather than one piece of state seeded by an effect:
+    // seeding would mean a render with the wrong stage, then a second one.
+    const [chosen, setChosen] = useState<FlowState | null>(null);
+    const flow = chosen ?? restored;
+
     const stage = flow?.stage ?? 'intro';
     const answers = flow?.answers ?? {};
     const saved = flow?.saved ?? null;
 
     // Atomic transition: a stage and its answer set change together.
     const transition = (next: Stage, nextAnswers: AnswerRecord) => {
-        setFlow((f) => ({ stage: next, answers: nextAnswers, saved: f?.saved ?? null }));
+        setChosen({ stage: next, answers: nextAnswers, saved });
         save({ stage: next, answers: nextAnswers });
     };
 
-    if (!ready) return null;
+    if (flow === null) return null;
 
     return (
         <>
@@ -249,7 +258,7 @@ function TestFlow() {
                     onStartVoice={() => transition('voice', {})}
                     hasSaved={!!saved && saved.stage !== 'intro'}
                     onResume={() => {
-                        if (saved) setFlow({ stage: saved.stage, answers: saved.answers, saved });
+                        if (saved) setChosen({ stage: saved.stage, answers: saved.answers, saved });
                     }}
                 />
             )}
@@ -300,7 +309,7 @@ function TestFlow() {
                         } catch {
                             // ignore
                         }
-                        setFlow({ stage: 'intro', answers: {}, saved: null });
+                        setChosen({ stage: 'intro', answers: {}, saved: null });
                     }}
                 />
             )}
@@ -326,9 +335,7 @@ export default function TestPage() {
                 </div>
             </header>
             <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-                <Suspense fallback={null}>
-                    <TestFlow />
-                </Suspense>
+                <TestFlow />
             </main>
         </div>
     );

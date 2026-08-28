@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AnswerRecord, DIMENSION_LABELS, DIMENSION_ORDER, LIKERT_LABELS, SOURCE_STATUS_LABELS } from '@/types/positions';
 import { computeProfile, computePartyMatches, PartyMatch } from '@/lib/scoringEngine';
 import { encodeAnswers } from '@/lib/profileCode';
+import { shareFragment } from '@/lib/shareLink';
 import { ProfileIcon } from '@/lib/icons';
 import { Compass, Coins, Scale } from 'lucide-react';
 import MftModule from './MftModule';
@@ -76,7 +77,7 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
     const [activeModule, setActiveModule] = useState<'mft' | 'impact' | null>(null);
     const [copied, setCopied] = useState<string | null>(null);
     const [country, setCountry] = useState<'tous' | 'FR' | 'BE'>('tous');
-    // Pending duo invitation (arrived via a /compare?a=... link). Read once
+    // Pending duo invitation (arrived via a /compare#a=... link). Read once
     // on initialization; this component only renders client-side.
     const [compareRef] = useState<string | null>(() => {
         try {
@@ -114,7 +115,7 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
                             } catch {
                                 // ignore
                             }
-                            router.push(`/compare?a=${compareRef}&b=${code}`);
+                            router.push(`/compare${shareFragment({ a: compareRef, b: code })}`);
                         }}
                         className="shrink-0 rounded-xl bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-accent-light)]"
                     >
@@ -179,22 +180,27 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
                     </button>
                     <button
                         type="button"
-                        onClick={() => copy(`${window.location.origin}/compare?a=${code}`, 'duo')}
+                        onClick={() =>
+                            copy(`${window.location.origin}/compare${shareFragment({ a: code })}`, 'duo')
+                        }
                         className="rounded-xl border-2 border-[var(--color-border)] bg-white px-6 py-3 text-sm font-semibold text-[var(--color-text)] transition-colors hover:border-[var(--color-primary)]/40"
                     >
                         {copied === 'duo' ? 'Lien copié !' : 'Comparer avec un proche'}
                     </button>
                     <button
                         type="button"
-                        onClick={() => copy(`${window.location.origin}/test?p=${code}`, 'self')}
+                        onClick={() =>
+                            copy(`${window.location.origin}/test${shareFragment({ p: code })}`, 'self')
+                        }
                         className="rounded-xl border-2 border-[var(--color-border)] bg-white px-6 py-3 text-sm font-semibold text-[var(--color-text)] transition-colors hover:border-[var(--color-primary)]/40"
                     >
                         {copied === 'self' ? 'Lien copié !' : 'Garder mes résultats'}
                     </button>
                 </div>
                 <p className="text-xs text-[var(--color-text-muted)]">
-                    Le lien encode vos réponses localement: il n&apos;est stocké nulle part, ne le partagez
-                    qu&apos;avec des personnes de confiance.
+                    Le lien encode vos réponses après le «&nbsp;#&nbsp;», la partie de l&apos;adresse que le
+                    navigateur ne transmet jamais: elles ne sont stockées nulle part et ne passent par aucun
+                    serveur. Ne le partagez qu&apos;avec des personnes de confiance.
                 </p>
             </section>
 
