@@ -213,6 +213,43 @@ async function renderInChrome(chrome, url) {
     return Buffer.concat(chunks).toString('utf8');
 }
 
+// Who may put each page inside a frame. /embed exists to be embedded by
+// partner media; nothing else does, and a page any site can frame can be
+// framed invisibly, underneath somebody else's controls.
+const EXPECTED_FRAME_POLICY = {
+    '/': "frame-ancestors 'self'",
+    '/test': "frame-ancestors 'self'",
+    '/compare': "frame-ancestors 'self'",
+    [`/p/${BADGE}`]: "frame-ancestors 'self'",
+    '/embed': 'frame-ancestors *'
+};
+
+function headersOf(path) {
+    return new Promise((resolve, reject) => {
+        const req = httpRequest(
+            { host: '127.0.0.1', port: APP_PORT, path, method: 'HEAD' },
+            (res) => {
+                res.resume();
+                resolve(res.headers);
+            }
+        );
+        req.on('error', reject);
+        req.end();
+    });
+}
+
+async function checkFramePolicy() {
+    const problems = [];
+    for (const [path, expected] of Object.entries(EXPECTED_FRAME_POLICY)) {
+        const headers = await headersOf(path);
+        const csp = headers['content-security-policy'];
+        if (csp !== expected) {
+            problems.push(`${path} says "${csp ?? '(no header)'}", expected "${expected}"`);
+        }
+    }
+    return problems;
+}
+
 async function main() {
     const chrome = findChrome();
 
@@ -243,6 +280,14 @@ async function main() {
         }
         const verdict = leaked.length === 0 && dom.includes(testCase.expect) ? 'ok' : 'FAILED';
         console.log(`${verdict.padEnd(7)} ${testCase.url}`);
+    }
+
+    for (const problem of await checkFramePolicy()) {
+        failures.push(`frame policy: ${problem}`);
+        console.log(`FAILED  ${problem}`);
+    }
+    if (failures.every((f) => !f.startsWith('frame policy'))) {
+        console.log(`ok      frame policy on ${Object.keys(EXPECTED_FRAME_POLICY).length} paths`);
     }
 
     proxy.close();

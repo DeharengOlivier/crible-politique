@@ -325,9 +325,10 @@ reaches a server, is not visible to a unit test: it is a property of what a
 browser transmits, not of what a function returns. So
 [`scripts/privacy-check.mjs`](scripts/privacy-check.mjs) starts the production
 build behind a proxy that records the exact request line the server receives,
-drives a real headless browser to the three share links, and fails if an
+drives a real headless browser to the four share links, and fails if an
 answer code appears in one. It also asserts each page rendered, because a
-check that passes because nothing loaded is worse than no check.
+check that passes because nothing loaded is worse than no check, and asserts
+who is allowed to put each page inside a frame.
 
 It runs in CI, and it catches a real regression: adding a single
 `fetch('/?leaked=' + code)` to the hook fails all three cases and prints the
