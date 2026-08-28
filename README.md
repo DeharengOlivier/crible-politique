@@ -184,7 +184,7 @@ erDiagram
 
 ## Running locally
 
-Requirements: Node.js 20+ and npm.
+Requirements: Node.js 22+ and npm. CI runs the same version.
 
 ```sh
 # 1. Configure environment variables (all optional for local dev)
