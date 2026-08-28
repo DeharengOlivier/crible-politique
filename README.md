@@ -109,19 +109,42 @@ flowchart LR
 
 ### Stateless profile sharing
 
+Nothing is stored, so a shared profile has to travel in the link. Where in the
+link is the whole design, because a set of answers to 28 political statements
+is special-category data under GDPR article 9 and a URL is not one thing:
+
+| Part of the URL | Transmitted to the server | What it carries |
+| --- | --- | --- |
+| path (`/p/2046354a`) | yes, and to every link-preview crawler | the badge: seven dominant currents and the profile they imply |
+| fragment (`#p=1eeba…`) | never | the answers |
+
+A badge code is one character per dimension, so it addresses at most 37^7
+badges against 6^28 answer sets: it is not a lossy encoding of the answers, it
+cannot be an encoding of them at all. That is what lets the server render the
+page and generate the Open Graph card without ever receiving the answers. The
+recipient's browser reads the fragment and offers to compare profiles;
+everything after that is client-side.
+
 ```mermaid
 sequenceDiagram
     participant U as User
     participant App as App (client)
-    participant URL as Shareable link
+    participant Link as Shareable link
+    participant Server as Server and crawlers
     U->>App: complete the test
-    App->>App: encode profile into a short code
-    App->>URL: build link with the code
-    Note over URL: the profile lives entirely in the URL, no server storage
-    U->>URL: share the link
-    URL->>App: decode code back into a profile
-    App->>U: render the profile or compare two profiles
+    App->>App: encode a badge code and an answer code
+    App->>Link: /p/{badge}#p={answers}
+    U->>Link: share the link
+    Link->>Server: request carries the path only
+    Server->>App: page and OG card, rendered from the badge
+    Link->>App: the browser reads the fragment
+    App->>U: profile, and the option to compare
 ```
+
+Links minted before badge codes existed carried the answers in the path, and
+`identityFromShareCode` still reads them, so those links keep resolving to the
+same page. Links that carried a code in a query string (`/compare?a=`,
+`/test?p=`) are honoured too, and rewritten in place to the fragment form.
 
 ### Data model
 
@@ -153,14 +176,11 @@ erDiagram
 - **recharts** for the moral-foundations radar, **lucide-react** for icons.
 - **Vitest** for the test suite.
 
-> Several dependencies declared in `package.json`
-> (`@supabase/supabase-js`, `@ai-sdk/anthropic`, `@ai-sdk/openai`, `ai`,
-> `zustand`, `react-hook-form`, `zod`) are not imported anywhere in the current
-> source. They are leftovers from the AI-bootstrapped scaffold and the two
-> pre-merge prototypes. They are consistent with the "no AI at runtime, no
-> server storage" doctrine being enforced by removing those code paths, not by
-> using those libraries. They can be removed from `package.json` to slim the
-> dependency tree (see Limitations below).
+> The dependency tree is deliberately small: no state library, no form
+> library, no validation library, no server SDK. Everything the product does
+> at runtime is a pure function over data files, so there was nothing for them
+> to do. `npm audit` runs as a blocking CI job, and the one resolution pinned
+> by hand is explained in [SECURITY.md](SECURITY.md).
 
 ## Running locally
 
@@ -236,8 +256,9 @@ French on purpose: they are the actual product copy.
 npm test
 ```
 
-The suite (Vitest, five files in `__tests__/`) locks the product's central
-promises: data integrity, determinism and external consistency.
+The suite (Vitest, nine files in `__tests__/`) locks the product's central
+promises: data integrity, determinism, external consistency, and the privacy
+properties of the share links.
 
 - `__tests__/scoringEngine.test.ts`: the 28 statements cover 7 dimensions, every
   party has a position on every statement, the agreement formula holds, "no
@@ -256,8 +277,22 @@ promises: data integrity, determinism and external consistency.
   measure has a source.
 - `__tests__/analysis.test.ts`: social-class classification and moral-profile
   interpretation.
+- `__tests__/shareLink.test.ts`: what a share URL puts where, and that a legacy
+  query-string code is honoured and moved into the fragment without disturbing
+  the rest of the URL.
+- `__tests__/badgeCode.test.ts`: the badge round trip, the rejection of every
+  malformed code, and two golden fixtures that fail if `data/badgeAlphabet.ts`
+  is ever reordered, which would silently change what an already shared link
+  means.
+- `__tests__/serviceWorker.test.ts`: what the offline cache is allowed to hold,
+  in particular that a shared profile and a comparison are never written to it.
+- `__tests__/localData.test.ts`: that "effacer mes données locales" reaches
+  local storage, session storage, the caches and the service worker, and keeps
+  going when one of them refuses.
 
-Current status: **44 tests passing across 5 files**.
+Current status: **117 tests passing across 9 files**. They run in CI on every
+push and pull request, alongside ESLint, `tsc --noEmit`, the production build
+and `npm audit`.
 
 ## Limitations and how I would improve this
 
@@ -272,19 +307,15 @@ two prototypes. It is honest about what is solid and what still needs hardening.
   named external legal experts. The CHES anchor is 2024; manifestos drift
   between elections. Next step: wire each position to a dated, linked citation
   and surface the coverage ratio prominently.
-- **Test coverage.** The suite is meaningful but narrow: it locks the scoring
-  invariants and data integrity (the highest-value properties) but there are no
-  component or end-to-end tests for the survey flow, the share/compare URLs, or
-  the embed widget. Next step: add React Testing Library coverage for the
-  results view and the profile-code edge cases in the UI, plus a Playwright
-  smoke test of the full `/test` flow.
-- **Dependency hygiene.** Several dependencies are declared but unused
-  (`@supabase/supabase-js`, the AI SDK packages, `zustand`, `react-hook-form`,
-  `zod`), inflating `node_modules` and the supply-chain surface. They are
-  leftovers from the bootstrap and the merge. Next step: remove them from
-  `package.json` and regenerate the lockfile, then add a `depcheck`/`knip` step
-  in CI to keep the tree honest. They were intentionally left in place here to
-  avoid shipping an inconsistent lockfile without a reinstall.
+- **Test coverage.** The suite locks the scoring invariants, the data
+  integrity and the privacy properties of the share links, all as pure
+  functions. What it does not cover is the components that call them: there is
+  no rendering test for the survey flow, the results view or the embed widget.
+  The share-link behaviour has been verified end to end in a real browser, by
+  recording the request line the server receives, but that was a measurement
+  and not a test that runs again tomorrow. Next step: React Testing Library
+  coverage of the results view, and a Playwright smoke test of `/test` that
+  asserts no request carries an answer code.
 - **Accessibility.** Icons are decorative (`aria-hidden`) and the Likert scale
   uses real buttons rather than a slider, which helps, but there is no audited
   keyboard path through the whole survey, no focus-management review, and the
@@ -296,8 +327,9 @@ two prototypes. It is honest about what is solid and what still needs hardening.
   `a_verifier` status and [GOVERNANCE.md](GOVERNANCE.md) encode). The
   AI-usage charter and prompts live in `transparence-ia/`.
 - **Pre-launch checklist (human).** Fill the publisher-identity placeholders on
-  the `/a-propos` page (legally required in France), connect the production
-  domains, and document the cookieless analytics choice on the privacy page.
+  the `/a-propos` page and name a contact for GDPR requests on `/legal`, both
+  legally required for a site published in France, and connect the production
+  domains.
 
 ## Transparency model
 
@@ -332,15 +364,21 @@ document or correct a position with a dated, linked primary source:
 - Keep the engine deterministic: no AI call at runtime, no server-side storage of
   answers. Anything that changes a result must be a published, hand-recomputable
   formula ([METHODOLOGY.md](METHODOLOGY.md)).
-- `npm test` must stay green (44 tests lock determinism, data integrity and the
-  CHES external-consistency check). Ship a test with any behaviour change.
+- `npm test` must stay green (117 tests lock determinism, data integrity, the
+  CHES external-consistency check and what a share link is allowed to put in a
+  URL). Ship a test with any behaviour change.
+- Never put an answer code anywhere the server sees it: not in a path, not in a
+  query string. The fragment is the only place. See
+  [Stateless profile sharing](#stateless-profile-sharing).
+- `data/badgeAlphabet.ts` is append only. Reordering it changes what every
+  already shared link means.
 - Match the existing style. User-facing copy and political data stay in French;
   code and comments are in English.
 
 **Good first issues.** The items under [Limitations](#limitations-and-how-i-would-improve-this)
-are deliberately scoped entry points: removing the unused scaffolded
-dependencies, an accessibility pass on the survey flow, and component or
-end-to-end tests for the results and share/compare views.
+are deliberately scoped entry points: an accessibility pass on the survey flow,
+component tests for the results view, and a Playwright smoke test of `/test`
+that asserts no request carries an answer code.
 
 ## License
 
