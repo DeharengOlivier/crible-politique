@@ -4,6 +4,7 @@ import { STATEMENTS } from '@/data/statements';
 import { PARTIES } from '@/data/parties';
 import { MEASURES } from '@/data/measures';
 import { DATA_VERSIONS, DATA_LAST_REVIEW } from '@/data/versions';
+import PageHeader from '@/components/PageHeader';
 
 export const metadata: Metadata = {
     title: 'Méthodologie - Le Crible Politique',
@@ -25,20 +26,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function MethodologyPage() {
     return (
         <div className="min-h-screen bg-[var(--color-bg)]">
-            <header className="border-b border-[var(--color-border-light)] bg-white/95">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                    <Link
-                        href="/"
-                        className="inline-flex min-h-[44px] items-center text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)] sm:min-h-0"
-                    >
-                        ← Le Crible Politique
-                    </Link>
-                    <h1 className="font-[family-name:var(--font-heading)] text-lg font-semibold text-[var(--color-primary)]">
-                        Méthodologie
-                    </h1>
-                    <div className="w-24" />
-                </div>
-            </header>
+            <PageHeader title="Méthodologie" />
 
             <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
                 <div className="space-y-6">

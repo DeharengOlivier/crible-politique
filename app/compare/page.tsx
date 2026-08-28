@@ -9,6 +9,7 @@ import { computeProfile } from '@/lib/scoringEngine';
 import { STATEMENTS } from '@/data/statements';
 import { AnswerRecord, DimensionKey, DIMENSION_LABELS, DIMENSION_ORDER, LIKERT_LABELS } from '@/types/positions';
 import { ProfileIcon } from '@/lib/icons';
+import PageHeader from '@/components/PageHeader';
 
 // Duo comparison, 100% client-side: both profiles live in the URL fragment,
 // nothing is stored and nothing is transmitted. Central use case: couples,
@@ -227,20 +228,7 @@ function CompareContent() {
 export default function ComparePage() {
     return (
         <div className="min-h-screen bg-[var(--color-bg)]">
-            <header className="sticky top-0 z-10 border-b border-[var(--color-border-light)] bg-white/95 backdrop-blur-sm">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                    <Link
-                        href="/"
-                        className="inline-flex min-h-[44px] items-center text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)] sm:min-h-0"
-                    >
-                        ← Le Crible Politique
-                    </Link>
-                    <h1 className="font-[family-name:var(--font-heading)] text-lg font-semibold text-[var(--color-primary)]">
-                        Comparaison
-                    </h1>
-                    <div className="w-24" />
-                </div>
-            </header>
+            <PageHeader title="Comparaison" sticky />
             <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
                 <CompareContent />
             </main>

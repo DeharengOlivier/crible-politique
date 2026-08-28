@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import PageHeader from '@/components/PageHeader';
 
 export const metadata: Metadata = {
     title: 'Qui sommes-nous - Le Crible Politique',
@@ -15,20 +16,7 @@ export const metadata: Metadata = {
 export default function AProposPage() {
     return (
         <div className="min-h-screen bg-[var(--color-bg)]">
-            <header className="border-b border-[var(--color-border-light)] bg-white/95">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                    <Link
-                        href="/"
-                        className="inline-flex min-h-[44px] items-center text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)] sm:min-h-0"
-                    >
-                        ← Le Crible Politique
-                    </Link>
-                    <h1 className="font-[family-name:var(--font-heading)] text-lg font-semibold text-[var(--color-primary)]">
-                        Qui sommes-nous
-                    </h1>
-                    <div className="w-24" />
-                </div>
-            </header>
+            <PageHeader title="Qui sommes-nous" />
 
             <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
                 <div className="space-y-6">
