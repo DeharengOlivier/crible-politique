@@ -12,7 +12,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check:privacy": "node scripts/privacy-check.mjs"
+    "check:privacy": "node scripts/privacy-check.mjs",
+    "check:build": "node scripts/build-budget.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.17.0",

@@ -35,6 +35,11 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Routes and bundle size
+        # A page that quietly stops being prerendered, or a library that
+        # arrives by accident, changes what every visitor downloads without
+        # failing a type check or a test.
+        run: npm run check:build
       - name: No answer code reaches the server
         # Drives a real browser at the production build, through a proxy that
         # records the request line the server receives, and fails if a set of

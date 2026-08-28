@@ -300,6 +300,20 @@ push and pull request, alongside ESLint, `tsc --noEmit`, the production build,
 `npm audit` and the privacy check below. Both jobs are required to merge into
 `main`.
 
+### The build budget
+
+```sh
+npm run build && npm run check:build
+```
+
+[`scripts/build-budget.mjs`](scripts/build-budget.mjs) asserts that every route
+is still built, and still built the way it is meant to be: static pages stay
+prerendered, `/p/[code]` stays dynamic because it has to read its own path, and
+a new route has to be declared. It also measures the JavaScript a first visit
+downloads, gzipped, against a stated ceiling. It runs in CI, and it catches
+both kinds of regression: adding `export const dynamic = 'force-dynamic'` to a
+page fails it by name, and so does the budget being exceeded.
+
 ### The privacy check
 
 ```sh

@@ -1,0 +1,36 @@
+name: CodeQL
+
+# Static analysis of the JavaScript and TypeScript in this repository. The
+# application has no server of its own, so the classes that matter here are
+# the ones that run in someone's browser: injection into the DOM, unsafe
+# handling of a value taken from a URL, and anything that could turn a share
+# link into an attack on the person who received it.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Once a week, so a newly published pattern is applied to code that has
+    # not changed. Monday, early.
+    - cron: '17 6 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-and-quality
+      - uses: github/codeql-action/analyze@v3
