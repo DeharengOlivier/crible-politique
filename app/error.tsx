@@ -7,6 +7,13 @@ import Link from 'next/link';
 // is the only thing worth showing: it is what identifies the occurrence, and
 // the raw message is either already generic or a detail the reader cannot act
 // on.
+//
+// Nothing is reported automatically, and that is not an omission. Sending a
+// crash report would mean sending something about someone from a page whose
+// whole premise is that nothing about them is sent anywhere, and the payload
+// of a client-side error on this site can contain the very answers the rest
+// of the application works to keep local. So the reader is the reporting
+// channel: they get the digest and somewhere to send it.
 
 export default function ErrorBoundary({
     error,
@@ -46,6 +53,17 @@ export default function ErrorBoundary({
                 {error.digest && (
                     <p className="text-xs text-[var(--color-text-muted)]">
                         Référence de l&apos;incident: <code>{error.digest}</code>
+                        <br />
+                        Rien n&apos;est signalé automatiquement: ce site n&apos;envoie aucun rapport
+                        d&apos;erreur. Si le problème persiste, cette référence nous aide à le
+                        retrouver, sur{' '}
+                        <a
+                            href="https://github.com/DeharengOlivier/crible-politique/issues"
+                            className="underline hover:text-[var(--color-primary)]"
+                        >
+                            le dépôt du projet
+                        </a>
+                        .
                     </p>
                 )}
             </div>
