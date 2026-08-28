@@ -42,7 +42,7 @@ describe('determineSocialClass', () => {
   });
 });
 
-// ==================== FONDATIONS MORALES ====================
+// ==================== MORAL FOUNDATIONS ====================
 
 describe('calculateMoralFoundations', () => {
   it('returns correct averages for paired questions', () => {

@@ -7,25 +7,21 @@ import { encodeAnswers, decodeAnswers, sanitizeAnswers } from '@/lib/profileCode
 import { chesRawData } from '@/data/ches';
 import { AnswerRecord, LikertValue } from '@/types/positions';
 
-// La promesse centrale du produit est le déterminisme et l'intégrité des
-// données: ces tests la verrouillent.
+// The product's central promise is determinism and data integrity: these
+// tests are what hold it.
 
-function buildAnswers(value: LikertValue): AnswerRecord {
-  return Object.fromEntries(STATEMENTS.map((s) => [s.id, value]));
-}
-
-describe('Intégrité des données', () => {
-  it('couvre 28 énoncés sur 7 dimensions', () => {
+describe('data integrity', () => {
+  it('covers 28 statements across 7 dimensions', () => {
     expect(STATEMENTS).toHaveLength(28);
     expect(new Set(STATEMENTS.map((s) => s.dimension)).size).toBe(7);
   });
 
-  it('le sous-ensemble express compte 12 énoncés couvrant les 7 dimensions', () => {
+  it('the express subset is 12 statements still covering all 7 dimensions', () => {
     expect(EXPRESS_STATEMENTS).toHaveLength(12);
     expect(new Set(EXPRESS_STATEMENTS.map((s) => s.dimension)).size).toBe(7);
   });
 
-  it('chaque parti déclaré a une position sur chaque énoncé', () => {
+  it('every declared party has a position on every statement', () => {
     expect(PARTIES.length).toBe(24);
     for (const statement of STATEMENTS) {
       for (const party of PARTIES) {
@@ -37,8 +33,8 @@ describe('Intégrité des données', () => {
   });
 });
 
-describe('Déterminisme du moteur', () => {
-  it('mêmes réponses, même résultat (matchs et profil)', () => {
+describe('engine determinism', () => {
+  it('the same answers give the same result, both matches and profile', () => {
     const answers: AnswerRecord = {};
     STATEMENTS.forEach((s, i) => {
       answers[s.id] = (((i % 5) - 2) as LikertValue);
@@ -49,8 +45,8 @@ describe('Déterminisme du moteur', () => {
     expect(JSON.stringify(computeProfile(answers))).toBe(JSON.stringify(computeProfile(answers)));
   });
 
-  it("la formule d'accord est respectée (1 - |écart|/4)", () => {
-    // Un seul énoncé répondu: le score du parti = accord sur cet énoncé.
+  it('the published agreement formula holds: 1 - |gap| / 4', () => {
+    // One statement answered, so the party score is the agreement on it.
     const answers: AnswerRecord = { ec1: 2 };
     const matches = computePartyMatches(answers);
     for (const m of matches) {
@@ -61,7 +57,7 @@ describe('Déterminisme du moteur', () => {
     }
   });
 
-  it('"sans opinion" est exclu du calcul, jamais pénalisé', () => {
+  it('"no opinion" is excluded from the computation, never counted against anyone', () => {
     const allNull: AnswerRecord = Object.fromEntries(STATEMENTS.map((s) => [s.id, null]));
     const profile = computeProfile(allNull);
     expect(profile.answeredCount).toBe(0);
@@ -69,7 +65,7 @@ describe('Déterminisme du moteur', () => {
     expect(matches.every((m) => m.answeredAndDocumented === 0)).toBe(true);
   });
 
-  it('accord total avec soi-même: répondre les positions exactes d’un parti donne 100%', () => {
+  it('answering a party\'s exact documented positions scores 100% against it', () => {
     const target = 'fr_lfi';
     const answers: AnswerRecord = {};
     STATEMENTS.forEach((s) => {
@@ -81,8 +77,8 @@ describe('Déterminisme du moteur', () => {
   });
 });
 
-describe('Encodage de profil (partage local)', () => {
-  it('roundtrip complet, y compris sans opinion et réponses partielles', () => {
+describe('profile encoding', () => {
+  it('a full roundtrip survives no-opinion answers and partial ones', () => {
     const answers: AnswerRecord = {};
     STATEMENTS.forEach((s, i) => {
       answers[s.id] = i % 4 === 0 ? null : ((((i % 5) - 2)) as LikertValue);
@@ -94,26 +90,26 @@ describe('Encodage de profil (partage local)', () => {
     }
   });
 
-  it('rejette les codes invalides', () => {
+  it('rejects malformed codes', () => {
     expect(decodeAnswers('')).toBeNull();
     expect(decodeAnswers('2abc')).toBeNull();
     expect(decodeAnswers('1abc')).toBeNull(); // longueur incorrecte
-    expect(decodeAnswers('1' + 'z'.repeat(28))).toBeNull(); // caractère inconnu
+    expect(decodeAnswers('1' + 'z'.repeat(28))).toBeNull(); // unknown character
   });
 });
 
-describe('sanitizeAnswers (validation du stockage local)', () => {
-  it('conserve les énoncés connus avec des valeurs Likert valides', () => {
+describe('sanitizeAnswers, the local-storage boundary', () => {
+  it('keeps known statements carrying valid Likert values', () => {
     const clean = sanitizeAnswers({ ec1: 2, pw1: -1, mo3: 0, ge3: null });
     expect(clean).toEqual({ ec1: 2, pw1: -1, mo3: 0, ge3: null });
   });
 
-  it('ignore les énoncés inconnus', () => {
+  it('drops statements it does not know', () => {
     const clean = sanitizeAnswers({ ec1: 1, inexistant: 2 });
     expect(clean).toEqual({ ec1: 1 });
   });
 
-  it('rejette tout le jeu si une valeur est corrompue', () => {
+  it('rejects the whole set when any value is corrupted', () => {
     expect(sanitizeAnswers({ ec1: 1, pw1: 99 })).toBeNull();
     expect(sanitizeAnswers({ ec1: 1.5 })).toBeNull();
     expect(sanitizeAnswers({ ec1: 'gauche' })).toBeNull();
@@ -122,10 +118,10 @@ describe('sanitizeAnswers (validation du stockage local)', () => {
   });
 });
 
-describe('Cohérence externe avec CHES 2024 (axe économique)', () => {
-  // Notre codage par énoncé et le positionnement académique CHES sont deux
-  // mesures indépendantes: elles doivent être fortement corrélées sur l'axe
-  // économique gauche-droite, sinon l'un des deux codages a un problème.
+describe('external agreement with CHES 2024 on the economic axis', () => {
+  // Our per-statement coding and the academic CHES placement are two
+  // independent measurements of the same thing. They have to correlate
+  // strongly on the economic left-right axis, or one of the two is wrong.
   const ID_MAP: Record<string, string> = {
     fr_lfi: 'lfi', fr_rn: 'rn', fr_renaissance: 'renaissance', fr_lr: 'lr',
     fr_eelv: 'eelv', fr_ps: 'ps', fr_reconquete: 'reconquete', fr_pcf: 'pcf',
@@ -157,14 +153,14 @@ describe('Cohérence externe avec CHES 2024 (axe économique)', () => {
     return num / Math.sqrt(dx * dy);
   }
 
-  it('la corrélation de rang entre notre axe économique et CHES lrecon est forte', () => {
+  it('our economic axis and the CHES lrecon axis rank parties the same way', () => {
     const ours: number[] = [];
     const ches: number[] = [];
     for (const [ourId, chesId] of Object.entries(ID_MAP)) {
       const data = chesRawData[chesId];
       if (!data) continue;
-      // Droite économique selon nos énoncés: refus de taxer (ec1-), refus du
-      // public (ec2-), priorité à la dette (ec4+).
+      // Economic right by our statements: against taxing (ec1-), against
+      // public provision (ec2-), debt first (ec4+).
       const econRight =
         -PARTY_POSITIONS.ec1[ourId].value -
         PARTY_POSITIONS.ec2[ourId].value +

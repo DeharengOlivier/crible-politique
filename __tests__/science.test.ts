@@ -3,8 +3,8 @@ import { chesRawData, chesDataToAppProfile, getOpenDataTable, getPartySource } f
 import { calculateMoralFoundations } from '@/utils/analysis';
 import { MORAL_FOUNDATION_QUESTIONS } from '@/data/moralFoundations';
 
-describe('CHES 2024 — normalisation et provenance', () => {
-  it('couvre 23 partis dont 22 issus du dataset officiel', () => {
+describe('CHES 2024: normalisation and provenance', () => {
+  it('covers 23 parties, 22 of them straight from the official dataset', () => {
     const all = Object.values(chesRawData);
     expect(all).toHaveLength(23);
     expect(all.filter(p => p.source === 'CHES 2024')).toHaveLength(22);
@@ -15,7 +15,7 @@ describe('CHES 2024 — normalisation et provenance', () => {
     expect(estimates[0].sourceNote).toBeTruthy();
   });
 
-  it('respecte les conventions du codebook 2024 (immigration directe, environnement inversé)', () => {
+  it('follows the 2024 codebook conventions: immigration direct, environment inverted', () => {
     // RN : immigrate_policy 9.55 (restrictif) → immigration_control élevé
     const rn = chesDataToAppProfile(chesRawData.rn);
     expect(rn.immigration_control).toBeGreaterThan(4);
@@ -31,7 +31,7 @@ describe('CHES 2024 — normalisation et provenance', () => {
     expect(re.internationalism).toBeGreaterThan(4);
   });
 
-  it('expose une table open data complète avec provenance', () => {
+  it('exposes a complete open-data table carrying its provenance', () => {
     const table = getOpenDataTable();
     expect(table).toHaveLength(23);
     table.forEach(row => {
@@ -41,15 +41,15 @@ describe('CHES 2024 — normalisation et provenance', () => {
     });
   });
 
-  it('getPartySource retourne la provenance par parti', () => {
+  it('getPartySource returns the provenance for one party', () => {
     expect(getPartySource('lfi')?.source).toBe('CHES 2024');
     expect(getPartySource('upr')?.source).toBe('Estimation documentée');
     expect(getPartySource('inconnu')).toBeNull();
   });
 });
 
-describe('Fondations morales (MFT)', () => {
-  it('couvre les 6 fondations avec 2 items chacune', () => {
+describe('moral foundations', () => {
+  it('covers the 6 foundations with 2 items each', () => {
     expect(MORAL_FOUNDATION_QUESTIONS).toHaveLength(12);
     const byFoundation = MORAL_FOUNDATION_QUESTIONS.reduce<Record<string, number>>((acc, q) => {
       acc[q.foundation] = (acc[q.foundation] ?? 0) + 1;
@@ -61,7 +61,7 @@ describe('Fondations morales (MFT)', () => {
     expect(Object.values(byFoundation).every(n => n === 2)).toBe(true);
   });
 
-  it('utilise le seul item présent au lieu de diluer avec un défaut neutre', () => {
+  it('uses the single item present rather than diluting it with a neutral default', () => {
     // mf2 = 5 (care élevé), mf1 absent → care doit être 5, pas (3+5)/2 = 4
     const mf = calculateMoralFoundations({ mf2: 5 });
     expect(mf.care).toBe(5);
