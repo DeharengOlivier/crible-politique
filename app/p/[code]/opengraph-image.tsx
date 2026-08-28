@@ -1,12 +1,15 @@
 import { ImageResponse } from 'next/og';
-import { decodeAnswers } from '@/lib/profileCode';
-import { computeProfile } from '@/lib/scoringEngine';
+import { identityFromShareCode } from '@/lib/badgeCode';
 import { DimensionKey, DIMENSION_LABELS } from '@/types/positions';
 import { profileIconNode } from '@/lib/icons';
 
 // Dynamic Open Graph card for a shared profile, generated from the URL
 // (no storage). This image is what shows up in previews on
 // WhatsApp / X / LinkedIn / iMessage: the heart of the viral loop.
+//
+// Every crawler that follows a shared link fetches this route, which is
+// exactly why the URL carries a badge code and not an answer code: the card
+// needs the identity, and the identity is all the code can say.
 // It shows the identity, never the party affinities.
 
 export const size = { width: 1200, height: 630 };
@@ -18,9 +21,8 @@ const OG_DIMENSIONS: DimensionKey[] = ['economy', 'social', 'environment', 'geop
 
 export default async function OgImage({ params }: { params: Promise<{ code: string }> }) {
     const { code } = await params;
-    const answers = decodeAnswers(code);
-    const profile = answers ? computeProfile(answers) : null;
-    const synth = profile?.syntheticProfile;
+    const identity = identityFromShareCode(code);
+    const synth = identity?.syntheticProfile;
     const iconChildren = profileIconNode(synth?.icon).map(([tag, attrs], i) => {
         const Tag = tag as 'path' | 'circle' | 'line' | 'polyline' | 'polygon' | 'rect';
         return <Tag key={i} {...attrs} />;
@@ -82,8 +84,8 @@ export default async function OgImage({ params }: { params: Promise<{ code: stri
 
                 <div style={{ display: 'flex', gap: 14, marginTop: 36, flexWrap: 'wrap', justifyContent: 'center' }}>
                     {OG_DIMENSIONS.map((dim) => {
-                        const archetype = profile?.dimensionArchetypes[dim];
-                        if (!archetype) return null;
+                        const label = identity?.dimensionLabels[dim];
+                        if (!label) return null;
                         return (
                             <div
                                 key={dim}
@@ -99,7 +101,7 @@ export default async function OgImage({ params }: { params: Promise<{ code: stri
                                     {DIMENSION_LABELS[dim]}
                                 </span>
                                 <span style={{ fontSize: 22, color: '#e2e8f0', fontWeight: 600 }}>
-                                    {archetype.label}
+                                    {label}
                                 </span>
                             </div>
                         );

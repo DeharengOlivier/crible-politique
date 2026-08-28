@@ -1,14 +1,20 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { decodeAnswers } from '@/lib/profileCode';
-import { shareFragment } from '@/lib/shareLink';
-import { computeProfile } from '@/lib/scoringEngine';
+import { identityFromShareCode } from '@/lib/badgeCode';
 import { DIMENSION_LABELS, DIMENSION_ORDER } from '@/types/positions';
 import { ProfileIcon } from '@/lib/icons';
+import SharedProfileActions from '@/components/SharedProfileActions';
 
-// Public page for a shared profile. The profile lives in the URL itself:
-// no server storage, the dynamic OG image is generated from the code.
+// Public page for a shared profile. Nothing is stored: the page and its
+// dynamic OG image are rendered from the code in the URL.
+//
+// That code is a badge code, and it says only what this page displays: the
+// dominant current per dimension, and the synthetic profile they imply. The
+// answers behind it are not in the path, because a path is transmitted and
+// they are special-category data. They travel in the fragment, which the
+// browser keeps to itself, and only the client actions below ever read them.
+//
 // Deliberate choice: the page shows the identity (profile + dimensions),
 // NEVER the party affinities (a badge is shared, an affiliation is
 // exposed). The recipient is invited to take the test.
@@ -20,23 +26,21 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { code } = await params;
-    const answers = decodeAnswers(code);
-    if (!answers) return { title: 'Profil introuvable - Le Crible Politique' };
-    const profile = computeProfile(answers);
-    const title = profile.syntheticProfile?.title ?? 'Profil singulier';
+    const identity = identityFromShareCode(code);
+    if (!identity) return { title: 'Profil introuvable - Le Crible Politique' };
+    const title = identity.syntheticProfile?.title ?? 'Profil singulier';
     return {
         title: `${title} - Le Crible Politique`,
-        description: `"${profile.syntheticProfile?.tagline ?? 'Un profil qui ne rentre dans aucune case.'}" Et toi, où te situes-tu ? Fais le test en 3 minutes: tes réponses ne quittent jamais ton appareil.`
+        description: `"${identity.syntheticProfile?.tagline ?? 'Un profil qui ne rentre dans aucune case.'}" Et toi, où te situes-tu ? Fais le test en 3 minutes: tes réponses ne quittent jamais ton appareil.`
     };
 }
 
 export default async function SharedProfilePage({ params }: PageProps) {
     const { code } = await params;
-    const answers = decodeAnswers(code);
-    if (!answers) notFound();
+    const identity = identityFromShareCode(code);
+    if (!identity) notFound();
 
-    const profile = computeProfile(answers);
-    const synth = profile.syntheticProfile;
+    const synth = identity.syntheticProfile;
 
     return (
         <div className="min-h-screen bg-[var(--color-bg)]">
@@ -70,45 +74,27 @@ export default async function SharedProfilePage({ params }: PageProps) {
 
                     <div className="grid gap-3 text-left sm:grid-cols-2">
                         {DIMENSION_ORDER.map((dim) => {
-                            const archetype = profile.dimensionArchetypes[dim];
-                            if (!archetype) return null;
+                            const label = identity.dimensionLabels[dim];
+                            if (!label) return null;
                             return (
                                 <div key={dim} className="rounded-xl border border-[var(--color-border-light)] bg-white p-4">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
                                         {DIMENSION_LABELS[dim]}
                                     </p>
                                     <p className="mt-1 text-sm font-semibold text-[var(--color-primary)]">
-                                        {archetype.label}
+                                        {label}
                                     </p>
                                 </div>
                             );
                         })}
                     </div>
 
-                    <div className="space-y-3">
-                        <Link
-                            href="/test"
-                            className="block w-full rounded-xl bg-[var(--color-primary)] px-6 py-4 text-lg font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[var(--color-primary-light)]"
-                        >
-                            Et toi, où te situes-tu ? Fais le test (3 min)
-                        </Link>
-                        <Link
-                            href={`/compare${shareFragment({ a: code })}`}
-                            className="block w-full rounded-xl border-2 border-[var(--color-border)] bg-white px-6 py-3.5 text-sm font-semibold text-[var(--color-text)] transition-colors hover:border-[var(--color-primary)]/40"
-                        >
-                            Faire le test et comparer nos profils
-                        </Link>
-                        <Link
-                            href={`/test${shareFragment({ p: code })}`}
-                            className="block text-xs text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-primary)] hover:underline"
-                        >
-                            C&apos;est mon profil: voir mes résultats complets
-                        </Link>
-                    </div>
+                    <SharedProfileActions />
 
                     <p className="text-xs text-[var(--color-text-muted)]">
-                        Ce profil vit uniquement dans ce lien: rien n&apos;est stocké sur un serveur.
-                        Méthodologie publique, calcul déterministe, jamais de consigne de vote.
+                        Ce profil vit uniquement dans ce lien: rien n&apos;est stocké sur un serveur, et
+                        les réponses qui l&apos;ont produit ne sont pas dans l&apos;adresse envoyée au
+                        serveur. Méthodologie publique, calcul déterministe, jamais de consigne de vote.
                     </p>
                 </div>
             </main>

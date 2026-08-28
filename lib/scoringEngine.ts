@@ -195,6 +195,16 @@ export function computeProfile(answers: AnswerRecord): ProfileResult {
     };
 }
 
+/**
+ * The synthetic profile matching a set of dominant archetype labels.
+ *
+ * Exported because it is the whole of what a shared profile page displays:
+ * rendering one needs the labels, never the answers they were derived from.
+ */
+export function syntheticProfileFor(labels: ArchetypeLabelMap): SyntheticProfile | null {
+    return SYNTHETIC_PROFILES.find((p) => p.matches(labels)) ?? null;
+}
+
 function findSyntheticProfile(
     dimensionArchetypes: Partial<Record<DimensionKey, ArchetypeScore>>
 ): SyntheticProfile | null {
@@ -211,5 +221,5 @@ function findSyntheticProfile(
         moral: dimensionArchetypes.moral?.label ?? ""
     };
 
-    return SYNTHETIC_PROFILES.find((p) => p.matches(labels)) ?? null;
+    return syntheticProfileFor(labels);
 }

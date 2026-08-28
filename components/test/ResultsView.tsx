@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AnswerRecord, DIMENSION_LABELS, DIMENSION_ORDER, LIKERT_LABELS, SOURCE_STATUS_LABELS } from '@/types/positions';
 import { computeProfile, computePartyMatches, PartyMatch } from '@/lib/scoringEngine';
 import { encodeAnswers } from '@/lib/profileCode';
+import { encodeBadge } from '@/lib/badgeCode';
 import { shareFragment } from '@/lib/shareLink';
 import { ProfileIcon } from '@/lib/icons';
 import { Compass, Coins, Scale } from 'lucide-react';
@@ -97,7 +98,11 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
         setTimeout(() => setCopied(null), 2500);
     };
 
+    // Two codes, and the difference between them is the whole privacy design.
+    // `code` is the answers, and only ever travels in a fragment. `badge` is
+    // the identity, and is the only thing allowed in a path the server sees.
     const code = encodeAnswers(answers);
+    const badge = encodeBadge(profile);
 
     return (
         <div className="mx-auto w-full max-w-3xl space-y-10">
@@ -159,7 +164,7 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
                     <button
                         type="button"
                         onClick={async () => {
-                            const url = `${window.location.origin}/p/${code}`;
+                            const url = `${window.location.origin}/p/${badge}${shareFragment({ p: code })}`;
                             if (navigator.share) {
                                 try {
                                     await navigator.share({
