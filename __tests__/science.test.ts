@@ -11,18 +11,18 @@ describe('CHES 2024: normalisation and provenance', () => {
     const estimates = all.filter(p => p.source !== 'CHES 2024');
     expect(estimates).toHaveLength(1);
     expect(estimates[0].name).toContain('Union Populaire');
-    // Toute estimation doit être justifiée
+    // Every estimate has to say where it came from
     expect(estimates[0].sourceNote).toBeTruthy();
   });
 
   it('follows the 2024 codebook conventions: immigration direct, environment inverted', () => {
-    // RN : immigrate_policy 9.55 (restrictif) → immigration_control élevé
+    // RN: immigrate_policy 9.55 (restrictive) -> high immigration_control
     const rn = chesDataToAppProfile(chesRawData.rn);
     expect(rn.immigration_control).toBeGreaterThan(4);
-    // EELV : environment 2.0 (pro-env) → green_policies élevé
+    // EELV: environment 2.0 (pro-environment) -> high green_policies
     const eelv = chesDataToAppProfile(chesRawData.eelv);
     expect(eelv.green_policies).toBeGreaterThan(4);
-    // LFI : lrecon 0.91 (gauche) → forte redistribution
+    // LFI: lrecon 0.91 (left) -> strong redistribution
     const lfi = chesDataToAppProfile(chesRawData.lfi);
     expect(lfi.economic_redistribution).toBeGreaterThan(4);
     // Renaissance : eu_position 6.27/7 → faible critique UE, fort internationalisme
@@ -62,10 +62,10 @@ describe('moral foundations', () => {
   });
 
   it('uses the single item present rather than diluting it with a neutral default', () => {
-    // mf2 = 5 (care élevé), mf1 absent → care doit être 5, pas (3+5)/2 = 4
+    // mf2 = 5 (high care), mf1 absent -> care must be 5, not (3+5)/2 = 4
     const mf = calculateMoralFoundations({ mf2: 5 });
     expect(mf.care).toBe(5);
-    // Aucun item → neutre
+    // No item at all -> neutral
     expect(mf.loyalty).toBe(3);
   });
 });

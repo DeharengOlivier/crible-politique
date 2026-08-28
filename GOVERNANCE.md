@@ -12,10 +12,10 @@ engagements du projet et le plan d'action pour les tenir.
    médias limités à la diffusion (sans contrôle éditorial).
 2. **Transparence sur tout ce qui détermine les résultats.** Énoncés, positions
    de partis avec sources et statuts, signatures des courants, formule de
-   calcul, méthodologie et ce document: tout est public. Le code source, lui,
-   ne l'est pas, et ce choix est dit explicitement (METHODOLOGY.md, préambule):
-   la formule publiée est assez simple pour être recalculée à la main, ce qui
-   rend les résultats auditables sans le code. Toute correction de donnée est
+   calcul, méthodologie et ce document: tout est public, comme le code lui-même
+   (MIT). La formule publiée reste assez simple pour être recalculée à la main,
+   ce qui rend les résultats auditables même sans lire le code. Toute
+   correction de donnée est
    consignée, datée et motivée dans le journal public des modifications
    (CHANGELOG-DONNEES.md).
 3. **Droit de réponse.** Tout parti évalué peut contester publiquement une

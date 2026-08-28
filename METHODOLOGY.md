@@ -1,19 +1,20 @@
 # Méthodologie
 
-Ce document décrit intégralement le fonctionnement de Political Reality Check.
+Ce document décrit intégralement le fonctionnement du Crible Politique.
 Un outil politique n'est crédible que si l'on peut vérifier comment il
 fonctionne et le contester point par point.
 
-**Position de transparence, dite clairement:** le code source du site n'est pas
-public. En revanche, tout ce qui détermine les résultats l'est: les énoncés,
-les positions attribuées aux partis avec leurs sources et statuts, les
-signatures des courants de pensée, et la formule de calcul. La formule est
-volontairement assez simple pour que n'importe qui puisse recalculer un score à
-la main et vérifier le nôtre. Toute modification des énoncés, des positions ou
-de la formule est consignée, datée et motivée dans un journal public des
-modifications (`CHANGELOG-DONNEES.md`). C'est le même modèle de transparence
-que les principaux outils d'aide au vote européens (Wahl-O-Mat, Smartvote),
-dont le code n'est pas non plus public.
+**Position de transparence, dite clairement:** tout est public. Le code sous
+licence MIT, et tout ce qui détermine les résultats sous licence CC BY 4.0:
+les énoncés, les positions attribuées aux partis avec leurs sources et
+statuts, les signatures des courants de pensée, et la formule de calcul. La
+formule est volontairement assez simple pour que n'importe qui puisse
+recalculer un score à la main et vérifier le nôtre, sans avoir à lire le code.
+Toute modification des énoncés, des positions ou de la formule est consignée,
+datée et motivée dans un journal public des modifications
+(`CHANGELOG-DONNEES.md`). Les principaux outils d'aide au vote européens
+(Wahl-O-Mat, Smartvote) publient leur méthodologie sans publier leur code;
+ici, les deux le sont.
 
 ## 1. Principes fondateurs
 

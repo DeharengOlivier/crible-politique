@@ -1,7 +1,7 @@
-# Transparence IA - Political Reality Check
+# Transparence IA - Le Crible Politique
 
 Ce dépôt public documente intégralement la place de l'intelligence artificielle
-dans Political Reality Check: où elle intervient, où elle n'intervient jamais,
+dans Le Crible Politique: où elle intervient, où elle n'intervient jamais,
 avec quels prompts, et sous quels garde-fous humains.
 
 Nous publions ce dépôt parce que la bonne question n'est pas "utilisez-vous
@@ -50,14 +50,13 @@ statut honnête que simuler une certitude.
 
 ## Ce que ce dépôt n'est pas
 
-Le code de l'application n'est pas public (choix assumé et documenté dans la
-méthodologie). Ce dépôt couvre tout ce qui concerne l'IA; les données
-elles-mêmes (énoncés, positions, sources) sont publiées par ailleurs sous
-CC BY 4.0.
+Ce dépôt couvre tout ce qui concerne l'IA, et rien d'autre. Le code de
+l'application est publié séparément sous licence MIT, et les données
+elles-mêmes (énoncés, positions, sources) sous CC BY 4.0.
 
 ## Licence
 
-Contenu publié sous CC BY 4.0. Attribution: "Political Reality Check".
+Contenu publié sous CC BY 4.0. Attribution: "Le Crible Politique".
 
 ## Contester
 

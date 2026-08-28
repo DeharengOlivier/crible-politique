@@ -93,7 +93,7 @@ describe('profile encoding', () => {
   it('rejects malformed codes', () => {
     expect(decodeAnswers('')).toBeNull();
     expect(decodeAnswers('2abc')).toBeNull();
-    expect(decodeAnswers('1abc')).toBeNull(); // longueur incorrecte
+    expect(decodeAnswers('1abc')).toBeNull(); // wrong length
     expect(decodeAnswers('1' + 'z'.repeat(28))).toBeNull(); // unknown character
   });
 });

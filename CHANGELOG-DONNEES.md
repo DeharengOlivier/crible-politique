@@ -2,9 +2,9 @@
 
 Ce journal consigne toute modification des éléments qui déterminent les
 résultats de l'outil: énoncés, positions de partis, signatures de courants,
-fiches de faisabilité, formule de calcul. C'est la contrepartie publique du
-choix de ne pas ouvrir le code source: ce qui détermine les résultats est
-public, daté et motivé.
+fiches de faisabilité, formule de calcul. Le code dit comment un résultat est
+calculé; ce journal dit à partir de quoi, et pourquoi cela a changé. Les deux
+sont publics, et celui-ci est daté et motivé entrée par entrée.
 
 Format de chaque entrée: date, élément modifié, ancienne valeur, nouvelle
 valeur, motif, source.
