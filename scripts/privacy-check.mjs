@@ -98,6 +98,11 @@ async function waitForPort(port, timeoutMs = 60_000) {
 // characters are escaped, and the line is capped, before it is ever stored.
 function readable(requestLine) {
     return requestLine
+        // The line break is the one that matters: it is what would let a
+        // single request line print as several, in a report whose whole
+        // content is a list of request lines.
+        .replace(/[\r\n]/g, ' ')
+        // Everything else that could move a cursor or colour a terminal.
         .replace(/[\u0000-\u001f\u007f]/g, (c) => `\\x${c.charCodeAt(0).toString(16).padStart(2, '0')}`)
         .slice(0, 400);
 }
