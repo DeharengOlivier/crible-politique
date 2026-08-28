@@ -39,10 +39,12 @@ export default function ConfidentialitePage() {
                                 données du site est documenté publiquement (charte, prompts, registre).
                             </li>
                             <li>
-                                <strong className="text-[var(--color-text)]">La voix reste sur l&apos;appareil.</strong>{' '}
-                                Le mode entretien utilise les capacités vocales de votre navigateur. Aucun
-                                enregistrement n&apos;est transmis ni conservé, et votre voix n&apos;est jamais
-                                interprétée: seule la position que vous validez compte.
+                                <strong className="text-[var(--color-text)]">Le micro n&apos;est jamais utilisé.</strong>{' '}
+                                Le mode entretien lit les énoncés à voix haute, avec la synthèse vocale de
+                                votre navigateur, qui fonctionne sur l&apos;appareil. Il n&apos;écoute pas:
+                                l&apos;application ne demande aucun accès au microphone, et l&apos;en-tête
+                                Permissions-Policy du site en refuse un. Seule la position que vous validez
+                                à l&apos;écran entre dans le calcul.
                             </li>
                             <li>
                                 <strong className="text-[var(--color-text)]">Le partage est un choix explicite.</strong>{' '}

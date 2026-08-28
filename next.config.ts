@@ -12,6 +12,24 @@ const nextConfig: NextConfig = {
       { source: "/account", destination: "/", permanent: true },
     ];
   },
+
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // Nothing here needs a camera, a microphone or a location. The
+          // microphone entry is the one that matters: the interview mode
+          // speaks and never listens, and this makes the browser refuse a
+          // request for one even if code asking for it ever came back.
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
