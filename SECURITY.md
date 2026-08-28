@@ -1,0 +1,43 @@
+# Security policy
+
+## Reporting a vulnerability
+
+Report privately through GitHub's
+[private vulnerability reporting](https://github.com/DeharengOlivier/crible-politique/security/advisories/new)
+rather than by opening a public issue. Please include what you did, what you
+observed, and what you expected. A first answer is sent within seven days.
+
+Do not run automated scanners against a deployed instance, and do not use a real
+person's answers as test material: the data this project handles describes
+political opinions.
+
+## What matters most here
+
+The tool computes everything in the browser and stores nothing about anyone. The
+findings that matter most are therefore the ones that break that property:
+
+- any path that sends a set of answers, or anything derived from them, to a
+  server that keeps it;
+- any way to recover someone's answers from a share link they did not intend to
+  share;
+- stored or reflected cross-site scripting, which would let injected code read
+  the answers held in `localStorage`;
+- anything that makes the published data or the score of a party depend on the
+  request rather than on the files in `data/`.
+
+## Dependencies
+
+`npm audit --audit-level=high` runs in CI on every push and every pull request,
+and it is a blocking job. Dependabot opens weekly update pull requests.
+
+One resolution is pinned by hand in `package.json`:
+
+    "overrides": { "micromatch": { "picomatch": "^4.0.7" } }
+
+`eslint-config-next` reaches `picomatch@2.3.1` through `fast-glob@3.3.1` and
+`micromatch@4.0.8`. Both advisories against that version (GHSA-3v7f-55p6-f55p,
+GHSA-c2c7-rcm5-vvqj) are unfixed upstream: `micromatch@4.0.8` is the latest
+release and still requires `picomatch@^2.3.1`. The override was verified not to
+change behaviour by comparing the exact list of files ESLint reports on before
+and after: 59 files, identical. Remove the override once `micromatch` ships a
+release that depends on `picomatch@^4`.
