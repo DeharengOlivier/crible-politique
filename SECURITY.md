@@ -25,6 +25,22 @@ findings that matter most are therefore the ones that break that property:
 - anything that makes the published data or the score of a party depend on the
   request rather than on the files in `data/`.
 
+## Static analysis
+
+CodeQL runs on every push, every pull request, and weekly on a schedule, with
+the `security-and-quality` query set.
+
+One alert is dismissed, and this is the record of why. `js/log-injection` in
+`scripts/privacy-check.mjs` traces the request line the logging proxy records
+into the failure report the check prints. `readable()` sanitises that line
+where it is stored: a line break becomes a space, every other control
+character is escaped, and the line is capped. CodeQL's taint tracking does not
+recognise that function as a sanitiser, so the path is still reported. The
+script is also a CI-only check that drives a browser at a local build, and the
+only thing writing request lines into it is the browser it launched itself.
+
+If `readable()` is ever removed or weakened, the dismissal stops being true.
+
 ## Dependencies
 
 `npm audit --audit-level=high` runs in CI on every push and every pull request,
