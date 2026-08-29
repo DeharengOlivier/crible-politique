@@ -1,0 +1,21 @@
+# Crible Politique API: encrypted profile vault + anonymous public statistics.
+# Deploy: npx wrangler deploy -c api/wrangler.toml
+# Secrets (set once): npx wrangler secret put SUB_PEPPER -c api/wrangler.toml
+#   SUB_PEPPER: 32+ random bytes. Rotating it orphans every vault (the storage
+#   key is a peppered hash), so it is set once and never printed.
+name = "crible-api"
+main = "src/index.ts"
+compatibility_date = "2026-08-01"
+
+[observability]
+enabled = false # request bodies and tokens must never end up in logs
+
+[vars]
+ALLOWED_ORIGINS = "https://crible.deploy-env.net,http://localhost:3000"
+# Public OAuth client id (not a secret); filled once the Google client exists.
+GOOGLE_CLIENT_ID = ""
+
+[[d1_databases]]
+binding = "DB"
+database_name = "crible-politique"
+database_id = "REPLACED_AT_CREATION"

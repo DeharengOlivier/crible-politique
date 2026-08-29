@@ -1,0 +1,20 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "lib": [
+            "esnext"
+        ],
+        "types": [
+            "@cloudflare/workers-types"
+        ],
+        "plugins": [],
+        "incremental": false,
+        "allowJs": false
+    },
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "../node_modules"
+    ]
+}

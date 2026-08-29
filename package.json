@@ -13,9 +13,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:privacy": "node scripts/privacy-check.mjs",
-    "check:build": "node scripts/build-budget.mjs"
+    "check:build": "node scripts/build-budget.mjs",
+    "check:api": "tsc -p api/tsconfig.json --noEmit"
   },
   "dependencies": {
+    "jose": "^6.2.10",
     "lucide-react": "^1.17.0",
     "next": "^16.2.7",
     "react": "^19.2.8",
@@ -23,6 +25,7 @@
     "recharts": "^3.4.1"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260829.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -34,7 +37,8 @@
     "jsdom": "^30.0.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^5",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.2",
+    "wrangler": "^4.127.1"
   },
   "overrides": {
     "micromatch": {
