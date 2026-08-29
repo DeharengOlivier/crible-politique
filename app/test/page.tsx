@@ -239,7 +239,7 @@ function IntroView({
                     className="inline-flex min-h-[44px] items-center justify-center gap-2 text-sm text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-primary)] hover:underline"
                 >
                     <Mic className="h-4 w-4" aria-hidden="true" />
-                    Préférer l&apos;entretien vocal (30 énoncés lus à voix haute, ~10 min)
+                    Préférer l&apos;entretien vocal (33 énoncés lus à voix haute, ~10 min)
                 </button>
             </div>
         </div>

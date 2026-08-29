@@ -29,17 +29,19 @@ const RENDER_TIMEOUT_MS = 60_000;
 // How long stdout must stay silent before the dump counts as finished.
 const QUIET_MS = 2_000;
 
-// Real answer codes and the badge codes they produce. A v2 code names the
-// country it was taken in; a v1 one predates countries and is still in
-// people's messages.
-const ANSWERS = '2fdcbedcbbdddedcdcdbdedccdbebdecsy';
+// Real answer codes and the badge codes they produce. A v3 code names the
+// country it was taken in; a v2 one does too but over the frozen thirty
+// statement corpus of 2026-08-29; a v1 one predates countries. All three
+// generations are in people's messages.
+const ANSWERS = '3fdcbedcbbdddebbedcdcdbdedccdbebdec14';
 const BADGE = '26111404';
-const ANSWERS_BE = '2bdcbeecbbddcedcdbdbdddcbdbebaaegx';
+const ANSWERS_BE = '3bdcbeecbbddcdbbedcdbdbdddcbdbebaaeo2';
+const LEGACY_ANSWERS_V2 = '2fdcbedcbbdddedcdcdbdedccdbebdecsy';
 const LEGACY_ANSWERS = '1eebaeedadaebedbeadaddbddabeb';
 
 // Every code that must never appear in a request line, whatever its generation
 // or country. Checking only one of them would let a leak through the others.
-const ANSWER_CODES = [ANSWERS, ANSWERS_BE, LEGACY_ANSWERS];
+const ANSWER_CODES = [ANSWERS, ANSWERS_BE, LEGACY_ANSWERS_V2, LEGACY_ANSWERS];
 
 const CASES = [
     {
@@ -54,6 +56,14 @@ const CASES = [
         url: `/test#p=${LEGACY_ANSWERS}`,
         expect: 'Dans quel pays votez-vous',
         why: 'a link older than the country asks for one instead of guessing'
+    },
+    {
+        // A version 2 link was minted before the geopolitics statements
+        // existed. It names its country, so it restores straight to results,
+        // over the frozen corpus it was taken on.
+        url: `/test#p=${LEGACY_ANSWERS_V2}`,
+        expect: 'Votre boussole en 7 dimensions',
+        why: 'a version 2 link keeps restoring after the corpus grew'
     },
     {
         url: `/compare#a=${ANSWERS}&b=${ANSWERS_BE}`,

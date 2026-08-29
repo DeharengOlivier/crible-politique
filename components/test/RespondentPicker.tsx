@@ -17,12 +17,12 @@ const CHOICES = [
     {
         country: 'FR' as const,
         title: 'France',
-        detail: '12 partis, 30 énoncés dont 3 propres au débat français'
+        detail: '12 partis, 33 énoncés dont 3 propres au débat français'
     },
     {
         country: 'BE' as const,
         title: 'Belgique',
-        detail: '12 partis, 30 énoncés dont 3 propres au débat belge'
+        detail: '12 partis, 33 énoncés dont 3 propres au débat belge'
     }
 ];
 
