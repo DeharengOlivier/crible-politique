@@ -5,7 +5,7 @@ import '../globals.css';
  * Embed layout: minimal chrome, no header/footer.
  * Designed for iframe embedding in partner media sites.
  *
- * Usage: <iframe src="https://criblepolitique.fr/embed" width="100%" height="800" />
+ * Usage: <iframe src="https://crible.eu/embed" width="100%" height="800" />
  */
 export const metadata: Metadata = {
   title: 'Le Crible Politique — Widget',

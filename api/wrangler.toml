@@ -7,15 +7,22 @@ name = "crible-api"
 main = "src/index.ts"
 compatibility_date = "2026-08-01"
 
+# Served from the site's own domain rather than workers.dev: the browser then
+# calls a sibling of the page it is on, so the request carries no third-party
+# context, and the API keeps a stable address the day the Worker is renamed.
+[[routes]]
+pattern = "api.crible.eu"
+custom_domain = true
+
 [observability]
 enabled = false # request bodies and tokens must never end up in logs
 
 [vars]
-ALLOWED_ORIGINS = "https://crible.deploy-env.net,http://localhost:3000"
+ALLOWED_ORIGINS = "https://crible.eu,https://www.crible.eu,http://localhost:3000"
 # Public OAuth client id (not a secret); filled once the Google client exists.
 GOOGLE_CLIENT_ID = ""
 
 [[d1_databases]]
 binding = "DB"
 database_name = "crible-politique"
-database_id = "REPLACED_AT_CREATION"
+database_id = "18d32b77-39ef-4f39-9373-cec2c3b6c357"

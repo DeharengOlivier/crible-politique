@@ -16,7 +16,7 @@ import type { Country } from "@/types/positions";
 // battery is the negative-permission proof: the wrong identity, the missing
 // token, the forged field, the oversized body, the unknown party.
 
-const ORIGIN = "https://crible.deploy-env.net";
+const ORIGIN = "https://crible.eu";
 
 class MemoryVaultStore implements VaultStore {
     vaults = new Map<string, StoredVault>();

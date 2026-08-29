@@ -17,7 +17,7 @@ import { publicStatisticsEnabled } from '@/lib/optionalFeatures';
 /**
  * Embeddable widget for partner media: the express test (15 statements)
  * on the deterministic engine, inside an iframe.
- * Usage: <iframe src="https://criblepolitique.fr/embed?pays=FR" width="100%" height="720" />
+ * Usage: <iframe src="https://crible.eu/embed?pays=FR" width="100%" height="720" />
  *
  * The country decides which statements are asked, so a partner pins theirs
  * with ?pays=FR or ?pays=BE. Without it the reader is asked, because guessing

@@ -73,7 +73,7 @@ describe('readShareUrl', () => {
   const KEYS = ['a', 'b'] as const;
 
   it('reads codes already in the fragment and leaves the URL alone', () => {
-    const href = 'https://criblepolitique.fr/compare#a=1aaa&b=1bbb';
+    const href = 'https://crible.eu/compare#a=1aaa&b=1bbb';
     expect(readShareUrl(href, KEYS)).toEqual({
       href,
       codes: { a: '1aaa', b: '1bbb' }
@@ -81,14 +81,14 @@ describe('readShareUrl', () => {
   });
 
   it('reports every requested key, null for the ones the URL does not carry', () => {
-    const result = readShareUrl('https://criblepolitique.fr/compare#a=1aaa', KEYS);
+    const result = readShareUrl('https://crible.eu/compare#a=1aaa', KEYS);
     expect(result.codes).toEqual({ a: '1aaa', b: null });
   });
 
   it('still honours a legacy link that carries the code in the query string', () => {
     // Links minted before the fragment form existed are in people's messages
     // and bookmarks. They must keep working.
-    const result = readShareUrl('https://criblepolitique.fr/compare?a=1aaa&b=1bbb', KEYS);
+    const result = readShareUrl('https://crible.eu/compare?a=1aaa&b=1bbb', KEYS);
     expect(result.codes).toEqual({ a: '1aaa', b: '1bbb' });
   });
 
@@ -96,24 +96,24 @@ describe('readShareUrl', () => {
     // The code has already reached the server on that one request. Rewriting
     // stops it travelling any further: address bar, Referer header of every
     // later asset, bookmark, synced tab.
-    const result = readShareUrl('https://criblepolitique.fr/compare?a=1aaa&b=1bbb', KEYS);
-    expect(result.href).toBe('https://criblepolitique.fr/compare#a=1aaa&b=1bbb');
+    const result = readShareUrl('https://crible.eu/compare?a=1aaa&b=1bbb', KEYS);
+    expect(result.href).toBe('https://crible.eu/compare#a=1aaa&b=1bbb');
     expect(result.href).not.toContain('?');
   });
 
   it('keeps query parameters that are not share codes', () => {
     const result = readShareUrl(
-      'https://criblepolitique.fr/compare?a=1aaa&utm_source=whatsapp',
+      'https://crible.eu/compare?a=1aaa&utm_source=whatsapp',
       KEYS
     );
     expect(result.href).toBe(
-      'https://criblepolitique.fr/compare?utm_source=whatsapp#a=1aaa'
+      'https://crible.eu/compare?utm_source=whatsapp#a=1aaa'
     );
   });
 
   it('prefers the fragment when a URL somehow carries both', () => {
     const result = readShareUrl(
-      'https://criblepolitique.fr/compare?a=1query#a=1fragment',
+      'https://crible.eu/compare?a=1query#a=1fragment',
       KEYS
     );
     expect(result.codes.a).toBe('1fragment');
@@ -121,21 +121,21 @@ describe('readShareUrl', () => {
 
   it('drops the query copy even when the fragment already had the code', () => {
     const result = readShareUrl(
-      'https://criblepolitique.fr/compare?a=1query#a=1fragment',
+      'https://crible.eu/compare?a=1query#a=1fragment',
       KEYS
     );
-    expect(result.href).toBe('https://criblepolitique.fr/compare#a=1fragment');
+    expect(result.href).toBe('https://crible.eu/compare#a=1fragment');
   });
 
   it('returns the URL unchanged when there is nothing to migrate', () => {
-    const href = 'https://criblepolitique.fr/test';
+    const href = 'https://crible.eu/test';
     const result = readShareUrl(href, ['p']);
     expect(result).toEqual({ href, codes: { p: null } });
   });
 
   it('treats an empty query code as no code at all', () => {
-    const result = readShareUrl('https://criblepolitique.fr/test?p=', ['p']);
+    const result = readShareUrl('https://crible.eu/test?p=', ['p']);
     expect(result.codes.p).toBeNull();
-    expect(result.href).toBe('https://criblepolitique.fr/test?p=');
+    expect(result.href).toBe('https://crible.eu/test?p=');
   });
 });

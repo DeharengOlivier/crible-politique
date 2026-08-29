@@ -15,9 +15,10 @@ const sourceSans = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  // Replace with the production domain once wired up
-  // (criblepolitique.fr): used as the base for absolute OG image URLs.
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://criblepolitique.fr"),
+  // The production domain, and the base every absolute URL is built on:
+  // canonical links, the sitemap, robots.txt and the Open Graph images. A
+  // preview deployment overrides it with NEXT_PUBLIC_SITE_URL.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://crible.eu"),
   title: "Le Crible Politique — Un miroir, pas un juge",
   description: "Vos convictions au crible, les programmes au crible du droit. Situez vos positions en 7 dimensions, comparez-les aux positions documentées des partis (FR/BE) et vérifiez ce que le droit permet vraiment. Le calcul se fait dans votre navigateur; sauvegarde chiffrée facultative.",
   manifest: "/manifest.json",

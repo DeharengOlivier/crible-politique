@@ -5,7 +5,7 @@ import { publicStatisticsEnabled } from '@/lib/optionalFeatures';
 // Sitemap generated from the data: each observatory sheet has its own
 // indexable URL (this is the product's organic acquisition engine).
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://criblepolitique.fr';
+const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://crible.eu';
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const staticRoutes = [
