@@ -4,24 +4,24 @@ import { useState } from 'react';
 import type { AnswerRecord, Respondent } from '@/types/positions';
 import { deleteVault } from '@/lib/cribleApi';
 import { profileVaultEnabled } from '@/lib/optionalFeatures';
-import {
-    forgetRecoveryCode,
-    recallRecoveryCode,
-    rememberRecoveryCode,
-    saveProfileToVault
-} from '@/lib/vaultClient';
+import { saveProfileToVault } from '@/lib/vaultClient';
 import GoogleSignInButton from '@/components/profile/GoogleSignInButton';
 
-// "Save my profile", 16personalities-style but with the opposite data deal:
-// the profile is encrypted in this browser before upload, the key never
-// leaves the user, and the card says exactly that. The recovery code is shown
-// once and must be kept: without it (and without this device), the vault is
-// unreadable by everyone, us included. That is the feature, not a bug.
+// "Save my profile", with the opposite data deal from the usual one: the
+// profile is sealed in this browser before it is uploaded and opened in this
+// browser when it comes back, so the plaintext never crosses the network and
+// the database holds no name, no email and no readable answer.
+//
+// Signing in with Google is the whole credential. There is no code to write
+// down: the key is derived from the account by the API, which means the same
+// account opens the same vault on any device, and it also means our server
+// could derive that key. The privacy page says so in those words rather than
+// promising an impossibility.
 
 type CardState =
     | { step: 'idle' }
     | { step: 'saving' }
-    | { step: 'saved'; recoveryCode: string; newCode: boolean; idToken: string }
+    | { step: 'saved'; idToken: string }
     | { step: 'deleted' }
     | { step: 'failed'; reason: 'quota_exceeded' | 'unauthorized' | 'error' };
 
@@ -33,52 +33,24 @@ export default function SaveProfileCard({
     respondent: Respondent;
 }) {
     const [state, setState] = useState<CardState>({ step: 'idle' });
-    const [copied, setCopied] = useState(false);
 
     if (!profileVaultEnabled()) return null;
 
     const handleIdToken = async (idToken: string) => {
         setState({ step: 'saving' });
-        const knownCode = recallRecoveryCode();
-        const result = await saveProfileToVault(
-            idToken,
-            {
-                country: respondent.country,
-                college: respondent.college ?? null,
-                answers,
-                savedAt: new Date().toISOString()
-            },
-            knownCode
-        );
-        if (result.outcome !== 'saved') {
-            setState({ step: 'failed', reason: result.outcome });
-            return;
-        }
-        rememberRecoveryCode(result.recoveryCode);
-        setState({
-            step: 'saved',
-            recoveryCode: result.recoveryCode,
-            newCode: knownCode === null,
-            idToken
+        const outcome = await saveProfileToVault(idToken, {
+            country: respondent.country,
+            college: respondent.college ?? null,
+            answers,
+            savedAt: new Date().toISOString()
         });
+        setState(outcome === 'saved' ? { step: 'saved', idToken } : { step: 'failed', reason: outcome });
     };
 
     const handleDelete = async (idToken: string) => {
-        if (await deleteVault(idToken)) {
-            forgetRecoveryCode();
-            setState({ step: 'deleted' });
-        } else {
-            setState({ step: 'failed', reason: 'error' });
-        }
-    };
-
-    const copyCode = async (code: string) => {
-        try {
-            await navigator.clipboard.writeText(code);
-            setCopied(true);
-        } catch {
-            // the code stays selectable on screen
-        }
+        setState(
+            (await deleteVault(idToken)) ? { step: 'deleted' } : { step: 'failed', reason: 'error' }
+        );
     };
 
     return (
@@ -90,10 +62,10 @@ export default function SaveProfileCard({
             {state.step === 'idle' && (
                 <div className="mt-3 space-y-4">
                     <p className="text-sm text-[var(--color-text-secondary)]">
-                        Retrouvez ce profil plus tard ou sur un autre appareil. Il est chiffré
-                        dans votre navigateur avant l&apos;envoi: le serveur ne stocke qu&apos;un
-                        bloc illisible, et personne (nous compris) ne peut relier vos réponses
-                        à votre compte.
+                        Retrouvez ce profil plus tard ou sur un autre appareil, en vous
+                        reconnectant avec Google. Il est chiffré dans votre navigateur avant
+                        l&apos;envoi: le serveur ne garde qu&apos;un bloc illisible, sans votre
+                        nom, sans votre adresse e-mail et sans votre identifiant Google en clair.
                     </p>
                     <GoogleSignInButton onIdToken={(idToken) => void handleIdToken(idToken)} />
                 </div>
@@ -108,25 +80,9 @@ export default function SaveProfileCard({
             {state.step === 'saved' && (
                 <div className="mt-3 space-y-4">
                     <p className="text-sm text-[var(--color-text-secondary)]">
-                        Profil chiffré et sauvegardé.
-                        {state.newCode
-                            ? ' Voici votre code de récupération. Notez-le: il est la seule clé de ce profil, et nous ne pouvons pas le régénérer.'
-                            : ' Votre code de récupération habituel reste valable.'}
+                        Profil chiffré et sauvegardé. Reconnectez-vous avec ce compte Google,
+                        depuis n&apos;importe quel appareil, pour le retrouver.
                     </p>
-                    {state.newCode && (
-                        <div className="rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-bg)] p-4">
-                            <p className="break-all text-center font-mono text-sm tracking-wide text-[var(--color-text)]">
-                                {state.recoveryCode}
-                            </p>
-                            <button
-                                type="button"
-                                onClick={() => void copyCode(state.recoveryCode)}
-                                className="mt-3 min-h-[44px] w-full rounded-xl border-2 border-[var(--color-border)] px-4 text-sm font-semibold text-[var(--color-text)] hover:border-[var(--color-primary)]/40"
-                            >
-                                {copied ? 'Copié ✓' : 'Copier le code'}
-                            </button>
-                        </div>
-                    )}
                     <button
                         type="button"
                         onClick={() => void handleDelete(state.idToken)}

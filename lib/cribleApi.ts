@@ -1,5 +1,5 @@
 import type { AnalysisStatEvent } from "@/lib/analysisStatEvent";
-import type { SealedProfile } from "@/lib/profileVault";
+import type { SealedProfile, VaultKey } from "@/lib/profileVault";
 import type { Country } from "@/types/positions";
 
 // The only client this site has for its only server (api/, a Cloudflare
@@ -60,6 +60,46 @@ export async function fetchPublicStats(): Promise<PublicStats | null> {
         const response = await fetch(`${base}/stats`);
         if (!response.ok) return null;
         return parsePublicStats(await response.json());
+    } catch {
+        return null;
+    }
+}
+
+export type VaultKeyResult =
+    | { outcome: "found"; key: VaultKey }
+    | { outcome: "unauthorized" }
+    | { outcome: "error" };
+
+/**
+ * The key that opens this account's vault, derived by the API from the Google
+ * account behind the token. It is used to seal and open in the browser and is
+ * never stored anywhere: a new device asks again after signing in.
+ */
+export async function fetchVaultKey(idToken: string): Promise<VaultKeyResult> {
+    const base = cribleApiBaseUrl();
+    if (base === null) return { outcome: "error" };
+    try {
+        const response = await fetch(`${base}/vault/key`, {
+            headers: { authorization: `Bearer ${idToken}` }
+        });
+        if (response.status === 401) return { outcome: "unauthorized" };
+        if (!response.ok) return { outcome: "error" };
+        const body: unknown = await response.json();
+        const key = vaultKeyFrom(body);
+        return key === null ? { outcome: "error" } : { outcome: "found", key };
+    } catch {
+        return { outcome: "error" };
+    }
+}
+
+/** Narrows the API's answer: 32 bytes of base64, or nothing. */
+function vaultKeyFrom(raw: unknown): VaultKey | null {
+    if (typeof raw !== "object" || raw === null) return null;
+    const { key } = raw as Record<string, unknown>;
+    if (typeof key !== "string" || key.length === 0) return null;
+    try {
+        const bytes = Uint8Array.from(atob(key), (character) => character.charCodeAt(0));
+        return bytes.length === 32 ? { raw: bytes } : null;
     } catch {
         return null;
     }

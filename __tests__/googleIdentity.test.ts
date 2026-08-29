@@ -39,8 +39,10 @@ function googleToken(overrides: {
     return jwt.sign(overrides.key ?? signingKey);
 }
 
+// The key pepper is fixed here: what this file is about is what the verifier
+// accepts. What it derives once it accepts is in vaultKeyFromGoogle.test.ts.
 function verifier(pepper: string = PEPPER) {
-    return googleIdentityVerifier(CLIENT_ID, pepper, jwks);
+    return googleIdentityVerifier(CLIENT_ID, pepper, "key-pepper", jwks);
 }
 
 describe("what the verifier accepts", () => {

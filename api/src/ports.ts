@@ -50,12 +50,19 @@ export interface StatsStore {
 }
 
 /**
- * The only thing authentication yields: a peppered hash of the Google subject.
- * The raw subject never reaches a handler or a store, so a database dump names
- * nobody.
+ * What authentication yields: two values derived from the Google subject, which
+ * itself never reaches a handler or a store, so a database dump names nobody.
+ *
+ * `subHash` names the row and is written to the database. `vaultKey` opens it
+ * and is written nowhere: it is answered to the browser that proved it owns the
+ * account, and forgotten. They come from two separate server secrets on
+ * purpose, so that a stolen database, even alongside a known Google account id,
+ * cannot be turned into a key.
  */
 export interface VerifiedIdentity {
     subHash: string;
+    /** 256-bit AES key material, base64. Never stored, never logged. */
+    vaultKey: string;
 }
 
 export type IdentityVerifier = (authorization: string | null) => Promise<VerifiedIdentity | null>;

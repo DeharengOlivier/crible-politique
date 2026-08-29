@@ -58,6 +58,7 @@ npx wrangler login                                  # once per machine
 npx wrangler d1 create crible-politique             # once; paste id in wrangler.toml
 npx wrangler d1 execute crible-politique --remote --file=api/schema.sql -c api/wrangler.toml
 openssl rand -hex 32 | npx wrangler secret put SUB_PEPPER -c api/wrangler.toml
+openssl rand -hex 32 | npx wrangler secret put VAULT_KEY_PEPPER -c api/wrangler.toml
 # fill GOOGLE_CLIENT_ID in [vars] once the OAuth client exists
 npx wrangler deploy -c api/wrangler.toml
 ```
@@ -65,9 +66,19 @@ npx wrangler deploy -c api/wrangler.toml
 Then set `NEXT_PUBLIC_CRIBLE_API_URL` (the worker URL) and
 `NEXT_PUBLIC_GOOGLE_CLIENT_ID` in the Vercel project and redeploy the site.
 
-**SUB_PEPPER is set once and never rotated casually**: the pepper is part of
-every vault's storage key, so rotating it orphans all vaults (users would
-save again; nothing is decryptable by anyone either way).
+**Both peppers are set once, never rotated casually, and never equal to each
+other.** SUB_PEPPER is part of every vault's storage key, so rotating it orphans
+all vaults. VAULT_KEY_PEPPER is part of every vault's encryption key, so
+rotating it makes stored vaults unreadable. Users would simply save again in
+either case.
+
+They must be two distinct random values, and that is a security property rather
+than hygiene: the storage key is written to the database, so if the encryption
+key came from the same secret, a stolen database would carry everything needed
+to open itself. Kept separate, a stolen database opens nothing, even for someone
+who knows the Google account id of a target. What an operator holding both the
+database and the Worker secrets can do is stated on the site's privacy page
+rather than hidden: they could decrypt a saved profile.
 
 ## Post-deploy checks
 

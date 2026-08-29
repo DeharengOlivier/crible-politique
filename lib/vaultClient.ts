@@ -1,91 +1,49 @@
-import {
-    decryptProfile,
-    encryptProfile,
-    generateVaultKey,
-    keyFromRecoveryCode,
-    recoveryCodeFromKey
-} from "@/lib/profileVault";
-import type { VaultProfile } from "@/lib/profileVault";
-import { loadVault, saveVault } from "@/lib/cribleApi";
+import { decryptProfile, encryptProfile } from "@/lib/profileVault";
+import type { VaultKey, VaultProfile } from "@/lib/profileVault";
+import { fetchVaultKey, loadVault, saveVault } from "@/lib/cribleApi";
 
 // The complete client-side workflow behind "save my profile" and "find my
-// profile back". The order of operations is the security property: encrypt
-// first, upload second, and the key material (the recovery code) never
-// appears in any request. Local storage keeps the code as a convenience on
-// this device; losing it and the code together means the vault is gone, which
-// the UI says out loud instead of pretending otherwise.
+// profile back".
+//
+// Signing in with Google is the whole credential. The key that opens the vault
+// is derived by the API from the Google account and answered only to a browser
+// holding a valid ID token for this application; it is used here and kept
+// nowhere. A reader has nothing to write down and nothing to lose, on any
+// device, which is the point.
+//
+// What did not change is the order of operations, and that is the security
+// property: the profile is sealed in this browser before anything is sent, and
+// the plaintext never appears in a request. The server holds ciphertext, and
+// what it can technically do is stated on the privacy page rather than dressed
+// up as impossible.
 
-export type VaultSaveResult =
-    | { outcome: "saved"; recoveryCode: string }
-    | { outcome: "quota_exceeded" }
-    | { outcome: "unauthorized" }
-    | { outcome: "error" };
+export type VaultSaveOutcome = "saved" | "quota_exceeded" | "unauthorized" | "error";
 
-/**
- * Encrypts and uploads the profile. A caller who already holds a recovery
- * code (same device, or typed back in) keeps its key, so every save stays
- * readable with the one code the user wrote down; without one, a fresh key is
- * generated and its code returned to be shown exactly once.
- */
 export async function saveProfileToVault(
     idToken: string,
-    profile: VaultProfile,
-    knownRecoveryCode: string | null
-): Promise<VaultSaveResult> {
-    const knownKey = knownRecoveryCode === null ? null : keyFromRecoveryCode(knownRecoveryCode);
-    const key = knownKey ?? generateVaultKey();
-    const sealed = await encryptProfile(profile, key);
-    const outcome = await saveVault(idToken, sealed);
-    if (outcome !== "saved") return { outcome };
-    return { outcome: "saved", recoveryCode: recoveryCodeFromKey(key) };
+    profile: VaultProfile
+): Promise<VaultSaveOutcome> {
+    const key = await fetchVaultKey(idToken);
+    if (key.outcome !== "found") return key.outcome;
+    const sealed = await encryptProfile(profile, key.key);
+    return saveVault(idToken, sealed);
 }
 
 export type VaultRestoreResult =
     | { outcome: "restored"; profile: VaultProfile }
     | { outcome: "empty" }
-    | { outcome: "wrong_code" }
     | { outcome: "unauthorized" }
     | { outcome: "error" };
 
-export async function restoreProfileFromVault(
-    idToken: string,
-    recoveryCode: string
-): Promise<VaultRestoreResult> {
-    const key = keyFromRecoveryCode(recoveryCode);
-    if (key === null) return { outcome: "wrong_code" };
+export async function restoreProfileFromVault(idToken: string): Promise<VaultRestoreResult> {
+    const key = await fetchVaultKey(idToken);
+    if (key.outcome !== "found") return { outcome: key.outcome };
     const loaded = await loadVault(idToken);
     if (loaded.outcome !== "found") return { outcome: loaded.outcome };
-    const profile = await decryptProfile(loaded.sealed, key);
-    // Wrong key and tampered blob are indistinguishable by design (GCM), and
-    // that is the right message: "this code does not open this vault".
-    return profile === null ? { outcome: "wrong_code" } : { outcome: "restored", profile };
+    const profile = await decryptProfile(loaded.sealed, key.key);
+    // A wrong key and a tampered blob are indistinguishable by design (AES-GCM)
+    // and both end here: the vault did not open, and nothing is guessed.
+    return profile === null ? { outcome: "error" } : { outcome: "restored", profile };
 }
 
-const RECOVERY_CODE_STORAGE_KEY = "crible_vault_recovery_v1";
-
-export function rememberRecoveryCode(code: string): void {
-    try {
-        localStorage.setItem(RECOVERY_CODE_STORAGE_KEY, code);
-    } catch {
-        // storage unavailable: the user still has the code on screen
-    }
-}
-
-/** Returns the stored code only if it still decodes to a key. */
-export function recallRecoveryCode(): string | null {
-    try {
-        const code = localStorage.getItem(RECOVERY_CODE_STORAGE_KEY);
-        if (code === null || keyFromRecoveryCode(code) === null) return null;
-        return code;
-    } catch {
-        return null;
-    }
-}
-
-export function forgetRecoveryCode(): void {
-    try {
-        localStorage.removeItem(RECOVERY_CODE_STORAGE_KEY);
-    } catch {
-        // nothing to forget if storage is unreachable
-    }
-}
+export type { VaultKey };

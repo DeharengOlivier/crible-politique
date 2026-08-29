@@ -426,13 +426,20 @@ Les opinions politiques sont des données sensibles (art. 9 RGPD). Architecture
 - le lien de comparaison duo encode les réponses dans l'URL elle-même, stocké
   nulle part, partagé uniquement par choix explicite de l'utilisateur;
 - la sauvegarde de profil (facultative, compte Google) chiffre le profil dans
-  le navigateur (AES-256-GCM); la clé, remise à l'utilisateur sous forme de
-  code de récupération, ne quitte jamais son appareil. Le serveur stocke un
-  bloc illisible, indexé par une empreinte SHA-256 poivrée du compte: ni
-  l'opérateur du site, ni l'hébergeur, ni un accès complet à la base ne
-  permettent de lire les réponses. Perdre le code et l'appareil rend le profil
-  indéchiffrable pour tout le monde, opérateur compris: c'est le prix assumé
-  de la garantie;
+  le navigateur (AES-256-GCM) et le déchiffre dans le navigateur: les réponses
+  en clair ne circulent jamais. Le serveur stocke un bloc illisible, indexé par
+  une empreinte SHA-256 poivrée du compte, sans nom, sans adresse e-mail et
+  sans identifiant Google en clair. **La clé est dérivée par l'API à partir du
+  compte Google et d'un second secret serveur** (depuis le 29 août 2026), et
+  remise au navigateur qui a prouvé détenir ce compte: se reconnecter suffit,
+  sur n'importe quel appareil, et il n'y a aucun code à conserver. Le prix de
+  ce choix est énoncé plutôt que masqué: un vol de la seule base ne donne rien,
+  même en connaissant l'identifiant Google de quelqu'un, mais qui détiendrait
+  à la fois la base et les secrets du serveur pourrait déchiffrer un profil.
+  La version précédente reposait sur un code de 62 caractères remis à
+  l'utilisateur: personne ne pouvait lire, y compris nous, mais perdre le code
+  perdait le profil. Le compromis a été tranché en faveur des gens qui perdent
+  leur code, et la page confidentialité le dit dans ces termes;
 - aucun pisteur publicitaire, aucune monétisation des données, par principe.
 
 Vérifiable sans accès au code: les outils de développement de n'importe quel

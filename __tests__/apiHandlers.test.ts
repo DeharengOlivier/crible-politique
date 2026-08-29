@@ -82,10 +82,15 @@ class MemoryStatsStore implements StatsStore {
 let vaults: MemoryVaultStore;
 let stats: MemoryStatsStore;
 
-function portsWith(identity: VerifiedIdentity | null): ApiPorts {
+// The key an identity carries is irrelevant to authorization, which is what
+// this file is about, so the fakes name it after the row they own. What the
+// real verifier derives is in vaultKeyFromGoogle.test.ts.
+function portsWith(identity: Omit<VerifiedIdentity, "vaultKey"> | null): ApiPorts {
     return {
         verifyIdentity: async (authorization) =>
-            authorization === "Bearer valid-token" ? identity : null,
+            authorization === "Bearer valid-token" && identity !== null
+                ? { ...identity, vaultKey: `key-of-${identity.subHash}` }
+                : null,
         vaults,
         stats,
         partyIdsOf: (country) =>

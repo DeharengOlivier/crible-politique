@@ -39,8 +39,10 @@ export default function ConfidentialitePage() {
                         </h2>
                         <p className="mt-2 text-lg text-[var(--color-text-secondary)]">
                             Les opinions politiques sont des données sensibles au sens de l&apos;article 9 du
-                            RGPD. Notre réponse: ne jamais pouvoir les lire, et faire reposer cette
-                            garantie sur l&apos;architecture plutôt que sur une promesse.
+                            RGPD. Notre réponse: ne jamais les collecter, et faire reposer cette
+                            garantie sur l&apos;architecture plutôt que sur une promesse. Ce qui est
+                            envoyé quand vous le demandez explicitement, et ce que cela implique,
+                            est décrit ci-dessous sans arrondir les angles.
                         </p>
                     </div>
 
@@ -53,18 +55,34 @@ export default function ConfidentialitePage() {
                                 et ne reçoit jamais vos réponses.
                             </li>
                             {profileVaultEnabled() && (
+                            <>
                             <li>
                                 <strong className="text-[var(--color-text)]">La sauvegarde de profil est chiffrée avant de partir.</strong>{' '}
                                 Si vous choisissez de sauvegarder votre profil avec votre compte Google, il
-                                est chiffré dans votre navigateur (AES-256-GCM) avec une clé qui ne quitte
-                                jamais votre appareil. Le serveur ne stocke qu&apos;un bloc illisible,
-                                associé à une empreinte irréversible de votre compte: personne, ni nous, ni
-                                l&apos;hébergeur, ni quiconque accéderait à la base de données, ne peut lire
-                                vos réponses ni savoir ce que vous pensez. La contrepartie est réelle: si
-                                vous perdez à la fois votre code de récupération et l&apos;appareil qui le
-                                garde, votre profil est indéchiffrable, pour nous aussi. Vous pouvez le
-                                supprimer du serveur à tout moment depuis vos résultats.
+                                est chiffré dans votre navigateur (AES-256-GCM) avant l&apos;envoi et
+                                déchiffré dans votre navigateur au retour: vos réponses en clair ne
+                                circulent jamais sur le réseau. La base ne contient que deux choses: une
+                                empreinte irréversible de votre compte, et un bloc chiffré. Sans votre nom,
+                                sans votre adresse e-mail, sans votre identifiant Google en clair, et sans
+                                aucune réponse lisible. Reconnectez-vous avec le même compte, sur
+                                n&apos;importe quel appareil, et vous retrouvez votre profil:{' '}
+                                <strong className="text-[var(--color-text)]">aucun code à conserver</strong>,
+                                rien à perdre.
                             </li>
+                            <li>
+                                <strong className="text-[var(--color-text)]">Ce que nous pourrions faire, et que nous ne faisons pas.</strong>{' '}
+                                La clé de votre sauvegarde est recalculée par notre API à partir de votre
+                                compte Google et d&apos;un secret serveur, puis remise à votre navigateur.
+                                Une personne qui détiendrait à la fois la base de données et les secrets du
+                                serveur{' '}
+                                <strong className="text-[var(--color-text)]">pourrait techniquement</strong>{' '}
+                                déchiffrer un profil sauvegardé. Un vol de la seule base, lui, ne donne
+                                rien, même en connaissant votre identifiant Google. Nous préférons
+                                l&apos;écrire que promettre une impossibilité: le code qui fait tout cela
+                                est public, ligne par ligne, et vous pouvez supprimer votre profil du
+                                serveur à tout moment depuis vos résultats.
+                            </li>
+                            </>
                             )}
                             {publicStatisticsEnabled() && (
                             <li>

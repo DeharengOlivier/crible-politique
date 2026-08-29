@@ -1,8 +1,14 @@
 # Crible Politique API: encrypted profile vault + anonymous public statistics.
 # Deploy: npx wrangler deploy -c api/wrangler.toml
-# Secrets (set once): npx wrangler secret put SUB_PEPPER -c api/wrangler.toml
-#   SUB_PEPPER: 32+ random bytes. Rotating it orphans every vault (the storage
-#   key is a peppered hash), so it is set once and never printed.
+# Secrets (set once, both required):
+#   npx wrangler secret put SUB_PEPPER       -c api/wrangler.toml
+#   npx wrangler secret put VAULT_KEY_PEPPER -c api/wrangler.toml
+#   SUB_PEPPER: 32+ random bytes, peppers the storage key. Rotating it orphans
+#   every vault (the rows can no longer be found), so it is set once.
+#   VAULT_KEY_PEPPER: 32+ random bytes, peppers the vault keys. Rotating it
+#   makes every stored vault unreadable. It MUST be a different value from
+#   SUB_PEPPER: with one shared value, whoever holds the database holds the key
+#   to every row in it.
 name = "crible-api"
 main = "src/index.ts"
 compatibility_date = "2026-08-01"

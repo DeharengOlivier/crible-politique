@@ -14,6 +14,12 @@ interface Env {
     GOOGLE_CLIENT_ID: string;
     /** Secret (wrangler secret put SUB_PEPPER): peppers the subject hashes. */
     SUB_PEPPER: string;
+    /**
+     * Secret (wrangler secret put VAULT_KEY_PEPPER): peppers the vault keys.
+     * Separate from SUB_PEPPER on purpose: one names the rows, the other opens
+     * them, and holding the database must not be holding both.
+     */
+    VAULT_KEY_PEPPER: string;
     /** Comma-separated list of origins allowed to call the writing endpoints. */
     ALLOWED_ORIGINS: string;
 }
@@ -31,7 +37,11 @@ let cachedPorts: ApiPorts | null = null;
 // verifier survives across requests instead of refetching Google's keys.
 function portsOf(env: Env): ApiPorts {
     cachedPorts ??= {
-        verifyIdentity: googleIdentityVerifier(env.GOOGLE_CLIENT_ID, env.SUB_PEPPER),
+        verifyIdentity: googleIdentityVerifier(
+            env.GOOGLE_CLIENT_ID,
+            env.SUB_PEPPER,
+            env.VAULT_KEY_PEPPER
+        ),
         vaults: d1VaultStore(env.DB),
         stats: d1StatsStore(env.DB),
         partyIdsOf: (country) => PARTY_IDS[country],

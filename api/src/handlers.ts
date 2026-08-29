@@ -3,8 +3,11 @@ import { MAX_BODY_BYTES, parseAnalysisEventBody, parseSealedProfileBody } from "
 import type { ApiPorts } from "./ports";
 
 // One entry point, three resources:
-//   /vault    - the caller's sealed profile; authenticated, owner-only by
-//               construction (the storage key IS the verified identity hash).
+//   /vault     - the caller's sealed profile; authenticated, owner-only by
+//                construction (the storage key IS the verified identity hash).
+//   /vault/key - the key that opens it, derived from the caller's Google
+//                account and answered only to a browser that proved it owns
+//                that account. Answered, never stored.
 //   /analyses - anonymous aggregate increments; no authentication, because an
 //               identity here would defeat the whole privacy design.
 //   /stats    - the public read-only aggregates, CORS-open and cacheable.
@@ -32,6 +35,7 @@ async function route(request: Request, ports: ApiPorts): Promise<Response> {
         if (request.method !== "POST") return respond(request, ports, 405);
         return recordAnalysis(request, ports);
     }
+    if (path === "/vault/key") return serveVaultKey(request, ports);
     if (path === "/vault") return serveVault(request, ports);
     return respond(request, ports, 404);
 }
@@ -59,6 +63,24 @@ async function recordAnalysis(request: Request, ports: ApiPorts): Promise<Respon
         leaderShares(event.leaders, event.positionsTaken)
     );
     return respond(request, ports, 204);
+}
+
+/**
+ * The vault key of the authenticated caller.
+ *
+ * Handing out a decryption key looks alarming written down, so the exact rule:
+ * the key is a function of the Google subject and a server secret, and this
+ * endpoint answers it only to a caller holding a Google ID token minted for
+ * this application and signed by Google. That token is the same credential
+ * that already authorizes reading the ciphertext, so the endpoint grants
+ * nothing the caller could not already obtain, and it lets the plaintext be
+ * opened in the browser rather than on the server.
+ */
+async function serveVaultKey(request: Request, ports: ApiPorts): Promise<Response> {
+    if (request.method !== "GET") return respond(request, ports, 405);
+    const identity = await ports.verifyIdentity(request.headers.get("authorization"));
+    if (identity === null) return respond(request, ports, 401);
+    return respond(request, ports, 200, JSON.stringify({ key: identity.vaultKey }));
 }
 
 async function serveVault(request: Request, ports: ApiPorts): Promise<Response> {
