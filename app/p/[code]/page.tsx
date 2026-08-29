@@ -41,6 +41,8 @@ export default async function SharedProfilePage({ params }: PageProps) {
     if (!identity) notFound();
 
     const synth = identity.syntheticProfile;
+    // Everything these dominant currents do not separate from the family shown.
+    const alsoInGroup = identity.leadingGroup.slice(1);
 
     return (
         <div className="min-h-screen bg-[var(--color-bg)]">
@@ -70,6 +72,24 @@ export default async function SharedProfilePage({ params }: PageProps) {
                         <p className="mt-2 text-lg italic text-[var(--color-text-secondary)]">
                             &quot;{synth?.tagline ?? 'Un profil qui ne rentre dans aucune case.'}&quot;
                         </p>
+                        {alsoInGroup.length > 0 && (
+                            <p className="mx-auto mt-3 max-w-xl text-sm text-[var(--color-text-secondary)]">
+                                {alsoInGroup.length === 1
+                                    ? 'Une autre famille colle'
+                                    : `${alsoInGroup.length} autres familles collent`}{' '}
+                                autant à ces réponses:{' '}
+                                {alsoInGroup.map((family, index) => (
+                                    <span key={family.id}>
+                                        {index > 0 &&
+                                            (index === alsoInGroup.length - 1 ? ' et ' : ', ')}
+                                        <span className="font-semibold text-[var(--color-text)]">
+                                            {family.title}
+                                        </span>
+                                    </span>
+                                ))}
+                                . Le titre ci-dessus est la plus proche, pas un verdict.
+                            </p>
+                        )}
                     </div>
 
                     <div className="grid gap-3 text-left sm:grid-cols-2">

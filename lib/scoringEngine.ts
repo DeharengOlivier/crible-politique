@@ -100,6 +100,13 @@ export interface ProfileResult {
     // User's mean position per dimension (-2..+2), null if no answer.
     dimensionPositions: Partial<Record<DimensionKey, number>>;
     syntheticProfile: SyntheticProfile | null;
+    /**
+     * How well that family actually fits, and what came second. Every completed
+     * analysis is now named, so the name alone would hide the difference
+     * between a respondent a family describes closely and one who merely had
+     * to be put somewhere. The margin is what says which of the two happened.
+     */
+    syntheticProfileFit: SyntheticProfileFit;
     answeredCount: number;
 }
 
@@ -388,30 +395,240 @@ export function computeProfile(answers: AnswerRecord): ProfileResult {
     const answeredCount = STATEMENTS.filter(
         (s) => answers[s.id] !== null && answers[s.id] !== undefined
     ).length;
+    const fit = findSyntheticProfile(dimensionArchetypes);
 
     return {
         dimensionArchetypes,
         dimensionTies,
         allArchetypeScores,
         dimensionPositions,
-        syntheticProfile: findSyntheticProfile(dimensionArchetypes),
+        syntheticProfile: fit.family,
+        syntheticProfileFit: fit,
         answeredCount
     };
 }
 
 /**
- * The synthetic profile matching a set of dominant archetype labels.
+ * The synthetic family closest to a set of dominant archetype labels.
  *
  * Exported because it is the whole of what a shared profile page displays:
  * rendering one needs the labels, never the answers they were derived from.
+ *
+ * Closest, not first to match. The families used to be boolean predicates read
+ * in declaration order, and on 5000 simulated Belgian express runs 58% of
+ * respondents were named by the position of an entry in a source file while
+ * three families could never come out at all. Distance settles it instead: the
+ * labels are turned back into the answers they stand for, each family carries
+ * the answers it expects, and the nearest one wins. Order stops mattering, and
+ * every family is reachable by construction, the same guarantee the archetype
+ * layer already holds one level below.
  */
 export function syntheticProfileFor(labels: ArchetypeLabelMap): SyntheticProfile | null {
-    return SYNTHETIC_PROFILES.find((p) => p.matches(labels)) ?? null;
+    return closestSyntheticProfile(labels).family;
+}
+
+export interface SyntheticProfileFit {
+    family: SyntheticProfile | null;
+    /** Agreement with the family's expectations, 0 to 100. */
+    score: number;
+    /**
+     * Every family these answers cannot separate from the closest one, that one
+     * first. Measured 2026-08-29: a respondent reproducing a party's documented
+     * positions exactly is a single point away from the runner-up, and a third of
+     * them are an exact tie. Naming one family alone would present a coin flip as
+     * a result, so the interval decides who is in and the reader sees the group,
+     * exactly as the party ranking already does.
+     */
+    leadingGroup: SyntheticProfile[];
+    /** Agreement of every family, 0 to 100, by family id. */
+    scores: Record<string, number>;
+    /** The next closest family, and how far behind it is, in the same points. */
+    runnerUp: SyntheticProfile | null;
+    margin: number;
+}
+
+/**
+ * Whether the answers really put the first family ahead of the second, or
+ * whether the gap between them is within the noise of a single respondent.
+ *
+ * Paired, statement by statement, and that is the whole point. Both families are
+ * judged on the same statements by the same person, so the two are not
+ * independent samples: the question is not "how sure are we of each score" but
+ * "how consistently does this respondent side with one rather than the other".
+ * The statements where the two expect the same thing, which is most of the
+ * corpus since a family describes one to three of the seven dimensions, cancel
+ * out exactly instead of drowning the ones where they differ.
+ *
+ * Measured 2026-08-29 on the whole party corpus: comparing the two scores as
+ * independent means left a median of 10 families out of 14 inside the leading
+ * group, even for a respondent reproducing a party's documented positions
+ * exactly, and 19 pairs of families expecting opposite currents were called
+ * indistinguishable. The paired difference is the correct test and it is the one
+ * the reader assumes is being made.
+ */
+function separatedFrom(leader: readonly number[], other: readonly number[]): boolean {
+    if (leader.length !== other.length || leader.length < 2) return false;
+    const differences = leader.map((agreement, i) => agreement - other[i]);
+    const mean = differences.reduce((sum, d) => sum + d, 0) / differences.length;
+    const standardError = standardErrorOfWeightedMean(
+        differences,
+        differences.map(() => 1),
+        mean
+    );
+    if (standardError === null) return false;
+    return mean - CONFIDENCE_Z * standardError > 0;
+}
+
+export function closestSyntheticProfile(labels: ArchetypeLabelMap): SyntheticProfileFit {
+    const respondent = expectedAnswersOf(labels);
+    const empty: SyntheticProfileFit = {
+        family: null,
+        score: 0,
+        leadingGroup: [],
+        scores: {},
+        runnerUp: null,
+        margin: 0
+    };
+    if (Object.keys(respondent).length === 0) return empty;
+
+    const ranked = SYNTHETIC_PROFILES.map((family) => {
+        const { similarity, agreements } = similarityBetween(respondent, expectationsOf(family));
+        return {
+            family,
+            similarity,
+            agreements,
+            // How much the family commits to. On an exact tie the more specific
+            // description wins: it says more about the respondent and risks more.
+            constrained: ARCHETYPE_SIGNATURES.filter(
+                ({ dimension }) => (family.expects[dimension] ?? []).length > 0
+            ).length
+        };
+    }).sort(
+        (a, b) =>
+            b.similarity - a.similarity ||
+            b.constrained - a.constrained ||
+            // Last resort, and never the list's order: two families that fit
+            // identically must not be separated by which was typed first.
+            a.family.id.localeCompare(b.family.id)
+    );
+
+    const [best, second] = ranked;
+    const scores: Record<string, number> = {};
+    for (const entry of ranked) scores[entry.family.id] = Math.round(entry.similarity * 100);
+
+    // A prefix of the ranking, not a filter over it: the group is read as "the
+    // closest families", so it must never skip one and keep a more distant one.
+    const leadingGroup: SyntheticProfile[] = [];
+    for (const entry of ranked) {
+        if (entry !== best && separatedFrom(best.agreements, entry.agreements)) break;
+        leadingGroup.push(entry.family);
+    }
+
+    return {
+        family: best.family,
+        score: scores[best.family.id],
+        leadingGroup,
+        scores,
+        runnerUp: second?.family ?? null,
+        margin: second === undefined ? 0 : Math.round((best.similarity - second.similarity) * 100)
+    };
+}
+
+/**
+ * The answers a respondent described by these labels would have given: each
+ * dominant current is published as a signature, so the labels can be read back
+ * as the pattern they stand for. A dimension left unanswered stays absent.
+ */
+function expectedAnswersOf(labels: ArchetypeLabelMap): Record<string, number> {
+    const expected: Record<string, number> = {};
+    for (const { dimension, signatures } of ARCHETYPE_SIGNATURES) {
+        const signature = signatures[labels[dimension]];
+        if (signature === undefined) continue;
+        for (const [statementId, value] of Object.entries(signature)) expected[statementId] = value;
+    }
+    return expected;
+}
+
+/** One dimension of a family's description: the patterns it accepts there. */
+interface DimensionExpectation {
+    statementIds: string[];
+    /** Alternatives, never blended: a family recognises itself in any of them. */
+    accepted: Record<string, number>[];
+}
+
+const familyExpectations = new Map<string, DimensionExpectation[]>();
+
+/**
+ * What a family expects, dimension by dimension. On a dimension it names, the
+ * signatures of the currents it accepts, kept apart; on a dimension it leaves
+ * out, the average of every current of that dimension, which is the only
+ * neutral value: a family that says nothing about the economy must neither gain
+ * nor lose from it.
+ *
+ * Alternatives are kept apart rather than averaged, because the average of two
+ * opposite currents is a third position that neither of them holds. Averaging
+ * them made "Néoréaliste stratège" unreachable: it accepts a sovereignist or an
+ * atlanticist geopolitics, and the midpoint of the two resembled neither.
+ */
+function expectationsOf(family: SyntheticProfile): DimensionExpectation[] {
+    const cached = familyExpectations.get(family.id);
+    if (cached !== undefined) return cached;
+
+    const expectations: DimensionExpectation[] = [];
+    for (const { dimension, signatures } of ARCHETYPE_SIGNATURES) {
+        const named = (family.expects[dimension] ?? []).filter((l) => signatures[l] !== undefined);
+        const allLabels = Object.keys(signatures);
+        const statementIds = Object.keys(signatures[allLabels[0]]);
+        if (named.length > 0) {
+            expectations.push({ statementIds, accepted: named.map((label) => signatures[label]) });
+            continue;
+        }
+        const centroid: Record<string, number> = {};
+        for (const statementId of statementIds) {
+            centroid[statementId] =
+                allLabels.reduce((sum, label) => sum + signatures[label][statementId], 0) /
+                allLabels.length;
+        }
+        expectations.push({ statementIds, accepted: [centroid] });
+    }
+    familyExpectations.set(family.id, expectations);
+    return expectations;
+}
+
+/**
+ * Mean agreement over the statements the respondent stands on, each dimension
+ * scored by the accepted pattern that fits best. O(dimensions x currents x
+ * statements), all three bounded by the published data.
+ *
+ * The per-statement agreements come back with the mean, because how much they
+ * disagree with each other is what says whether the mean can be trusted to
+ * separate one family from the next.
+ */
+function similarityBetween(
+    respondent: Record<string, number>,
+    expectations: DimensionExpectation[]
+): { similarity: number; agreements: number[] } {
+    const agreements: number[] = [];
+    for (const { statementIds, accepted } of expectations) {
+        const shared = statementIds.filter((id) => respondent[id] !== undefined);
+        if (shared.length === 0) continue;
+        const perPattern = accepted.map((pattern) =>
+            shared.map((id) => 1 - Math.abs(respondent[id] - pattern[id]) / MAX_DISTANCE)
+        );
+        const meanOf = (values: number[]) => values.reduce((sum, v) => sum + v, 0) / values.length;
+        const best = perPattern.reduce((a, b) => (meanOf(b) > meanOf(a) ? b : a));
+        agreements.push(...best);
+    }
+    if (agreements.length === 0) return { similarity: 0, agreements };
+    return {
+        similarity: agreements.reduce((sum, a) => sum + a, 0) / agreements.length,
+        agreements
+    };
 }
 
 function findSyntheticProfile(
     dimensionArchetypes: Partial<Record<DimensionKey, ArchetypeScore>>
-): SyntheticProfile | null {
+): SyntheticProfileFit {
     const labels: ArchetypeLabelMap = {
         power: dimensionArchetypes.power?.label ?? "",
         economy: dimensionArchetypes.economy?.label ?? "",
@@ -422,5 +639,5 @@ function findSyntheticProfile(
         moral: dimensionArchetypes.moral?.label ?? ""
     };
 
-    return syntheticProfileFor(labels);
+    return closestSyntheticProfile(labels);
 }

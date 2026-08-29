@@ -291,6 +291,55 @@ d'archétypes dominants. Règles d'écriture: même bienveillance pour tous les
 profils, chaque profil a une force et un point de vigilance, et son titre doit
 pouvoir être revendiqué fièrement par la personne décrite.
 
+### 4.1 La famille affichée est la plus proche, et jamais la première déclarée
+
+Chaque famille déclare ce qu'elle attend, dimension par dimension: les courants
+qu'elle accepte là où elle se prononce, et rien là où elle ne se prononce pas.
+Les courants dominants du répondant sont relus comme le pattern de réponses
+qu'ils représentent, chaque famille est comparée à ce pattern, et **la plus
+proche est nommée**. Une dimension dont la famille ne parle pas est notée sur le
+centre de la dimension: une famille qui ne dit rien de l'économie ne doit ni
+gagner ni perdre sur l'économie. Les courants alternatifs d'une même dimension
+ne sont **jamais moyennés**, la moyenne de deux positions opposées étant une
+troisième position que ni l'une ni l'autre ne tient.
+
+Auparavant, chaque famille était un prédicat booléen et la première à accepter
+les sept courants dominants gagnait. Mesuré le 29 août 2026 sur 5 000 répondants
+simulés: sur le test express belge, **55 à 58% des résultats étaient décidés par
+la position d'une entrée dans un fichier**, trois familles étaient inatteignables
+quoi que l'on réponde, et 8 à 23% des analyses complètes ne recevaient aucun nom.
+Depuis, 0% d'analyse sans nom, 14 familles sur 14 atteignables, et l'ordre du
+fichier n'a plus d'effet, ce que trois tests tiennent.
+
+### 4.2 Les familles que les réponses ne séparent pas sont nommées aussi
+
+Nommer une famille et s'arrêter là supposerait qu'elle a gagné. Mesuré le
+29 août 2026 sur l'ensemble du corpus des partis: un répondant qui reproduit
+**exactement** les positions documentées d'un parti n'est séparé de la deuxième
+famille que par 1 point sur 100 en médiane, et un tiers de ces répondants sont à
+égalité parfaite. L'écart entre familles est plus petit que la précision du test.
+
+L'outil applique donc aux familles la règle qu'il applique déjà aux partis: il
+publie un **groupe de tête** au lieu d'un vainqueur. La comparaison est
+**appariée**, énoncé par énoncé: les deux familles sont jugées sur les mêmes
+énoncés par la même personne, la question n'est pas "quelle confiance a-t-on
+dans chaque score" mais "avec quelle constance ce répondant penche-t-il pour
+l'une plutôt que pour l'autre". Les énoncés où les deux familles attendent la
+même chose, c'est-à-dire l'essentiel du corpus puisqu'une famille décrit une à
+trois dimensions sur sept, s'annulent exactement au lieu de noyer ceux qui les
+séparent. Traiter les deux scores comme indépendants laissait **10 familles sur
+14 dans le groupe de tête** en médiane, et déclarait indiscernables 19 paires de
+familles qui attendent des courants opposés. Avec la comparaison appariée, la
+médiane tombe à **4 familles sur 14**, et 4 paires seulement restent
+indiscernables.
+
+Ces 4 paires ne sont pas un échec statistique, c'est la donnée qui parle: chacune
+implique une famille qui ne décrit qu'une ou deux dimensions sur sept
+("Gaulliste social-étatiste" ne décrit que le rapport au pouvoir). Le correctif
+est éditorial, pas statistique: décrire ces familles sur plus de dimensions. La
+liste est gelée dans un test pour que sa réduction soit constatée et que rien ne
+s'y ajoute en silence.
+
 Choix délibéré: la carte de partage ne contient jamais les affinités
 partisanes, uniquement le profil. Un badge identitaire se partage; une
 affiliation partisane s'expose.
@@ -426,8 +475,13 @@ pas un sondage.
 - Les profils synthétiques sont une simplification assumée, conçue pour la
   discussion, pas pour l'assignation.
 - Les signatures d'archétypes reposent sur 3 à 7 énoncés par dimension: la
-  granularité est limitée et le premier profil synthétique qui correspond est
-  retenu (l'ordre de la liste fait partie des données publiées).
+  granularité est limitée.
+- Les familles synthétiques décrivent une à trois des sept dimensions. C'est la
+  limite dominante de cette couche: elle laisse en médiane 4 familles sur 14 que
+  les réponses ne séparent pas, y compris pour un répondant parfaitement
+  cohérent (section 4.2). Le groupe de tête est affiché en entier plutôt que
+  réduit à son premier, mais une description plus complète des familles reste le
+  vrai correctif, et il est éditorial.
 - Le test express seul ne sépare pas tous les courants (35 archétypes sur 79 en
   France, 52 en Belgique, mesurés par énumération exhaustive). Le départage
   adaptatif de la section 2.3 les rend tous atteignables, mais seulement pour un

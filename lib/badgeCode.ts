@@ -1,6 +1,6 @@
 import { ArchetypeLabelMap, DimensionKey, DIMENSION_ORDER } from "@/types/positions";
 import { BADGE_ALPHABET } from "@/data/badgeAlphabet";
-import { computeProfile, ProfileResult, syntheticProfileFor } from "@/lib/scoringEngine";
+import { closestSyntheticProfile, computeProfile, ProfileResult } from "@/lib/scoringEngine";
 import { decodeAnswers } from "@/lib/profileCode";
 import { SyntheticProfile } from "@/data/syntheticProfiles";
 
@@ -35,6 +35,13 @@ export interface BadgeIdentity {
     // determine is absent, exactly as it is absent from a computed profile.
     dimensionLabels: Partial<Record<DimensionKey, string>>;
     syntheticProfile: SyntheticProfile | null;
+    /**
+     * The families these dominant currents do not separate from the one above,
+     * that one first. A shared card is read as a claim about a person, so it
+     * carries the same reservation the results page carries rather than
+     * presenting the closest family as the only one that fits.
+     */
+    leadingGroup: SyntheticProfile[];
 }
 
 /** Encodes the identity layer of a profile, and nothing else. */
@@ -77,12 +84,11 @@ export function decodeBadge(code: string | null | undefined): BadgeIdentity | nu
         dimensionLabels[dimension] = label;
     }
 
-    return { dimensionLabels, syntheticProfile: syntheticProfileFrom(dimensionLabels) };
+    const { family, leadingGroup } = fitFrom(dimensionLabels);
+    return { dimensionLabels, syntheticProfile: family, leadingGroup };
 }
 
-function syntheticProfileFrom(
-    dimensionLabels: Partial<Record<DimensionKey, string>>
-): SyntheticProfile | null {
+function fitFrom(dimensionLabels: Partial<Record<DimensionKey, string>>) {
     // The matching rules read every dimension, and an undetermined one is an
     // empty label, the same convention computeProfile uses.
     const labels: ArchetypeLabelMap = {
@@ -94,7 +100,7 @@ function syntheticProfileFrom(
         knowledge: dimensionLabels.knowledge ?? "",
         moral: dimensionLabels.moral ?? ""
     };
-    return syntheticProfileFor(labels);
+    return closestSyntheticProfile(labels);
 }
 
 /** The identity layer of a computed profile: what a shared page displays. */
@@ -104,7 +110,11 @@ export function badgeIdentityOf(profile: ProfileResult): BadgeIdentity {
         const label = profile.dimensionArchetypes[dimension]?.label;
         if (label !== undefined) dimensionLabels[dimension] = label;
     }
-    return { dimensionLabels, syntheticProfile: profile.syntheticProfile };
+    return {
+        dimensionLabels,
+        syntheticProfile: profile.syntheticProfile,
+        leadingGroup: profile.syntheticProfileFit.leadingGroup
+    };
 }
 
 /**

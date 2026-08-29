@@ -137,10 +137,21 @@ describe('badge codes already sent to people', () => {
   // the only thing that notices. They are not to be regenerated: a failure
   // here means the alphabet was reordered, and the fix is to put it back and
   // append instead.
+  //
+  // `labels` is what the code carries and must never move. `synthetic` is
+  // derived from those labels, and the derivation changed once, deliberately,
+  // on 2026-08-29: the family used to be the first boolean predicate to accept
+  // the labels, in declaration order, and is now the closest family by
+  // distance (CHANGELOG-DONNEES.md). The first fixture moved from
+  // "gaulliste_social_pragmatique" to "egalitariste_intersectionnel" that day.
+  // A third-worldist internationalist who is also hedonist on social questions
+  // was only ever called a Gaullist because that entry sat earlier in the file.
+  // Any further move of this field is a defect until a changelog entry says
+  // otherwise.
   const FIXTURES = [
     {
       badge: '2046354a',
-      synthetic: 'gaulliste_social_pragmatique',
+      synthetic: 'egalitariste_intersectionnel',
       labels: {
         power: 'Étatiste planificateur',
         economy: 'Dirigiste colbertiste',
@@ -201,5 +212,36 @@ describe('badgeIdentityOf', () => {
   it('is what encodeBadge and decodeBadge agree on', () => {
     const profile = computeProfile(answersFromParty('fr_ps'));
     expect(decodeBadge(encodeBadge(profile))).toEqual(badgeIdentityOf(profile));
+  });
+});
+
+describe('the shared card carries the families it cannot be separated from', () => {
+  // The shared card is the most visible thing this tool produces, and it is
+  // read as a claim about a person. It has to make the same claim the results
+  // page makes: the closest family, plus the ones the answers do not separate
+  // from it. A card that names one family alone while the results name three
+  // would be the tool contradicting itself in public.
+  it.each(PARTIES_UNDER_TEST)('names the leading group of %s', (partyId) => {
+    const profile = computeProfile(answersFromParty(partyId));
+    const expected = profile.syntheticProfileFit.leadingGroup.map((f) => f.id);
+
+    expect(badgeIdentityOf(profile).leadingGroup.map((f) => f.id)).toEqual(expected);
+    expect(decodeBadge(encodeBadge(profile))?.leadingGroup.map((f) => f.id)).toEqual(expected);
+    expect(
+      identityFromShareCode(encodeAnswers(answersFromParty(partyId), 'FR'))?.leadingGroup.map(
+        (f) => f.id
+      )
+    ).toEqual(expected);
+  });
+
+  it('starts the group with the family it displays', () => {
+    const identity = decodeBadge(encodeBadge(computeProfile(answersFromParty('fr_rn'))));
+    expect(identity?.leadingGroup[0]?.id).toBe(identity?.syntheticProfile?.id);
+  });
+
+  it('has no group when it has no family', () => {
+    const identity = decodeBadge(encodeBadge(computeProfile({})));
+    expect(identity?.syntheticProfile).toBeNull();
+    expect(identity?.leadingGroup).toEqual([]);
   });
 });

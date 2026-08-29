@@ -107,6 +107,9 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
     });
 
     const synth = profile.syntheticProfile;
+    const fit = profile.syntheticProfileFit;
+    // Everything the answers cannot separate from the family shown above them.
+    const alsoInGroup = fit.leadingGroup.slice(1);
     const leaders = matches.filter((m) => m.inLeadingGroup);
     const rankedMatches = useMemo(() => rankedForReading(matches, reading), [matches, reading]);
     const perimeter =
@@ -167,6 +170,28 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                     <p className="mt-2 text-lg italic text-[var(--color-text-secondary)]">
                         &quot;{synth?.tagline ?? 'Vous empruntez à plusieurs traditions politiques.'}&quot;
                     </p>
+                    {alsoInGroup.length > 0 ? (
+                        <p className="mx-auto mt-3 max-w-xl text-sm text-[var(--color-text-secondary)]">
+                            {alsoInGroup.length === 1 ? 'Une autre famille colle' : `${alsoInGroup.length} autres familles collent`}{' '}
+                            autant à vos réponses:{' '}
+                            {alsoInGroup.map((family, index) => (
+                                <span key={family.id}>
+                                    {index > 0 && (index === alsoInGroup.length - 1 ? ' et ' : ', ')}
+                                    <span className="font-semibold text-[var(--color-text)]">
+                                        {family.title}
+                                    </span>
+                                </span>
+                            ))}
+                            . L&apos;écart entre elles est plus petit que la précision du test: le
+                            titre ci-dessus est la plus proche, pas un verdict.
+                        </p>
+                    ) : (
+                        synth && (
+                            <p className="mx-auto mt-3 max-w-xl text-sm text-[var(--color-text-secondary)]">
+                                Aucune autre famille du répertoire ne colle autant à vos réponses.
+                            </p>
+                        )
+                    )}
                 </div>
                 {synth && (
                     <div className="mx-auto grid max-w-2xl gap-3 text-left sm:grid-cols-2">

@@ -11,6 +11,47 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-29 (soir) - La famille affichée devient la plus proche, et le groupe de tête est publié
+
+- **Motif, mesuré**: les 14 familles synthétiques étaient des prédicats booléens
+  lus dans l'ordre du fichier. Sur 5 000 répondants simulés, le test express
+  belge décidait 55 à 58% des résultats par la position d'une entrée dans
+  `data/syntheticProfiles.ts`, trois familles étaient inatteignables quoi que
+  l'on réponde ("Souverainiste républicain d'ordre", "Multilatéraliste de la
+  raison", "Égalitariste des luttes croisées"), et 8 à 23% des analyses
+  ressortaient sans nom ("Profil singulier").
+- **Changement de données**: chaque famille ne déclare plus une fonction de test
+  mais **ce qu'elle attend**, dimension par dimension (`expects`), c'est-à-dire
+  les courants qu'elle accepte là où elle se prononce. Les alternatives d'une
+  même dimension sont conservées séparées et jamais moyennées: la moyenne d'une
+  géopolitique souverainiste et d'une géopolitique atlantiste est une troisième
+  position que ni l'une ni l'autre ne tient, et c'est ce qui rendait
+  "Néoréaliste stratège" inatteignable.
+- **Changement de calcul**: la famille nommée est la plus proche du pattern de
+  réponses que représentent les courants dominants du répondant. Résultat mesuré:
+  0% d'analyse sans nom, 14 familles sur 14 atteignables, famille la plus
+  fréquente ramenée de 40,6% à 21%, et indépendance à l'ordre du fichier tenue
+  par un test qui inverse la liste et compare.
+- **Deuxième mesure, qui a décidé de la suite**: un répondant qui reproduit
+  exactement les positions documentées d'un parti n'est séparé de la deuxième
+  famille que par 1 point sur 100 en médiane, et un tiers de ces répondants sont
+  à égalité parfaite. Nommer une seule famille en grand présenterait un tirage au
+  sort comme un résultat. L'outil publie donc un **groupe de tête** de familles,
+  comme il le fait déjà pour les partis, par comparaison **appariée** énoncé par
+  énoncé. En traitant les deux scores comme indépendants, le groupe contenait
+  10 familles sur 14 en médiane et 19 paires de familles aux courants opposés
+  étaient déclarées indiscernables; apparié, la médiane tombe à 4 sur 14 et il
+  reste 4 paires, toutes impliquant une famille qui ne décrit qu'une ou deux
+  dimensions sur sept. Ces 4 paires sont gelées dans un test.
+- **Effet sur un lien déjà partagé**: le badge `2046354a` continue de décoder
+  exactement les mêmes sept courants dominants (le badge n'a pas changé de
+  signification), mais la famille qui en est dérivée passe de
+  "Gaulliste social-étatiste" à "Égalitariste des luttes croisées". Un
+  internationaliste tiers-mondiste également libertaire hédoniste n'était appelé
+  gaulliste que parce que cette entrée était déclarée plus haut dans le fichier.
+- Aucun énoncé, aucune position de parti et aucune signature de courant n'est
+  modifié par cette entrée.
+
 ## 2026-08-29 (nuit, suite) - Le test express pose la question du Proche-Orient
 
 - **Motif**: les trois clivages géopolitiques ajoutés dans la nuit n'entraient
