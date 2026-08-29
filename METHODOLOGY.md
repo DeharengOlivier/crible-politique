@@ -277,11 +277,16 @@ corrélation y vaut +0,65 et +0,64. Les deux lectures peuvent donc désigner des
 partis différents, et c'est l'information: un premier rang qui ne survit qu'à
 une seule des deux métriques n'en était pas un.
 
-### 3.4 La saillance
+### 3.4 La saillance: vos combats prioritaires
 
-Le répondant peut déclarer qu'un énoncé compte double pour lui. La proximité
-devient une moyenne pondérée; à poids égaux le résultat est exactement le
-résultat non pondéré. La formule reste recalculable à la main.
+Le répondant peut déclarer, depuis ses résultats, jusqu'à trois dimensions
+comme ses combats prioritaires: chaque énoncé de ces dimensions compte alors
+double. La proximité devient une moyenne pondérée; à poids égaux le résultat
+est exactement le résultat non pondéré, l'intervalle de confiance et le groupe
+de tête utilisent la version pondérée de l'erreur-type, et la formule reste
+recalculable à la main. La pondération n'agit que sur l'affichage de la
+session en cours: elle n'est ni transmise, ni comptée dans les statistiques
+anonymes, qui restent non pondérées.
 
 ### 3.5 Un chiffre interprétable à côté du pourcentage
 
@@ -360,13 +365,22 @@ publie un **groupe de tête** au lieu d'un vainqueur. La comparaison est
 énoncés par la même personne, la question n'est pas "quelle confiance a-t-on
 dans chaque score" mais "avec quelle constance ce répondant penche-t-il pour
 l'une plutôt que pour l'autre". Les énoncés où les deux familles attendent la
-même chose, c'est-à-dire l'essentiel du corpus puisqu'une famille décrit une à
-trois dimensions sur sept, s'annulent exactement au lieu de noyer ceux qui les
-séparent. Traiter les deux scores comme indépendants laissait **10 familles sur
-14 dans le groupe de tête** en médiane, et déclarait indiscernables 19 paires de
-familles qui attendent des courants opposés. Avec la comparaison appariée, la
-médiane tombe à **4 familles sur 14**, et 4 paires seulement restent
-indiscernables.
+même chose s'annulent exactement au lieu de noyer ceux qui les séparent.
+Traiter les deux scores comme indépendants laissait **10 familles sur 14 dans
+le groupe de tête** en médiane, et déclarait indiscernables 19 paires de
+familles qui attendent des courants opposés. La comparaison appariée a ramené
+la médiane à 4, et il restait 4 paires indiscernables, toutes impliquant une
+famille qui ne décrivait qu'une ou deux dimensions sur sept.
+
+Le 29 août 2026 au soir, le correctif éditorial annoncé a été appliqué: **chaque
+famille décrit désormais les sept dimensions**, avec, quand une famille a
+plusieurs ailes, plusieurs courants acceptés sur une dimension (des
+alternatives, jamais une moyenne). Remesuré ce jour-là: plus **aucune** paire de
+familles en contradiction sur au moins une dimension n'est indiscernable, et le
+groupe de tête d'un répondant reproduisant les positions d'un parti tombe à une
+médiane de **3 familles en France et 2 en Belgique** (contre 4). Un groupe
+au-dessus de 1 reste honnête: un parti réel emprunte à plusieurs familles, et
+le dire vaut mieux que trancher.
 
 Ces 4 paires ne sont pas un échec statistique, c'est la donnée qui parle: chacune
 implique une famille qui ne décrit qu'une ou deux dimensions sur sept
@@ -518,12 +532,11 @@ pas un sondage.
   discussion, pas pour l'assignation.
 - Les signatures d'archétypes reposent sur 3 à 7 énoncés par dimension: la
   granularité est limitée.
-- Les familles synthétiques décrivent une à trois des sept dimensions. C'est la
-  limite dominante de cette couche: elle laisse en médiane 4 familles sur 14 que
-  les réponses ne séparent pas, y compris pour un répondant parfaitement
-  cohérent (section 4.2). Le groupe de tête est affiché en entier plutôt que
-  réduit à son premier, mais une description plus complète des familles reste le
-  vrai correctif, et il est éditorial.
+- Les familles synthétiques décrivent les sept dimensions depuis le 29 août
+  2026 (elles n'en décrivaient qu'une à trois avant cette date). Le groupe de
+  tête reste affiché en entier plutôt que réduit à son premier: un répondant
+  réel, comme un parti réel, peut emprunter à plusieurs familles, et le dire
+  vaut mieux que trancher (section 4.2).
 - Le test express seul ne sépare pas tous les courants (35 archétypes sur 79 en
   France, 52 en Belgique, mesurés par énumération exhaustive). Le départage
   adaptatif de la section 2.3 les rend tous atteignables, mais seulement pour un

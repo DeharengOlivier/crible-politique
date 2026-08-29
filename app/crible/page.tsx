@@ -37,6 +37,18 @@ export default function CriblePage() {
                     </Link>
                 </div>
 
+                <div className="mb-8 rounded-xl border border-[var(--color-border-light)] bg-white p-4 text-sm text-[var(--color-text-secondary)]">
+                    <strong className="text-[var(--color-text)]">Pourquoi ces {MEASURES.length} mesures, et pas d&apos;autres&nbsp;?</strong>{' '}
+                    Trois critères, cumulés: la mesure est portée publiquement par au moins un parti du
+                    corpus; elle structure le débat (elle revient d&apos;une campagne à l&apos;autre ou
+                    oppose frontalement des camps); et son examen mobilise au moins une norme identifiable
+                    (Constitution, droit de l&apos;UE, traités, jurisprudence, cadre budgétaire), sans quoi
+                    il n&apos;y aurait rien à documenter. La liste est courte parce que chaque fiche est
+                    coûteuse à sourcer sérieusement, et elle est ouverte: proposer une mesure se fait par
+                    la même procédure publique que contester un point, et l&apos;ajout est consigné au
+                    journal des données.
+                </div>
+
                 <div className="space-y-6">
                     {MEASURES.map((measure) => (
                         <FicheCard key={measure.id} measure={measure} />

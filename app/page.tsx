@@ -7,6 +7,7 @@ import { PARTIES } from '@/data/parties';
 import { MEASURES } from '@/data/measures';
 import ProfileGallery from '@/components/home/ProfileGallery';
 import HomeStatsBand from '@/components/home/HomeStatsBand';
+import HomeIdentity from '@/components/home/HomeIdentity';
 import { publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
 // Both countries answer the same number of express statements, so the hero can
@@ -36,6 +37,9 @@ export default function Home() {
               en 3 minutes et découvrez les courants de pensée et les partis les plus proches
               de vous. Sans compte, sans collecte de données, jamais de consigne de vote.
             </p>
+
+            {/* A returning respondent sees their own profile before any door. */}
+            <HomeIdentity />
 
             {/* Two doors, not one behind the other: the reader chooses how much
                 of the corpus they want to answer before answering any of it. */}

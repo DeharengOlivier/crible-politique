@@ -17,6 +17,7 @@ import FamilyCompositionCard from '@/components/FamilyCompositionCard';
 import { COLLEGE_LABELS, COUNTRY_LABELS } from '@/lib/electoralScope';
 import { rankedForReading, READINGS, READING_LABELS, Reading } from '@/lib/resultsReading';
 import { computeProfile, computePartyMatches, PartyMatch } from '@/lib/scoringEngine';
+import { MAX_PRIORITY_DIMENSIONS, weightsForPriorities } from '@/lib/priorityWeights';
 import { encodeAnswers } from '@/lib/profileCode';
 import { encodeBadge } from '@/lib/badgeCode';
 import { shareFragment } from '@/lib/shareLink';
@@ -95,7 +96,29 @@ interface ResultsViewProps {
 export default function ResultsView({ answers, respondent, onRestart }: ResultsViewProps) {
     const router = useRouter();
     const profile = useMemo(() => computeProfile(answers), [answers]);
-    const matches = useMemo(() => computePartyMatches(answers, respondent), [answers, respondent]);
+    // The reader's fights: dimensions whose statements count double in the
+    // displayed ranking (METHODOLOGY.md 3.4). Display-only and session-local;
+    // the anonymous stat event was sent unweighted before this screen.
+    const [priorities, setPriorities] = useState<DimensionKey[]>([]);
+    const matches = useMemo(
+        () =>
+            computePartyMatches(answers, {
+                ...respondent,
+                weights:
+                    priorities.length > 0
+                        ? weightsForPriorities(respondent.country, priorities)
+                        : undefined
+            }),
+        [answers, respondent, priorities]
+    );
+    const togglePriority = (dim: DimensionKey) =>
+        setPriorities((current) =>
+            current.includes(dim)
+                ? current.filter((d) => d !== dim)
+                : current.length < MAX_PRIORITY_DIMENSIONS
+                  ? [...current, dim]
+                  : current
+        );
     const [activeModule, setActiveModule] = useState<'mft' | 'impact' | null>(null);
     const [copied, setCopied] = useState<string | null>(null);
     const [reading, setReading] = useState<Reading>('proximity');
@@ -224,15 +247,17 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                 {synth && (
                     <div className="mx-auto max-w-2xl space-y-3 text-left">
                         <p className="text-sm text-[var(--color-text-secondary)]">
-                            Une famille est une combinaison nommée de quelques courants de votre
-                            boussole (détaillée plus bas): elle ne se prononce que sur les
-                            dimensions qu&apos;elle liste, et ne dit rien des autres.
+                            Une famille est une combinaison nommée de courants sur les 7
+                            dimensions de votre boussole (détaillée plus bas). Dépliez chaque
+                            famille pour voir ce qu&apos;elle attend, ce que vous tenez, et donc
+                            pourquoi elle vous correspond plus ou moins qu&apos;une autre.
                         </p>
                         {fit.leadingGroup.map((family, index) => (
                             <FamilyCompositionCard
                                 key={family.id}
                                 family={family}
                                 held={heldCurrents}
+                                score={fit.scores[family.id]}
                                 open={index === 0}
                             />
                         ))}
@@ -385,6 +410,52 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                             </button>
                         ))}
                     </div>
+                </div>
+
+                {/* The reader's fights: what counts double, chosen here, said here. */}
+                <div className="mb-4 rounded-xl border border-[var(--color-border-light)] bg-white p-4">
+                    <p className="text-sm font-semibold text-[var(--color-text)]">
+                        Vos combats prioritaires
+                    </p>
+                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                        Choisissez jusqu&apos;à {MAX_PRIORITY_DIMENSIONS} dimensions: leurs énoncés
+                        compteront double dans les scores affichés, pour voir quels partis vous
+                        rejoignent sur ce qui compte le plus pour vous.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {DIMENSION_ORDER.map((dim) => {
+                            const active = priorities.includes(dim);
+                            const saturated =
+                                !active && priorities.length >= MAX_PRIORITY_DIMENSIONS;
+                            return (
+                                <button
+                                    key={dim}
+                                    type="button"
+                                    disabled={saturated}
+                                    onClick={() => togglePriority(dim)}
+                                    className={`min-h-[44px] rounded-full border px-4 py-1.5 text-sm font-medium transition-colors sm:min-h-0 ${
+                                        active
+                                            ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white'
+                                            : saturated
+                                              ? 'cursor-not-allowed border-[var(--color-border-light)] text-[var(--color-text-muted)] opacity-50'
+                                              : 'border-[var(--color-border)] bg-white text-[var(--color-text)] hover:border-[var(--color-primary)]/40'
+                                    }`}
+                                >
+                                    {DIMENSION_LABELS[dim]}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    {priorities.length > 0 && (
+                        <p className="mt-3 text-xs text-[var(--color-text-secondary)]">
+                            Les énoncés de{' '}
+                            <span className="font-semibold">
+                                {priorities.map((d) => DIMENSION_LABELS[d]).join(', ')}
+                            </span>{' '}
+                            comptent double dans les scores et le groupe de tête ci-dessous. La
+                            formule reste la moyenne pondérée publiée dans la méthodologie.
+                        </p>
+                    )}
                 </div>
 
                 {/* What the leading group is, before any single name is read as a winner. */}

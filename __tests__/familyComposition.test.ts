@@ -26,13 +26,17 @@ describe("what a family is made of", () => {
         }
     });
 
-    it("commits to one to three dimensions, never zero, never all", () => {
-        // Zero would be a family matching everyone; seven would be a fifteenth
-        // compass. Both would break the two-layer reading the UI explains.
+    it("describes every one of the seven dimensions", () => {
+        // Specification changed 2026-08-29 (night), at the reader's demand and
+        // rightly: a family used to constrain one to three dimensions and stay
+        // silent on the rest, and a "profile" that says nothing about five
+        // dimensions of seven names very little. Silence also kept a median of
+        // 4 families inseparable. Every family now takes a position everywhere;
+        // wings of one family are expressed as alternatives per dimension.
         for (const family of SYNTHETIC_PROFILES) {
-            const { constrained } = familyCompositionOf(family);
-            expect(constrained.length).toBeGreaterThanOrEqual(1);
-            expect(constrained.length).toBeLessThanOrEqual(3);
+            const { constrained, silent } = familyCompositionOf(family);
+            expect(constrained.length, family.id).toBe(7);
+            expect(silent, family.id).toEqual([]);
         }
     });
 

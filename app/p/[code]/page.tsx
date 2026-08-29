@@ -96,21 +96,9 @@ export default async function SharedProfilePage({ params }: PageProps) {
                         )}
                         {composition && (
                             <p className="mx-auto mt-3 max-w-xl text-sm text-[var(--color-text-secondary)]">
-                                Cette famille se définit par{' '}
-                                {composition.constrained.map((reading, index) => (
-                                    <span key={reading.dimension}>
-                                        {index > 0 &&
-                                            (index === composition.constrained.length - 1
-                                                ? ' et '
-                                                : ', ')}
-                                        <span className="font-semibold text-[var(--color-text)]">
-                                            {DIMENSION_LABELS[reading.dimension].toLowerCase()}
-                                        </span>{' '}
-                                        ({reading.expected.join(' ou ')})
-                                    </span>
-                                ))}
-                                . Les autres dimensions ci-dessous n&apos;entrent pas dans sa
-                                définition.
+                                Cette famille se définit par une combinaison de courants sur les 7
+                                dimensions: chaque case ci-dessous montre le courant de ce profil
+                                et, en dessous, ce que la famille attend là.
                             </p>
                         )}
                     </div>
@@ -119,6 +107,9 @@ export default async function SharedProfilePage({ params }: PageProps) {
                         {DIMENSION_ORDER.map((dim) => {
                             const label = identity.dimensionLabels[dim];
                             if (!label) return null;
+                            const expected = composition?.constrained.find(
+                                (reading) => reading.dimension === dim
+                            )?.expected;
                             return (
                                 <div key={dim} className="rounded-xl border border-[var(--color-border-light)] bg-white p-4">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
@@ -127,6 +118,11 @@ export default async function SharedProfilePage({ params }: PageProps) {
                                     <p className="mt-1 text-sm font-semibold text-[var(--color-primary)]">
                                         {label}
                                     </p>
+                                    {expected && (
+                                        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                                            La famille attend: {expected.join(' ou ')}
+                                        </p>
+                                    )}
                                 </div>
                             );
                         })}

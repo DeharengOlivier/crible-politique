@@ -240,23 +240,14 @@ describe('the families the answers cannot tell apart', () => {
         expect(confusedPairs(2)).toEqual([]);
     });
 
-    it('names the pairs a single dimension of disagreement cannot separate', () => {
-        // These four are not a statistical failure, they are the data speaking.
-        // Each of these families describes one or two of the seven dimensions
-        // ("Gaulliste social-étatiste" describes only power), so a respondent
-        // holding one of them is a respondent about whom almost nothing was
-        // claimed, and four or five statements of disagreement out of thirty do
-        // not carry a conclusion. The tool says so instead of picking.
-        //
-        // The fix is editorial and not statistical: describe these families on
-        // more dimensions and the list shrinks. It is frozen here so that shrinking
-        // is noticed, and so that nothing silently joins it.
-        expect(confusedPairs(1).sort()).toEqual([
-            'democrate_pluraliste_compromis / humaniste_compassionnel',
-            'democrate_pluraliste_compromis / technocrate_mondialiste',
-            'gaulliste_social_pragmatique / technocrate_mondialiste',
-            'populiste_social_souverainiste / technocrate_mondialiste'
-        ]);
+    it('separates even the pairs that disagree on a single dimension', () => {
+        // Four pairs used to sit here, frozen, with the note that the fix was
+        // editorial: families describing one or two dimensions of seven left a
+        // respondent about whom almost nothing was claimed. On 2026-08-29
+        // (night) every family was described on all seven dimensions, at a
+        // reader's demand, and the list emptied exactly as predicted. Frozen
+        // at empty so that nothing silently joins it again.
+        expect(confusedPairs(1)).toEqual([]);
     });
 
     it('does not depend on the order of the data file', () => {

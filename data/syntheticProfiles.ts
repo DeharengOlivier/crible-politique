@@ -28,13 +28,17 @@ export interface SyntheticProfile {
     /**
      * The dominant currents this family expects, dimension by dimension. Several
      * currents on one dimension are alternatives: the family recognises itself
-     * in any of them.
+     * in any of them, and the alternatives cover the wings of one family, never
+     * two unrelated families under one name.
      *
-     * A dimension left out is a dimension the family says nothing about, and it
-     * is read as the average of that dimension rather than as a free pass. That
-     * is what stops a family that constrains one dimension from swallowing every
-     * respondent, which is exactly what happened while these expectations were
-     * boolean predicates evaluated in declaration order.
+     * Since 2026-08-29 (night) every family describes all seven dimensions.
+     * They used to constrain one to three and stay silent on the rest, read as
+     * the dimension's average; measured on the party corpus, that silence left
+     * a median of 4 families out of 14 that the answers could not separate,
+     * and readers rightly asked what a "profile" that says nothing about five
+     * dimensions was naming. The type stays Partial because the engine still
+     * handles a partial description correctly; the data no longer uses that
+     * freedom, and a test forbids it.
      */
     expects: Partial<Record<DimensionKey, string[]>>;
 }
@@ -50,11 +54,28 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Maîtrise des frontières, autorité régalienne assumée, indépendance vis-à-vis des organisations supranationales.",
         weakness: "Le défi: protéger sans se fermer aux coopérations utiles.",
         expects: {
+            power: [PowerArchetype.PartisanOrdre, PowerArchetype.CentralisateurJacobin],
+            economy: [
+                EconomyArchetype.CorporatisteProtectionniste,
+                EconomyArchetype.DirigisteColbertiste
+            ],
             geopolitics: [
                 GeopoliticsArchetype.SouverainisteProtectionniste,
                 GeopoliticsArchetype.GaullisteSouverainiste
             ],
-            power: [PowerArchetype.PartisanOrdre]
+            social: [
+                SocialArchetype.AssimilationnisteRepublicain,
+                SocialArchetype.ConservateurMoral
+            ],
+            environment: [
+                EnvironmentArchetype.ProductivisteEconomique,
+                EnvironmentArchetype.EcomodernisteTechnophile
+            ],
+            knowledge: [
+                KnowledgeArchetype.BonSensExperientiel,
+                KnowledgeArchetype.EmpiristePragmatique
+            ],
+            moral: [MoralArchetype.RealisteEtat, MoralArchetype.NationalRomantique]
         }
     },
     {
@@ -72,7 +93,25 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
                 EconomyArchetype.CorporatisteProtectionniste,
                 EconomyArchetype.SocialDemocrateRedistributif,
                 EconomyArchetype.KeynesienProductiviste
-            ]
+            ],
+            geopolitics: [
+                GeopoliticsArchetype.SouverainisteProtectionniste,
+                GeopoliticsArchetype.GaullisteSouverainiste
+            ],
+            social: [
+                SocialArchetype.EgalitaristeCompassionnel,
+                SocialArchetype.AssimilationnisteRepublicain
+            ],
+            environment: [
+                EnvironmentArchetype.TechnocrateVert,
+                EnvironmentArchetype.ProductivisteEconomique
+            ],
+            knowledge: [
+                KnowledgeArchetype.PopulisteAntiElite,
+                KnowledgeArchetype.DefiantInstitutionnel,
+                KnowledgeArchetype.BonSensExperientiel
+            ],
+            moral: [MoralArchetype.RevoltePrometheen, MoralArchetype.RealisteInterets]
         }
     },
     {
@@ -85,7 +124,25 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Planification industrielle, participation des salariés, politique étrangère indépendante.",
         weakness: "Le défi: éviter la lourdeur bureaucratique et le centralisme excessif.",
         expects: {
-            power: [PowerArchetype.CentralisateurJacobin, PowerArchetype.EtatistePlanificateur]
+            power: [PowerArchetype.CentralisateurJacobin, PowerArchetype.EtatistePlanificateur],
+            economy: [
+                EconomyArchetype.DirigisteColbertiste,
+                EconomyArchetype.KeynesienProductiviste
+            ],
+            geopolitics: [GeopoliticsArchetype.GaullisteSouverainiste],
+            social: [
+                SocialArchetype.AssimilationnisteRepublicain,
+                SocialArchetype.MeritocrateExigeant
+            ],
+            environment: [
+                EnvironmentArchetype.EcomodernisteTechnophile,
+                EnvironmentArchetype.TechnocrateVert
+            ],
+            knowledge: [
+                KnowledgeArchetype.TechnocrateExpertCentre,
+                KnowledgeArchetype.EmpiristePragmatique
+            ],
+            moral: [MoralArchetype.RealisteEtat, MoralArchetype.DualisteStrategique]
         }
     },
     {
@@ -98,10 +155,32 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Décroissance choisie, relocalisation, agriculture durable, sobriété énergétique.",
         weakness: "Le défi: convaincre au-delà des convaincus, sans paraître punitif.",
         expects: {
+            power: [PowerArchetype.DecentralisateurGirondin, PowerArchetype.AnarchisteHorizontal],
+            economy: [
+                EconomyArchetype.EcologisteDecroissant,
+                EconomyArchetype.CommunautaristeSolidaire,
+                EconomyArchetype.Altermondialiste
+            ],
+            geopolitics: [
+                GeopoliticsArchetype.MultilateralisteOnusien,
+                GeopoliticsArchetype.NonInterventionnisteIsolationniste
+            ],
+            social: [
+                SocialArchetype.MulticulturalisteTolerant,
+                SocialArchetype.EgalitaristeCompassionnel
+            ],
             environment: [
                 EnvironmentArchetype.EcologisteRadical,
                 EnvironmentArchetype.PostCroissanceLocaliste,
                 EnvironmentArchetype.SpiritualisteEcologique
+            ],
+            knowledge: [
+                KnowledgeArchetype.RationalisteScientiste,
+                KnowledgeArchetype.CroyantMystique
+            ],
+            moral: [
+                MoralArchetype.MoralisteUniversaliste,
+                MoralArchetype.SpiritualisteTranscendant
             ]
         }
     },
@@ -115,12 +194,23 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Alliances entre démocraties, gouvernance par les compétences, lutte contre la désinformation.",
         weakness: "Le défi: rester audible des citoyens qui se sentent déclassés.",
         expects: {
+            power: [PowerArchetype.TechnocrateRationaliste, PowerArchetype.ElitisteEclaire],
+            economy: [
+                EconomyArchetype.CapitalisteNeoliberal,
+                EconomyArchetype.TechnoprogressisteGreenGrowth
+            ],
+            geopolitics: [GeopoliticsArchetype.AtlantisteLiberal],
+            social: [SocialArchetype.ProgressisteSocietal, SocialArchetype.MeritocrateExigeant],
+            environment: [
+                EnvironmentArchetype.EcomodernisteTechnophile,
+                EnvironmentArchetype.TechnocrateVert
+            ],
             knowledge: [
                 KnowledgeArchetype.MeritocrateCognitif,
                 KnowledgeArchetype.RationalisteScientiste,
                 KnowledgeArchetype.TechnocrateExpertCentre
             ],
-            geopolitics: [GeopoliticsArchetype.AtlantisteLiberal]
+            moral: [MoralArchetype.MoralisteUniversaliste, MoralArchetype.RealisteEtat]
         }
     },
     {
@@ -134,9 +224,29 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         weakness: "Le défi: ne pas perdre le lien avec les attachements locaux et nationaux.",
         expects: {
             power: [PowerArchetype.TechnocrateRationaliste],
+            economy: [
+                EconomyArchetype.TechnoprogressisteGreenGrowth,
+                EconomyArchetype.SocialDemocrateRedistributif
+            ],
             geopolitics: [
                 GeopoliticsArchetype.MultilateralisteOnusien,
                 GeopoliticsArchetype.MondialisteCosmopolite
+            ],
+            social: [
+                SocialArchetype.ProgressisteSocietal,
+                SocialArchetype.MulticulturalisteTolerant
+            ],
+            environment: [
+                EnvironmentArchetype.TechnocrateVert,
+                EnvironmentArchetype.EcomodernisteTechnophile
+            ],
+            knowledge: [
+                KnowledgeArchetype.TechnocrateExpertCentre,
+                KnowledgeArchetype.RationalisteScientiste
+            ],
+            moral: [
+                MoralArchetype.MoralisteUniversaliste,
+                MoralArchetype.ComplexisteRelativiste
             ]
         }
     },
@@ -151,7 +261,24 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         weakness: "Le défi: répondre aux problèmes qui exigent de la coordination collective.",
         expects: {
             power: [PowerArchetype.LibertarienIndividualiste],
-            economy: [EconomyArchetype.LibertarienMarchePur]
+            economy: [
+                EconomyArchetype.LibertarienMarchePur,
+                EconomyArchetype.CapitalisteNeoliberal
+            ],
+            geopolitics: [GeopoliticsArchetype.NonInterventionnisteIsolationniste],
+            social: [SocialArchetype.LibertaireHedoniste, SocialArchetype.ProgressisteSocietal],
+            environment: [
+                EnvironmentArchetype.EcomodernisteTechnophile,
+                EnvironmentArchetype.TranshumanistePostHumain
+            ],
+            knowledge: [
+                KnowledgeArchetype.SceptiqueCartesien,
+                KnowledgeArchetype.EmpiristePragmatique
+            ],
+            moral: [
+                MoralArchetype.RealisteInterets,
+                MoralArchetype.PragmatiqueDesideologise
+            ]
         }
     },
     {
@@ -164,11 +291,25 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Investissements dans l'innovation, droits individuels étendus, intégration européenne.",
         weakness: "Le défi: ne pas sous-estimer les résistances culturelles et les coûts de transition.",
         expects: {
-            social: [SocialArchetype.ProgressisteSocietal],
+            power: [
+                PowerArchetype.TechnopragmatiqueGestionnaire,
+                PowerArchetype.TechnocrateRationaliste
+            ],
+            economy: [EconomyArchetype.TechnoprogressisteGreenGrowth],
+            geopolitics: [
+                GeopoliticsArchetype.MondialisteCosmopolite,
+                GeopoliticsArchetype.MultilateralisteOnusien
+            ],
+            social: [SocialArchetype.ProgressisteSocietal, SocialArchetype.FeministeUniversaliste],
             environment: [
                 EnvironmentArchetype.EcomodernisteTechnophile,
                 EnvironmentArchetype.TranshumanistePostHumain
-            ]
+            ],
+            knowledge: [
+                KnowledgeArchetype.RationalisteScientiste,
+                KnowledgeArchetype.MeritocrateCognitif
+            ],
+            moral: [MoralArchetype.MoralisteUniversaliste, MoralArchetype.RevoltePrometheen]
         }
     },
     {
@@ -181,8 +322,22 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Protection du patrimoine, politique familiale, continuité historique et culturelle.",
         weakness: "Le défi: faire une place aux évolutions sans trahir l'héritage.",
         expects: {
-            moral: [MoralArchetype.NationalRomantique, MoralArchetype.IntransigeantMoral],
-            social: [SocialArchetype.ConservateurMoral]
+            power: [PowerArchetype.PartisanOrdre, PowerArchetype.DecentralisateurGirondin],
+            economy: [
+                EconomyArchetype.CommunautaristeSolidaire,
+                EconomyArchetype.CorporatisteProtectionniste
+            ],
+            geopolitics: [
+                GeopoliticsArchetype.CivilisationnisteCulturaliste,
+                GeopoliticsArchetype.SouverainisteProtectionniste
+            ],
+            social: [SocialArchetype.ConservateurMoral, SocialArchetype.NationalIdentitaire],
+            environment: [
+                EnvironmentArchetype.BioConservateur,
+                EnvironmentArchetype.SpiritualisteEcologique
+            ],
+            knowledge: [KnowledgeArchetype.BonSensExperientiel, KnowledgeArchetype.CroyantMystique],
+            moral: [MoralArchetype.NationalRomantique, MoralArchetype.IntransigeantMoral]
         }
     },
     {
@@ -195,11 +350,32 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Realpolitik, pragmatisme économique, alliances d'intérêt, évaluation par les résultats.",
         weakness: "Le défi: nourrir aussi un idéal capable de mobiliser.",
         expects: {
-            moral: [MoralArchetype.PragmatiqueDesideologise, MoralArchetype.RealisteEtat],
+            power: [
+                PowerArchetype.TechnopragmatiqueGestionnaire,
+                PowerArchetype.ElitisteEclaire
+            ],
+            economy: [
+                EconomyArchetype.CapitalisteNeoliberal,
+                EconomyArchetype.RigoristeBudgetaire
+            ],
             geopolitics: [
                 GeopoliticsArchetype.SouverainisteProtectionniste,
                 GeopoliticsArchetype.GaullisteSouverainiste,
                 GeopoliticsArchetype.AtlantisteLiberal
+            ],
+            social: [SocialArchetype.MeritocrateExigeant],
+            environment: [
+                EnvironmentArchetype.ProductivisteEconomique,
+                EnvironmentArchetype.EcomodernisteTechnophile
+            ],
+            knowledge: [
+                KnowledgeArchetype.EmpiristePragmatique,
+                KnowledgeArchetype.TechnocrateExpertCentre
+            ],
+            moral: [
+                MoralArchetype.PragmatiqueDesideologise,
+                MoralArchetype.RealisteEtat,
+                MoralArchetype.RealisteInterets
             ]
         }
     },
@@ -213,8 +389,31 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Justice sociale, accueil digne, diplomatie de la paix, protection des vulnérables.",
         weakness: "Le défi: concilier générosité et soutenabilité des politiques.",
         expects: {
-            moral: [MoralArchetype.CompassionnelHumanitaire],
-            social: [SocialArchetype.EgalitaristeCompassionnel]
+            power: [PowerArchetype.RepublicainHumaniste, PowerArchetype.DemocratePluraliste],
+            economy: [
+                EconomyArchetype.SocialDemocrateRedistributif,
+                EconomyArchetype.CommunautaristeSolidaire
+            ],
+            geopolitics: [
+                GeopoliticsArchetype.MultilateralisteOnusien,
+                GeopoliticsArchetype.InternationalisteTiersMondiste
+            ],
+            social: [
+                SocialArchetype.EgalitaristeCompassionnel,
+                SocialArchetype.MulticulturalisteTolerant
+            ],
+            environment: [
+                EnvironmentArchetype.TechnocrateVert,
+                EnvironmentArchetype.EcologisteRadical
+            ],
+            knowledge: [
+                KnowledgeArchetype.EmpiristePragmatique,
+                KnowledgeArchetype.CroyantMystique
+            ],
+            moral: [
+                MoralArchetype.CompassionnelHumanitaire,
+                MoralArchetype.MoralisteUniversaliste
+            ]
         }
     },
     {
@@ -227,8 +426,25 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Politiques antidiscriminatoires actives, représentation des minorités, justice sociale.",
         weakness: "Le défi: construire du commun au-delà des appartenances de groupes.",
         expects: {
+            power: [PowerArchetype.AnarchisteHorizontal, PowerArchetype.EtatistePlanificateur],
+            economy: [
+                EconomyArchetype.Altermondialiste,
+                EconomyArchetype.SocialDemocrateRedistributif
+            ],
+            geopolitics: [
+                GeopoliticsArchetype.DecolonialPostOccidental,
+                GeopoliticsArchetype.InternationalisteTiersMondiste
+            ],
             social: [SocialArchetype.IntersectionnelMilitant],
-            geopolitics: [GeopoliticsArchetype.DecolonialPostOccidental]
+            environment: [
+                EnvironmentArchetype.EcologisteRadical,
+                EnvironmentArchetype.PostCroissanceLocaliste
+            ],
+            knowledge: [
+                KnowledgeArchetype.RelativisteCulturel,
+                KnowledgeArchetype.DefiantInstitutionnel
+            ],
+            moral: [MoralArchetype.RevoltePrometheen, MoralArchetype.IntransigeantMoral]
         }
     },
     {
@@ -241,12 +457,25 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Valeurs familiales, bioéthique prudente, place reconnue aux communautés de foi.",
         weakness: "Le défi: vivre sa fidélité dans une société pluraliste et laïque.",
         expects: {
+            power: [PowerArchetype.DecentralisateurGirondin, PowerArchetype.PartisanOrdre],
+            economy: [
+                EconomyArchetype.CommunautaristeSolidaire,
+                EconomyArchetype.SocialDemocrateRedistributif
+            ],
+            geopolitics: [
+                GeopoliticsArchetype.CivilisationnisteCulturaliste,
+                GeopoliticsArchetype.NonInterventionnisteIsolationniste
+            ],
             social: [
                 SocialArchetype.TraditionnalisteReligieux,
                 SocialArchetype.ConservateurMoral
             ],
+            environment: [
+                EnvironmentArchetype.BioConservateur,
+                EnvironmentArchetype.SpiritualisteEcologique
+            ],
             knowledge: [KnowledgeArchetype.CroyantMystique],
-            moral: [MoralArchetype.SpiritualisteTranscendant]
+            moral: [MoralArchetype.SpiritualisteTranscendant, MoralArchetype.IntransigeantMoral]
         }
     },
     {
@@ -259,8 +488,25 @@ export const SYNTHETIC_PROFILES: SyntheticProfile[] = [
         strategy: "Coalitions, concertation, réformes graduées, protection des contre-pouvoirs.",
         weakness: "Le défi: garder un cap clair au milieu des nuances.",
         expects: {
-            power: [PowerArchetype.DemocratePluraliste],
-            moral: [MoralArchetype.ComplexisteRelativiste]
+            power: [PowerArchetype.DemocratePluraliste, PowerArchetype.RepublicainHumaniste],
+            economy: [
+                EconomyArchetype.SocialDemocrateRedistributif,
+                EconomyArchetype.CapitalisteNeoliberal
+            ],
+            geopolitics: [
+                GeopoliticsArchetype.MultilateralisteOnusien,
+                GeopoliticsArchetype.AtlantisteLiberal
+            ],
+            social: [
+                SocialArchetype.UniversalisteCritique,
+                SocialArchetype.ProgressisteSocietal
+            ],
+            environment: [EnvironmentArchetype.TechnocrateVert],
+            knowledge: [
+                KnowledgeArchetype.TechnocrateExpertCentre,
+                KnowledgeArchetype.SceptiqueCartesien
+            ],
+            moral: [MoralArchetype.ComplexisteRelativiste, MoralArchetype.DualisteStrategique]
         }
     }
 ];

@@ -67,7 +67,8 @@ export default function ConceptsPage() {
                 <p className="mb-5 text-sm text-[var(--color-text-secondary)]">
                     Le profil affiché en haut de vos résultats n&apos;est pas une huitième dimension:
                     chaque famille est une <strong className="text-[var(--color-text)]">combinaison</strong>{' '}
-                    nommée de un à trois courants ci-dessus, et ne dit rien des autres dimensions. Sa
+                    nommée de courants sur les sept dimensions ci-dessus, avec parfois plusieurs
+                    courants acceptés sur une dimension: ce sont les ailes d&apos;une même famille. Sa
                     composition exacte figure sur chaque carte. Plusieurs familles peuvent coller
                     également à vos réponses: vos résultats les nomment toutes plutôt que d&apos;en
                     désigner une seule.
@@ -114,10 +115,12 @@ export default function ConceptsPage() {
                                         {reading.expected.join(' ou ')}
                                     </p>
                                 ))}
-                                <p className="text-xs leading-relaxed text-[var(--color-text-muted)]">
-                                    Ne dit rien sur:{' '}
-                                    {composition.silent.map((d) => DIMENSIONS[d].title).join(', ')}.
-                                </p>
+                                {composition.silent.length > 0 && (
+                                    <p className="text-xs leading-relaxed text-[var(--color-text-muted)]">
+                                        Ne dit rien sur:{' '}
+                                        {composition.silent.map((d) => DIMENSIONS[d].title).join(', ')}.
+                                    </p>
+                                )}
                             </div>
                         </div>
                         );

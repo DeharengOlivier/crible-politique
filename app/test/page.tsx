@@ -3,12 +3,18 @@
 import { useMemo, useState } from 'react';
 import { AnswerRecord, Respondent, Statement } from '@/types/positions';
 import { computeProfile, computePartyMatches } from '@/lib/scoringEngine';
-import { decodeProfile, sanitizeAnswers } from '@/lib/profileCode';
+import { decodeProfile } from '@/lib/profileCode';
+import {
+    TEST_SESSION_STORAGE_KEY,
+    Stage,
+    SavedSession,
+    loadSavedSession,
+    saveSession
+} from '@/lib/testSession';
 import { nextClarifyingStatement } from '@/lib/adaptiveClarification';
 import {
     expressStatementsFor,
     parseBelgianCollege,
-    parseCountry,
     statementsFor
 } from '@/lib/electoralScope';
 import { useShareCodes } from '@/lib/useShareCodes';
@@ -22,7 +28,7 @@ import VoiceSurvey from '@/components/test/VoiceSurvey';
 import ResultsView from '@/components/test/ResultsView';
 import { ProfileIcon } from '@/lib/icons';
 import { Compass, Check, Mic } from 'lucide-react';
-import PageHeader from '@/components/PageHeader';
+import FloatingBackButton from '@/components/FloatingBackButton';
 import RestoreProfileCard from '@/components/profile/RestoreProfileCard';
 import type { VaultProfile } from '@/lib/profileVault';
 
@@ -37,23 +43,6 @@ import type { VaultProfile } from '@/lib/profileVault';
 // after the results, because it decides which statements are asked, not only
 // which parties are displayed.
 
-const STAGES = [
-    'intro',
-    'country',
-    'express',
-    'clarify',
-    'teaser',
-    'refine',
-    'full',
-    'voice',
-    'results'
-] as const;
-type Stage = (typeof STAGES)[number];
-
-// v2: the saved session now carries the respondent. A v1 session has no
-// country, so it cannot be resumed into a scoped test and is not read.
-const STORAGE_KEY = 'crible_test_v2';
-
 /** The statements not yet answered: express and clarifications excluded alike. */
 function refineStatementsFor(respondent: Respondent, answers: AnswerRecord): Statement[] {
     return statementsFor(respondent.country).filter((s) => !(s.id in answers));
@@ -63,48 +52,6 @@ function refineStatementsFor(respondent: Respondent, answers: AnswerRecord): Sta
 function clarificationsAskedSoFar(respondent: Respondent, answers: AnswerRecord): string[] {
     const expressIds = new Set(expressStatementsFor(respondent.country).map((s) => s.id));
     return Object.keys(answers).filter((id) => !expressIds.has(id));
-}
-
-interface SavedState {
-    stage: Stage;
-    answers: AnswerRecord;
-    respondent: Respondent | null;
-}
-
-/** Narrows a stored respondent, which is untrusted like anything in storage. */
-function parseRespondent(raw: unknown): Respondent | null {
-    if (typeof raw !== 'object' || raw === null) return null;
-    const { country, college } = raw as Record<string, unknown>;
-    const parsedCountry = parseCountry(country);
-    if (parsedCountry === null) return null;
-    if (college === undefined || college === null) return { country: parsedCountry };
-    const parsedCollege = parseBelgianCollege(college);
-    if (parsedCollege === null || parsedCountry !== 'BE') return null;
-    return { country: parsedCountry, college: parsedCollege };
-}
-
-function loadSaved(): SavedState | null {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return null;
-        const parsed: unknown = JSON.parse(raw);
-        if (typeof parsed !== 'object' || parsed === null) return null;
-        const { stage, answers, respondent } = parsed as Record<string, unknown>;
-        if (typeof stage !== 'string' || !STAGES.includes(stage as Stage)) return null;
-        const cleanAnswers = sanitizeAnswers(answers);
-        if (cleanAnswers === null) return null;
-        return { stage: stage as Stage, answers: cleanAnswers, respondent: parseRespondent(respondent) };
-    } catch {
-        return null;
-    }
-}
-
-function save(state: SavedState) {
-    try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-        // storage unavailable: the app stays functional
-    }
 }
 
 function TeaserView({
@@ -271,10 +218,10 @@ interface FlowState {
     stage: Stage;
     answers: AnswerRecord;
     respondent: Respondent | null;
-    saved: SavedState | null;
+    saved: SavedSession | null;
 }
 
-function restoreFlow(code: string | null, door: AnalysisMode | null): FlowState {
+function restoreFlow(code: string | null, door: AnalysisMode | null, resume: boolean): FlowState {
     const decoded = code ? decodeProfile(code) : null;
     // A link minted before the country existed names none. Rather than guess
     // one, the respondent is asked, and their answers are kept.
@@ -287,10 +234,18 @@ function restoreFlow(code: string | null, door: AnalysisMode | null): FlowState 
         };
     }
     if (decoded) return { stage: 'country', answers: decoded.answers, respondent: null, saved: null };
+    const saved = loadSavedSession();
+    // "Revoir mes résultats" from the home page carries its intent in the
+    // address: the reader already chose to come back to their session, so the
+    // introduction has nothing left to offer them. Without a resumable
+    // session the address degrades to the ordinary introduction.
+    if (resume && saved !== null && saved.respondent !== null && saved.stage !== 'intro') {
+        return { ...saved, saved };
+    }
     // A reader who came through one of the two doors has already made the
     // choice the introduction screen exists to offer.
-    if (door !== null) return { stage: 'country', answers: {}, respondent: null, saved: loadSaved() };
-    return { stage: 'intro', answers: {}, respondent: null, saved: loadSaved() };
+    if (door !== null) return { stage: 'country', answers: {}, respondent: null, saved };
+    return { stage: 'intro', answers: {}, respondent: null, saved };
 }
 
 function TestFlow() {
@@ -309,10 +264,16 @@ function TestFlow() {
                 : requestedAnalysis(new URLSearchParams(window.location.search).get('analyse')),
         []
     );
+    const resume = useMemo(
+        () =>
+            typeof window !== 'undefined' &&
+            new URLSearchParams(window.location.search).get('reprendre') === '1',
+        []
+    );
 
     const restored = useMemo(
-        () => (shared === null ? null : restoreFlow(shared.p, door)),
-        [shared, door]
+        () => (shared === null ? null : restoreFlow(shared.p, door, resume)),
+        [shared, door, resume]
     );
 
     // Everything the user does afterwards replaces the restored state. Two
@@ -342,7 +303,7 @@ function TestFlow() {
             );
         }
         setChosen({ stage: next, answers: nextAnswers, respondent: nextRespondent, saved });
-        save({ stage: next, answers: nextAnswers, respondent: nextRespondent });
+        saveSession({ stage: next, answers: nextAnswers, respondent: nextRespondent });
     };
 
     // A vault profile was sealed by this app, but it travelled through a
@@ -352,7 +313,7 @@ function TestFlow() {
         const vaultRespondent: Respondent =
             college === null ? { country: profile.country } : { country: profile.country, college };
         setChosen({ stage: 'results', answers: profile.answers, respondent: vaultRespondent, saved: null });
-        save({ stage: 'results', answers: profile.answers, respondent: vaultRespondent });
+        saveSession({ stage: 'results', answers: profile.answers, respondent: vaultRespondent });
     };
 
     if (flow === null) return null;
@@ -391,7 +352,7 @@ function TestFlow() {
                     statements={statementsFor(respondent.country)}
                     initialAnswers={answers}
                     onComplete={(a) => transition('results', a)}
-                    onAnswer={(a) => save({ stage: 'voice', answers: a, respondent })}
+                    onAnswer={(a) => saveSession({ stage: 'voice', answers: a, respondent })}
                 />
             )}
 
@@ -403,7 +364,7 @@ function TestFlow() {
                     onComplete={(a) =>
                         transition(nextClarifyingStatement(a, []) === null ? 'teaser' : 'clarify', a)
                     }
-                    onAnswer={(a) => save({ stage: 'express', answers: a, respondent })}
+                    onAnswer={(a) => saveSession({ stage: 'express', answers: a, respondent })}
                 />
             )}
 
@@ -412,7 +373,7 @@ function TestFlow() {
                     initialAnswers={answers}
                     initialAsked={clarificationsAskedSoFar(respondent, answers)}
                     onComplete={(a) => transition('teaser', a)}
-                    onAnswer={(a) => save({ stage: 'clarify', answers: a, respondent })}
+                    onAnswer={(a) => saveSession({ stage: 'clarify', answers: a, respondent })}
                 />
             )}
 
@@ -432,7 +393,7 @@ function TestFlow() {
                     progressOffset={statementsFor(respondent.country).length - refineStatementsFor(respondent, answers).length}
                     progressTotal={statementsFor(respondent.country).length}
                     onComplete={(a) => transition('results', a)}
-                    onAnswer={(a) => save({ stage: 'refine', answers: a, respondent })}
+                    onAnswer={(a) => saveSession({ stage: 'refine', answers: a, respondent })}
                 />
             )}
 
@@ -442,7 +403,7 @@ function TestFlow() {
                     initialAnswers={answers}
                     progressTotal={statementsFor(respondent.country).length}
                     onComplete={(a) => transition('results', a)}
-                    onAnswer={(a) => save({ stage: 'full', answers: a, respondent })}
+                    onAnswer={(a) => saveSession({ stage: 'full', answers: a, respondent })}
                 />
             )}
 
@@ -452,7 +413,7 @@ function TestFlow() {
                     respondent={respondent}
                     onRestart={() => {
                         try {
-                            localStorage.removeItem(STORAGE_KEY);
+                            localStorage.removeItem(TEST_SESSION_STORAGE_KEY);
                         } catch {
                             // ignore
                         }
@@ -467,7 +428,7 @@ function TestFlow() {
 export default function TestPage() {
     return (
         <div className="min-h-screen bg-[var(--color-bg)]">
-            <PageHeader title="Le test" sticky />
+            <FloatingBackButton />
             <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
                 <TestFlow />
             </main>

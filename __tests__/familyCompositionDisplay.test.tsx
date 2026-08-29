@@ -57,10 +57,33 @@ describe('the results explain what the named family is made of', () => {
         }
     });
 
-    it('says which dimensions the family is silent about', () => {
+    it('shows no silent dimension: every family describes all seven', () => {
+        // Specification changed 2026-08-29 (night): families used to constrain
+        // one to three dimensions and the cards disclosed the silence. At the
+        // reader's demand every family now describes all seven, so the silence
+        // line must be gone, and each unfolded card carries seven expectations.
         const answers = deterministicAnswers();
+        const { container } = render(
+            <ResultsView answers={answers} respondent={RESPONDENT} onRestart={() => {}} />
+        );
+        expect(screen.queryByText(/n['’]entrent pas dans la définition/)).toBeNull();
+        const groupSize = computeProfile(answers).syntheticProfileFit.leadingGroup.length;
+        const expectations = [...container.querySelectorAll('p')].filter((p) =>
+            p.textContent?.startsWith('Attend:')
+        );
+        expect(expectations.length).toBe(7 * groupSize);
+    });
+
+    it('shows how well each family of the group matches, so two can be compared', () => {
+        const answers = deterministicAnswers();
+        const fit = computeProfile(answers).syntheticProfileFit;
         render(<ResultsView answers={answers} respondent={RESPONDENT} onRestart={() => {}} />);
-        expect(screen.getAllByText(/n['’]entrent pas dans la définition/).length).toBeGreaterThan(0);
+        for (const family of fit.leadingGroup) {
+            expect(
+                screen.getAllByText(`${fit.scores[family.id]}%`).length,
+                `${family.id} score shown`
+            ).toBeGreaterThan(0);
+        }
     });
 
     it('lays the respondent\'s own current against each expectation', () => {

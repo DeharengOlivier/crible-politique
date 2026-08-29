@@ -139,15 +139,20 @@ describe('badge codes already sent to people', () => {
   // append instead.
   //
   // `labels` is what the code carries and must never move. `synthetic` is
-  // derived from those labels, and the derivation changed once, deliberately,
-  // on 2026-08-29: the family used to be the first boolean predicate to accept
-  // the labels, in declaration order, and is now the closest family by
-  // distance (CHANGELOG-DONNEES.md). The first fixture moved from
-  // "gaulliste_social_pragmatique" to "egalitariste_intersectionnel" that day.
-  // A third-worldist internationalist who is also hedonist on social questions
-  // was only ever called a Gaullist because that entry sat earlier in the file.
-  // Any further move of this field is a defect until a changelog entry says
-  // otherwise.
+  // derived from those labels, and the derivation changed twice, deliberately,
+  // both on 2026-08-29 and both in CHANGELOG-DONNEES.md. First the family
+  // became the closest by distance instead of the first boolean predicate in
+  // declaration order (the first fixture moved from
+  // "gaulliste_social_pragmatique" to "egalitariste_intersectionnel": a
+  // third-worldist internationalist hedonist was only ever called a Gaullist
+  // because that entry sat earlier in the file). Then, that night, every
+  // family was described on all seven dimensions instead of one to three, and
+  // the second fixture moved from "conservateur_national_romantique" to
+  // "souverainiste_republicain_securitaire": order + protectionism +
+  // productivism + pragmatism fit the full order-sovereignty description,
+  // where the rooted conservative expects bio-conservation and spirituality
+  // this respondent does not hold. Any further move of this field is a defect
+  // until a changelog entry says otherwise.
   const FIXTURES = [
     {
       badge: '2046354a',
@@ -164,7 +169,7 @@ describe('badge codes already sent to people', () => {
     },
     {
       badge: '28234225',
-      synthetic: 'conservateur_national_romantique',
+      synthetic: 'souverainiste_republicain_securitaire',
       labels: {
         power: "Partisan de l'ordre",
         economy: 'Protectionniste industriel',

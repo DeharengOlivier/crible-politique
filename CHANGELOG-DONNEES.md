@@ -11,6 +11,32 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-29 (nuit, 2) - Chaque famille synthétique décrit les sept dimensions
+
+- **Modification des 14 familles** (`data/syntheticProfiles.ts`): chacune
+  décrivait une à trois dimensions et se taisait sur les autres; chacune
+  décrit désormais les sept, avec plusieurs courants acceptés sur une
+  dimension quand la famille a plusieurs ailes (alternatives, jamais une
+  moyenne).
+- **Motif**: demande d'un lecteur, et elle était juste. Un "profil" qui ne dit
+  rien sur cinq dimensions sur sept ne nomme presque rien; le silence
+  maintenait aussi 4 familles en médiane dans le groupe de tête d'un répondant
+  cohérent, et 4 paires indiscernables.
+- **Remesuré après modification**: plus aucune paire de familles en
+  contradiction sur au moins une dimension n'est indiscernable (la liste gelée
+  de 4 paires est vide); groupe de tête d'un clone de parti: médiane 3 (FR) et
+  2 (BE), contre 4 avant.
+- **Effet sur les liens déjà partagés**: un code de badge encode les courants,
+  jamais la famille, qui est recalculée à l'affichage. Un ancien lien peut
+  donc afficher une famille mieux ajustée qu'au jour de l'envoi. Le témoin
+  gelé `28234225` est passé de "Conservateur enraciné" à "Souverainiste
+  républicain d'ordre", et ce déplacement est motivé: ordre + protectionnisme
+  + productivisme + pragmatisme correspondent à la description complète du
+  souverainisme d'ordre, quand le conservateur enraciné attend une écologie
+  bio-conservatrice et une spiritualité que ces courants ne portent pas.
+
+---
+
 ## 2026-08-29 (nuit) - Sorties formulées de l'UE et de l'OTAN + groupe de tête apparié
 
 - **Ajout de 2 énoncés à portée France** (ge8_fr "La France devrait quitter
