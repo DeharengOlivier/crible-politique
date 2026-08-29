@@ -3,11 +3,12 @@
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { decodeAnswers } from '@/lib/profileCode';
+import { decodeProfile } from '@/lib/profileCode';
 import { useShareCodes } from '@/lib/useShareCodes';
 import { computeProfile } from '@/lib/scoringEngine';
-import { STATEMENTS } from '@/data/statements';
-import { AnswerRecord, DimensionKey, DIMENSION_LABELS, DIMENSION_ORDER, LIKERT_LABELS } from '@/types/positions';
+import { compareAnswers, sharedStatementCount } from '@/lib/duoComparison';
+import { COUNTRY_LABELS } from '@/lib/electoralScope';
+import { DIMENSION_LABELS, DIMENSION_ORDER, LIKERT_LABELS } from '@/types/positions';
 import { ProfileIcon } from '@/lib/icons';
 import PageHeader from '@/components/PageHeader';
 
@@ -19,38 +20,6 @@ import PageHeader from '@/components/PageHeader';
 const SHARE_KEYS = ['a', 'b'] as const;
 
 
-function compareAnswers(a: AnswerRecord, b: AnswerRecord) {
-    const pairs = STATEMENTS.flatMap((s) => {
-        const va = a[s.id];
-        const vb = b[s.id];
-        if (va === null || va === undefined || vb === null || vb === undefined) return [];
-        return [{ statement: s, a: va, b: vb, agreement: 1 - Math.abs(va - vb) / 4 }];
-    });
-
-    const overall = pairs.length
-        ? Math.round((pairs.reduce((s, p) => s + p.agreement, 0) / pairs.length) * 100)
-        : null;
-
-    const byDimension: Partial<Record<DimensionKey, number>> = {};
-    for (const dim of DIMENSION_ORDER) {
-        const list = pairs.filter((p) => p.statement.dimension === dim);
-        if (list.length) {
-            byDimension[dim] = Math.round(
-                (list.reduce((s, p) => s + p.agreement, 0) / list.length) * 100
-            );
-        }
-    }
-
-    const sorted = [...pairs].sort((x, y) => y.agreement - x.agreement);
-    return {
-        overall,
-        byDimension,
-        agreements: sorted.filter((p) => p.agreement >= 0.75).slice(0, 3),
-        disagreements: sorted.filter((p) => p.agreement <= 0.5).slice(-3).reverse(),
-        count: pairs.length
-    };
-}
-
 const likertLabel = (v: number) => LIKERT_LABELS[String(v)] ?? String(v);
 
 function CompareContent() {
@@ -59,8 +28,18 @@ function CompareContent() {
 
     const codeA = shared?.a ?? null;
     const codeB = shared?.b ?? null;
-    const answersA = useMemo(() => (codeA ? decodeAnswers(codeA) : null), [codeA]);
-    const answersB = useMemo(() => (codeB ? decodeAnswers(codeB) : null), [codeB]);
+    const decodedA = useMemo(() => (codeA ? decodeProfile(codeA) : null), [codeA]);
+    const decodedB = useMemo(() => (codeB ? decodeProfile(codeB) : null), [codeB]);
+    const answersA = decodedA?.answers ?? null;
+    const answersB = decodedB?.answers ?? null;
+    // Two respondents of different countries only share the common corpus. The
+    // comparison already runs on the intersection; this is what says so.
+    const acrossTheBorder =
+        decodedA !== null &&
+        decodedB !== null &&
+        decodedA.country !== null &&
+        decodedB.country !== null &&
+        decodedA.country !== decodedB.country;
     const profileA = useMemo(() => (answersA ? computeProfile(answersA) : null), [answersA]);
     const profileB = useMemo(() => (answersB ? computeProfile(answersB) : null), [answersB]);
     const comparison = useMemo(
@@ -156,8 +135,23 @@ function CompareContent() {
                     {comparison.overall}%
                 </div>
                 <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-                    de convergence globale, sur {comparison.count} énoncés où vous vous êtes tous les deux positionnés.
+                    de convergence globale, sur {comparison.count} énoncés où vous vous êtes tous les
+                    deux positionnés
+                    {decodedA?.country && decodedB?.country
+                        ? ` sur ${sharedStatementCount(decodedA.country, decodedB.country)} possibles`
+                        : ''}
+                    .
                 </p>
+                {acrossTheBorder && (
+                    <p className="mt-3 rounded-lg bg-[var(--color-bg-elevated)] px-3 py-2 text-xs text-[var(--color-text-muted)]">
+                        Vous avez répondu dans deux pays différents (
+                        {COUNTRY_LABELS[decodedA!.country!]} et {COUNTRY_LABELS[decodedB!.country!]}). La
+                        comparaison ne porte que sur les énoncés communs aux deux&nbsp;: les clivages
+                        propres à chaque pays, comme la réforme de l&apos;État en Belgique ou l&apos;âge
+                        de la retraite en France, n&apos;ont pas d&apos;équivalent de l&apos;autre côté et
+                        sont écartés.
+                    </p>
+                )}
             </div>
 
             <div className="rounded-2xl border border-[var(--color-border-light)] bg-white p-6">

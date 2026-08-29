@@ -42,7 +42,7 @@ export default function LikertScale({ value, onSelect }: LikertScaleProps) {
                 <button
                     type="button"
                     onClick={() => onSelect(null)}
-                    className={`text-sm text-[var(--color-text-muted)] underline-offset-4 transition-colors hover:text-[var(--color-primary)] hover:underline ${
+                    className={`inline-flex min-h-[44px] items-center justify-center px-4 text-sm text-[var(--color-text-muted)] underline-offset-4 transition-colors hover:text-[var(--color-primary)] hover:underline ${
                         value === null ? 'underline font-semibold' : ''
                     }`}
                 >

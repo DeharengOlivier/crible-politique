@@ -93,7 +93,7 @@ export default function StatementSurvey({
                     type="button"
                     onClick={() => index > 0 && setIndex(index - 1)}
                     disabled={index === 0}
-                    className="text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex min-h-[44px] items-center text-sm font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     ← Énoncé précédent
                 </button>

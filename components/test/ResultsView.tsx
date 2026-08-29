@@ -3,7 +3,16 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AnswerRecord, DIMENSION_LABELS, DIMENSION_ORDER, LIKERT_LABELS, SOURCE_STATUS_LABELS } from '@/types/positions';
+import {
+    AnswerRecord,
+    DIMENSION_LABELS,
+    DIMENSION_ORDER,
+    LIKERT_LABELS,
+    Respondent,
+    SOURCE_STATUS_LABELS
+} from '@/types/positions';
+import { COLLEGE_LABELS, COUNTRY_LABELS } from '@/lib/electoralScope';
+import { rankedForReading, READINGS, READING_LABELS, Reading } from '@/lib/resultsReading';
 import { computeProfile, computePartyMatches, PartyMatch } from '@/lib/scoringEngine';
 import { encodeAnswers } from '@/lib/profileCode';
 import { encodeBadge } from '@/lib/badgeCode';
@@ -29,9 +38,16 @@ function PartyDetail({ match }: { match: PartyMatch }) {
 
     return (
         <div className="space-y-4 px-1 pb-2 pt-1">
+            <p className="text-sm text-[var(--color-text)]">
+                Vous êtes du même côté que ce parti sur{' '}
+                <span className="font-semibold">{match.sameSideCount}</span> énoncés et du côté opposé
+                sur <span className="font-semibold">{match.oppositeSideCount}</span>, sur les{' '}
+                {match.answeredAndDocumented} où vous vous êtes positionné et où sa position est
+                documentée.
+            </p>
             <p className="text-xs text-[var(--color-text-muted)]">
-                Calculé sur {match.answeredAndDocumented} énoncés où vous vous êtes positionné et où la
-                position du parti est documentée.
+                Proximité {match.score}%, intervalle de confiance à 90% de {match.lowerBound} à{' '}
+                {match.upperBound}%. Lecture directionnelle {match.directionalScore}%.
                 {match.party.program?.label ? ` Référence: ${match.party.program.label}.` : ''}
             </p>
             {agreements.length > 0 && (
@@ -68,16 +84,17 @@ function PartyDetail({ match }: { match: PartyMatch }) {
 
 interface ResultsViewProps {
     answers: AnswerRecord;
+    respondent: Respondent;
     onRestart: () => void;
 }
 
-export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
+export default function ResultsView({ answers, respondent, onRestart }: ResultsViewProps) {
     const router = useRouter();
     const profile = useMemo(() => computeProfile(answers), [answers]);
-    const matches = useMemo(() => computePartyMatches(answers), [answers]);
+    const matches = useMemo(() => computePartyMatches(answers, respondent), [answers, respondent]);
     const [activeModule, setActiveModule] = useState<'mft' | 'impact' | null>(null);
     const [copied, setCopied] = useState<string | null>(null);
-    const [country, setCountry] = useState<'tous' | 'FR' | 'BE'>('tous');
+    const [reading, setReading] = useState<Reading>('proximity');
     // Pending duo invitation (arrived via a /compare#a=... link). Read once
     // on initialization; this component only renders client-side.
     const [compareRef] = useState<string | null>(() => {
@@ -89,8 +106,12 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
     });
 
     const synth = profile.syntheticProfile;
-    const filteredMatches =
-        country === 'tous' ? matches : matches.filter((m) => m.party.country === country);
+    const leaders = matches.filter((m) => m.inLeadingGroup);
+    const rankedMatches = useMemo(() => rankedForReading(matches, reading), [matches, reading]);
+    const perimeter =
+        respondent.college === undefined
+            ? COUNTRY_LABELS[respondent.country]
+            : `${COUNTRY_LABELS[respondent.country]}, ${COLLEGE_LABELS[respondent.college]}`;
 
     const copy = async (url: string, key: string) => {
         await navigator.clipboard.writeText(url);
@@ -101,7 +122,7 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
     // Two codes, and the difference between them is the whole privacy design.
     // `code` is the answers, and only ever travels in a fragment. `badge` is
     // the identity, and is the only thing allowed in a path the server sees.
-    const code = encodeAnswers(answers);
+    const code = encodeAnswers(answers, respondent.country);
     const badge = encodeBadge(profile);
 
     return (
@@ -215,7 +236,9 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
                     Votre boussole en 7 dimensions
                 </h3>
                 <p className="mb-4 text-sm text-[var(--color-text-secondary)]">
-                    Pour chaque dimension, le courant de pensée le plus proche de vos réponses.{' '}
+                    Pour chaque dimension, le courant de pensée le plus proche de vos réponses. Quand
+                    plusieurs courants collent également à vos réponses, ils sont tous nommés plutôt
+                    qu&apos;arbitrés.{' '}
                     <Link href="/concepts" className="font-semibold text-[var(--color-primary)] hover:underline">
                         Comprendre ces courants
                     </Link>
@@ -223,6 +246,7 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {DIMENSION_ORDER.map((dim) => {
                         const archetype = profile.dimensionArchetypes[dim];
+                        const tied = profile.dimensionTies[dim] ?? [];
                         return (
                             <div key={dim} className="rounded-xl border border-[var(--color-border-light)] bg-white p-4">
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
@@ -231,6 +255,12 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
                                 <p className="mt-1 text-sm font-semibold text-[var(--color-primary)]">
                                     {archetype?.label ?? 'Non renseigné'}
                                 </p>
+                                {tied.length > 1 && (
+                                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                                        À égalité avec {tied.filter((l) => l !== archetype?.label).join(', ')}
+                                        {' '}: vos réponses sur cette dimension ne les départagent pas.
+                                    </p>
+                                )}
                                 {archetype && (
                                     <div className="mt-2 flex items-center gap-2">
                                         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--color-bg-elevated)]">
@@ -250,45 +280,79 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
 
             {/* LAYER 3: PARTIES EXPLAINED */}
             <section>
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <h3 className="font-[family-name:var(--font-heading)] text-xl font-semibold text-[var(--color-primary)]">
                         Proximité avec les partis
                     </h3>
                     <div className="flex gap-1 rounded-lg border border-[var(--color-border-light)] bg-white p-1 text-xs font-semibold">
-                        {(['tous', 'FR', 'BE'] as const).map((c) => (
+                        {READINGS.map((key) => (
                             <button
-                                key={c}
+                                key={key}
                                 type="button"
-                                onClick={() => setCountry(c)}
-                                className={`rounded-md px-3 py-1.5 transition-colors ${
-                                    country === c
+                                onClick={() => setReading(key)}
+                                className={`min-h-[44px] rounded-md px-3 py-1.5 transition-colors sm:min-h-0 ${
+                                    reading === key
                                         ? 'bg-[var(--color-primary)] text-white'
                                         : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'
                                 }`}
                             >
-                                {c === 'tous' ? 'Tous' : c}
+                                {READING_LABELS[key]}
                             </button>
                         ))}
                     </div>
                 </div>
+
+                {/* What the leading group is, before any single name is read as a winner. */}
+                <div className="mb-4 space-y-2 rounded-xl border border-[var(--color-border-light)] bg-white p-4 text-sm">
+                    <p className="text-[var(--color-text)]">
+                        Périmètre&nbsp;: <span className="font-semibold">{perimeter}</span>, {matches.length}{' '}
+                        partis.{' '}
+                        {leaders.length > 1 ? (
+                            <>
+                                <span className="font-semibold">
+                                    {leaders.length} partis sont à égalité statistique
+                                </span>{' '}
+                                en tête ({leaders.map((m) => m.party.name).join(', ')}). Leurs intervalles de
+                                confiance se recouvrent&nbsp;: les départager sur ces réponses serait lire du
+                                bruit.
+                            </>
+                        ) : (
+                            <>
+                                <span className="font-semibold">{leaders[0]?.party.name}</span> est seul en
+                                tête&nbsp;: son intervalle ne recouvre celui d&apos;aucun autre parti.
+                            </>
+                        )}
+                    </p>
+                    <p className="text-xs text-[var(--color-text-muted)]">
+                        {reading === 'proximity'
+                            ? "Lecture par proximité: la distance moyenne entre vos réponses et celles du parti. Elle favorise mécaniquement les partis codés au centre de chaque échelle."
+                            : "Lecture directionnelle: elle récompense l'accord intense dans le même sens plutôt que la faible distance. Les deux lectures peuvent diverger, et c'est l'information."}
+                    </p>
+                </div>
+
                 <p className="mb-4 text-sm text-[var(--color-text-secondary)]">
                     Proximité n&apos;est pas consigne de vote. Dépliez chaque parti pour voir exactement
                     pourquoi, énoncé par énoncé, avec le statut de sourçage de chaque position.
                 </p>
                 <div className="space-y-2">
-                    {filteredMatches.map((match) => (
+                    {rankedMatches.map(({ match, displayRank }) => (
                         <details
                             key={match.party.id}
                             className="group rounded-xl border border-[var(--color-border-light)] bg-white px-4 py-3"
                         >
                             <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
                                 <span className="flex min-w-0 items-center gap-2">
+                                    <span className="w-6 shrink-0 text-right text-xs font-semibold tabular-nums text-[var(--color-text-muted)]">
+                                        {displayRank}
+                                    </span>
                                     <span className="truncate text-sm font-medium text-[var(--color-text)]">
                                         {match.party.name}
                                     </span>
-                                    <span className="rounded border border-[var(--color-border)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)]">
-                                        {match.party.country}
-                                    </span>
+                                    {match.inLeadingGroup && leaders.length > 1 && (
+                                        <span className="rounded border border-[var(--color-primary)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-primary)]">
+                                            à égalité en tête
+                                        </span>
+                                    )}
                                     {match.lowCoverage && (
                                         <span className="rounded border border-amber-400 px-1.5 py-0.5 text-[10px] text-amber-600">
                                             couverture faible
@@ -302,8 +366,17 @@ export default function ResultsView({ answers, onRestart }: ResultsViewProps) {
                                             style={{ width: `${match.score}%` }}
                                         />
                                     </span>
-                                    <span className="w-11 text-right font-[family-name:var(--font-heading)] font-bold text-[var(--color-primary)]">
-                                        {match.score}%
+                                    <span className="text-right font-[family-name:var(--font-heading)] font-bold text-[var(--color-primary)]">
+                                        {reading === 'proximity' ? (
+                                            <>
+                                                {match.score}%
+                                                <span className="ml-1 block text-[10px] font-normal tabular-nums text-[var(--color-text-muted)] sm:inline sm:ml-2">
+                                                    {match.lowerBound}-{match.upperBound}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <>{match.directionalScore}%</>
+                                        )}
                                     </span>
                                 </span>
                             </summary>

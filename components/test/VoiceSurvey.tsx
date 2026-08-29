@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { STATEMENTS } from '@/data/statements';
-import { AnswerRecord, AnswerValue } from '@/types/positions';
+import { Statement, AnswerRecord, AnswerValue } from '@/types/positions';
 import { Ear, Volume2 } from 'lucide-react';
 import LikertScale from './LikertScale';
 
@@ -21,17 +20,20 @@ import LikertScale from './LikertScale';
 // back, and the Permissions-Policy header denies one at the browser.
 
 interface VoiceSurveyProps {
+    // The statements of this respondent's country: the survey never decides
+    // for itself what it reads out.
+    statements: Statement[];
     initialAnswers: AnswerRecord;
     onComplete: (answers: AnswerRecord) => void;
     onAnswer?: (answers: AnswerRecord) => void;
 }
 
-export default function VoiceSurvey({ initialAnswers, onComplete, onAnswer }: VoiceSurveyProps) {
+export default function VoiceSurvey({ statements, initialAnswers, onComplete, onAnswer }: VoiceSurveyProps) {
     const [index, setIndex] = useState(0);
     const [answers, setAnswers] = useState<AnswerRecord>(initialAnswers);
     const [isSpeaking, setIsSpeaking] = useState(false);
 
-    const statement = STATEMENTS[index];
+    const statement = statements[index];
 
     // Stop the reading when the mode is left, so a statement is not still
     // being spoken over whatever the reader moved on to.
@@ -57,7 +59,7 @@ export default function VoiceSurvey({ initialAnswers, onComplete, onAnswer }: Vo
         setAnswers(next);
         onAnswer?.(next);
 
-        if (index + 1 < STATEMENTS.length) {
+        if (index + 1 < statements.length) {
             setIndex(index + 1);
         } else {
             onComplete(next);
@@ -69,7 +71,7 @@ export default function VoiceSurvey({ initialAnswers, onComplete, onAnswer }: Vo
             <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm text-[var(--color-text-muted)]">
                     <span>
-                        Énoncé {index + 1} / {STATEMENTS.length}
+                        Énoncé {index + 1} / {statements.length}
                     </span>
                     <span className="rounded-full border border-[var(--color-border-light)] bg-white px-3 py-1 text-xs font-medium">
                         Mode entretien
@@ -78,7 +80,7 @@ export default function VoiceSurvey({ initialAnswers, onComplete, onAnswer }: Vo
                 <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-bg-elevated)]">
                     <div
                         className="h-full rounded-full bg-[var(--color-primary)] transition-all duration-300"
-                        style={{ width: `${((index + 1) / STATEMENTS.length) * 100}%` }}
+                        style={{ width: `${((index + 1) / statements.length) * 100}%` }}
                     />
                 </div>
             </div>
