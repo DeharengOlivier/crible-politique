@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { fetchPublicStats, PublicStats } from '@/lib/cribleApi';
 import { ANALYSIS_CORPUS_SIZE } from '@/lib/analysisStatEvent';
 import { COUNTRY_LABELS } from '@/lib/electoralScope';
-import { PARTIES } from '@/data/parties';
+import { partyLabelOf } from '@/lib/partyLabel';
 import type { Country } from '@/types/positions';
 
 // The live public counters: how many analyses the tool has run, and which
@@ -13,10 +13,6 @@ import type { Country } from '@/types/positions';
 // per-event rows, which is why this board can be public at all.
 
 const REFRESH_EVERY_MS = 30_000;
-
-const PARTY_NAMES: ReadonlyMap<string, string> = new Map(
-    PARTIES.map((party) => [party.id, party.name])
-);
 
 type Board =
     | { status: 'loading' }
@@ -124,7 +120,7 @@ function CountryBoard({ country, stats }: { country: Country; stats: PublicStats
                     {ranked.map((leader) => (
                         <LeaderBar
                             key={leader.partyId}
-                            name={PARTY_NAMES.get(leader.partyId) ?? leader.partyId}
+                            name={partyLabelOf(leader.partyId)}
                             share={countryStats.weightSum > 0 ? leader.weightSum / countryStats.weightSum : 0}
                             timesLed={leader.timesLed}
                         />

@@ -12,6 +12,7 @@ import {
     statementsFor
 } from '@/lib/electoralScope';
 import { useShareCodes } from '@/lib/useShareCodes';
+import { AnalysisMode, requestedAnalysis } from '@/lib/analysisMode';
 import { statEventOf } from '@/lib/analysisStatEvent';
 import { reportAnalysis } from '@/lib/cribleApi';
 import RespondentPicker from '@/components/test/RespondentPicker';
@@ -36,7 +37,17 @@ import type { VaultProfile } from '@/lib/profileVault';
 // after the results, because it decides which statements are asked, not only
 // which parties are displayed.
 
-const STAGES = ['intro', 'country', 'express', 'clarify', 'teaser', 'refine', 'voice', 'results'] as const;
+const STAGES = [
+    'intro',
+    'country',
+    'express',
+    'clarify',
+    'teaser',
+    'refine',
+    'full',
+    'voice',
+    'results'
+] as const;
 type Stage = (typeof STAGES)[number];
 
 // v2: the saved session now carries the respondent. A v1 session has no
@@ -263,7 +274,7 @@ interface FlowState {
     saved: SavedState | null;
 }
 
-function restoreFlow(code: string | null): FlowState {
+function restoreFlow(code: string | null, door: AnalysisMode | null): FlowState {
     const decoded = code ? decodeProfile(code) : null;
     // A link minted before the country existed names none. Rather than guess
     // one, the respondent is asked, and their answers are kept.
@@ -276,6 +287,9 @@ function restoreFlow(code: string | null): FlowState {
         };
     }
     if (decoded) return { stage: 'country', answers: decoded.answers, respondent: null, saved: null };
+    // A reader who came through one of the two doors has already made the
+    // choice the introduction screen exists to offer.
+    if (door !== null) return { stage: 'country', answers: {}, respondent: null, saved: loadSaved() };
     return { stage: 'intro', answers: {}, respondent: null, saved: loadSaved() };
 }
 
@@ -286,9 +300,19 @@ function TestFlow() {
     // "keep my results" link, and local storage. Neither exists during the
     // server render, so the hook reports null until mount and this stays
     // null with it, which renders nothing rather than a wrong first frame.
+    // The door is in the query string, which the server does see, unlike the
+    // fragment. It says which analysis was asked for and nothing about anyone.
+    const door = useMemo(
+        () =>
+            typeof window === 'undefined'
+                ? null
+                : requestedAnalysis(new URLSearchParams(window.location.search).get('analyse')),
+        []
+    );
+
     const restored = useMemo(
-        () => (shared === null ? null : restoreFlow(shared.p)),
-        [shared]
+        () => (shared === null ? null : restoreFlow(shared.p, door)),
+        [shared, door]
     );
 
     // Everything the user does afterwards replaces the restored state. Two
@@ -357,7 +381,9 @@ function TestFlow() {
             )}
 
             {(stage === 'country' || needsRespondent) && (
-                <RespondentPicker onChoose={(r) => transition('express', answers, r)} />
+                <RespondentPicker
+                    onChoose={(r) => transition(door === 'complete' ? 'full' : 'express', answers, r)}
+                />
             )}
 
             {stage === 'voice' && respondent && (
@@ -407,6 +433,16 @@ function TestFlow() {
                     progressTotal={statementsFor(respondent.country).length}
                     onComplete={(a) => transition('results', a)}
                     onAnswer={(a) => save({ stage: 'refine', answers: a, respondent })}
+                />
+            )}
+
+            {stage === 'full' && respondent && (
+                <StatementSurvey
+                    statements={statementsFor(respondent.country)}
+                    initialAnswers={answers}
+                    progressTotal={statementsFor(respondent.country).length}
+                    onComplete={(a) => transition('results', a)}
+                    onAnswer={(a) => save({ stage: 'full', answers: a, respondent })}
                 />
             )}
 

@@ -2,10 +2,16 @@ import Link from 'next/link';
 import { ArrowRight, ShieldCheck, Eye, GitBranch, Scale } from 'lucide-react';
 import { SYNTHETIC_PROFILES } from '@/data/syntheticProfiles';
 import { STATEMENTS } from '@/data/statements';
+import { expressStatementsFor } from '@/lib/electoralScope';
 import { PARTIES } from '@/data/parties';
 import { MEASURES } from '@/data/measures';
 import ProfileGallery from '@/components/home/ProfileGallery';
+import HomeStatsBand from '@/components/home/HomeStatsBand';
 import { publicStatisticsEnabled } from '@/lib/optionalFeatures';
+
+// Both countries answer the same number of express statements, so the hero can
+// name it without asking the reader where they vote.
+const EXPRESS_STATEMENT_COUNT = expressStatementsFor('FR').length;
 
 export default function Home() {
   return (
@@ -31,22 +37,43 @@ export default function Home() {
               de vous. Sans compte, sans collecte de données, jamais de consigne de vote.
             </p>
 
-            <div className="mb-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            {/* Two doors, not one behind the other: the reader chooses how much
+                of the corpus they want to answer before answering any of it. */}
+            <div className="mb-6 grid gap-3 sm:grid-cols-2">
               <Link
-                href="/test"
-                className="group inline-flex items-center gap-2.5 rounded-xl bg-[var(--color-primary)] px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-[var(--color-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-light)] hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+                href="/test?analyse=express"
+                className="group flex flex-col items-center gap-1 rounded-xl bg-[var(--color-primary)] px-6 py-5 text-white shadow-lg shadow-[var(--color-primary)]/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[var(--color-primary-light)] hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
               >
-                <span>Faire le test</span>
-                <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold">3 min</span>
-                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                <span className="inline-flex items-center gap-2 text-lg font-semibold">
+                  Analyse express
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                </span>
+                <span className="text-sm text-white/80">
+                  {EXPRESS_STATEMENT_COUNT} énoncés, 3 minutes
+                </span>
               </Link>
               <Link
-                href="/crible"
-                className="inline-flex items-center gap-2 rounded-xl border-2 border-[var(--color-border)] bg-white px-8 py-4 font-semibold text-[var(--color-text)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+                href="/test?analyse=complete"
+                className="group flex flex-col items-center gap-1 rounded-xl border-2 border-[var(--color-border)] bg-white px-6 py-5 text-[var(--color-text)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--color-primary)]/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
               >
-                <span>Explorer l&apos;observatoire</span>
+                <span className="inline-flex items-center gap-2 text-lg font-semibold">
+                  Analyse complète
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                </span>
+                <span className="text-sm text-[var(--color-text-secondary)]">
+                  {STATEMENTS.length} énoncés, 10 minutes
+                </span>
               </Link>
             </div>
+
+            <p className="mb-6 text-sm text-[var(--color-text-muted)]">
+              Les deux mènent aux mêmes résultats: l&apos;express les donne plus vite, la
+              complète les donne plus finement, et elle se poursuit depuis l&apos;express si
+              vous changez d&apos;avis en route.{' '}
+              <Link href="/crible" className="font-semibold text-[var(--color-primary)] hover:underline">
+                Explorer l&apos;observatoire
+              </Link>
+            </p>
 
             <p className="inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
               <ShieldCheck className="h-4 w-4 text-[var(--color-success)]" aria-hidden="true" />
@@ -57,6 +84,13 @@ export default function Home() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6">
+        {/* ===== WHAT THE TOOL HAS MEASURED: its own public counters ===== */}
+        {publicStatisticsEnabled() && (
+          <section className="pt-12 md:pt-16">
+            <HomeStatsBand />
+          </section>
+        )}
+
         {/* ===== PROFILE GALLERY: the desire trigger ===== */}
         <section aria-labelledby="gallery-title" className="py-12 md:py-16">
           <div className="mb-10 text-center">

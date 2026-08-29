@@ -73,6 +73,12 @@ describe("PublicStatsBoard", () => {
     });
 
     it("survives a snapshot naming a party the corpus no longer knows", async () => {
+        // The counter row is real and outlives the corpus, so it is kept with
+        // its share rather than dropped. What it is called changed on
+        // 2026-08-29: this used to assert the raw id was printed, and a real
+        // render of the home page showed what that means for a reader, a slug
+        // like "be_vlaams_belang" in the middle of party names. The survival
+        // property is unchanged; only the label a human sees is.
         const withUnknown = {
             ...SNAPSHOT,
             countries: {
@@ -82,6 +88,8 @@ describe("PublicStatsBoard", () => {
         };
         vi.stubGlobal("fetch", vi.fn().mockResolvedValue(statsResponse(withUnknown)));
         render(<PublicStatsBoard />);
-        await waitFor(() => expect(screen.getByText("be_gone")).toBeTruthy());
+        await waitFor(() => expect(screen.getByText(/Parti retiré du corpus/)).toBeTruthy());
+        expect(screen.queryByText("be_gone")).toBeNull();
+        expect(screen.getByText("en tête de 1 analyses")).toBeTruthy();
     });
 });
