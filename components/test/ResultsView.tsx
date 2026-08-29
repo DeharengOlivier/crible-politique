@@ -26,6 +26,7 @@ import { ProfileIcon } from '@/lib/icons';
 import { Compass, Coins, Scale } from 'lucide-react';
 import MftModule from './MftModule';
 import ImpactModule from './ImpactModule';
+import PartyFightsPanel from './PartyFightsPanel';
 
 // Layered results (progressive disclosure):
 // 1. Identity (shareable synthetic profile)
@@ -457,6 +458,12 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                         </p>
                     )}
                 </div>
+
+                {/* The mirror of the block above: what the parties themselves fight for. */}
+                <PartyFightsPanel
+                    parties={rankedMatches.map(({ match }) => match.party)}
+                    priorities={priorities}
+                />
 
                 {/* What the leading group is, before any single name is read as a winner. */}
                 <div className="mb-4 space-y-2 rounded-xl border border-[var(--color-border-light)] bg-white p-4 text-sm">

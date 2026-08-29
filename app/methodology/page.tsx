@@ -95,6 +95,22 @@ score(parti)   = moyenne des accords sur les énoncés où
                             formule de similarité face à des &quot;signatures&quot; de courants de pensée,
                             publiées et contestables.
                         </p>
+                        <p>
+                            <strong className="text-[var(--color-text)]">Vos combats prioritaires</strong>:
+                            depuis les résultats, vous pouvez nommer jusqu&apos;à trois dimensions dont les
+                            énoncés comptent double. La formule devient une moyenne pondérée, toujours
+                            recalculable à la main; la pondération n&apos;agit que sur l&apos;affichage de
+                            votre session et n&apos;est jamais transmise.
+                        </p>
+                        <p>
+                            <strong className="text-[var(--color-text)]">Les combats déclarés des
+                            partis</strong>: en miroir, les résultats affichent pour chaque parti les trois
+                            thèmes les plus centraux de son discours public, mesurés par la saillance du
+                            CHES 2024 (échelle 0-10). La saillance dit de quoi un parti parle, jamais quel
+                            camp il défend, et n&apos;entre pas dans le calcul des scores. Les deux partis
+                            hors du panel CHES (UPR, Les Patriotes) affichent le combat déclaré de leur
+                            programme, marqué &quot;Estimation documentée&quot;.
+                        </p>
                     </Section>
 
                     <Section title="4. Le positionnement des partis">
@@ -203,15 +219,17 @@ score(parti)   = moyenne des accords sur les énoncés où
                                 et peut être périmé.
                             </li>
                             <li>
-                                Le score ne pondère pas (encore) l&apos;importance que vous accordez à chaque
-                                sujet.
+                                Par défaut, tous les énoncés pèsent pareil; la pondération par vos combats
+                                prioritaires est un choix explicite, limité à trois dimensions et à votre
+                                session.
                             </li>
                             <li>
                                 Les profils synthétiques sont une simplification assumée, conçue pour la
                                 discussion, pas pour l&apos;assignation. La famille affichée est la plus
                                 proche de vos réponses, et toutes les familles que vos réponses ne
-                                séparent pas de celle-là sont nommées avec elle: en médiane 4 sur 14,
-                                parce que chaque famille ne décrit qu&apos;une à trois des sept dimensions.
+                                séparent pas de celle-là sont nommées avec elle: en médiane 3 sur 14 en
+                                France et 2 en Belgique, depuis que chaque famille décrit les sept
+                                dimensions.
                             </li>
                             <li>
                                 Les estimations d&apos;impact en euros dépendent de barèmes simplifiés et

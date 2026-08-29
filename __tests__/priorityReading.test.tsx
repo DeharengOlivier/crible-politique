@@ -30,7 +30,13 @@ function economyLeaningAnswers(): AnswerRecord {
 }
 
 function lfiScoreShown(): string {
-    const row = screen.getByText('La France Insoumise').closest('details');
+    // Since 2026-08-29 (night) the party name also appears in the declared
+    // fights panel; the score under test lives in the ranking row, so the
+    // helper skips any occurrence inside that panel.
+    const row = screen
+        .getAllByText('La France Insoumise')
+        .map((el) => el.closest('details'))
+        .find((d) => d !== null && !d.hasAttribute('data-fights-panel'));
     expect(row).not.toBeNull();
     return row!.textContent ?? '';
 }

@@ -288,7 +288,28 @@ recalculable à la main. La pondération n'agit que sur l'affichage de la
 session en cours: elle n'est ni transmise, ni comptée dans les statistiques
 anonymes, qui restent non pondérées.
 
-### 3.5 Un chiffre interprétable à côté du pourcentage
+### 3.5 Les combats déclarés des partis
+
+Le miroir de la saillance du répondant: pour chaque parti du classement, les
+résultats affichent les trois thèmes les plus centraux de son discours public,
+mesurés par le panel d'experts du CHES 2024 (variables de saillance du
+codebook: `eu_salience`, `lrecon_salience`, `galtan_salience`,
+`immigrate_salience`, `multicult_salience`, `redist_salience`,
+`climate_change_salience`, `environment_salience`, `anti_elite_salience`,
+échelle 0-10). La saillance est neutre en direction: elle dit de quoi un parti
+parle, jamais quel camp il défend, et n'entre pas dans le calcul des scores.
+
+Chaque thème CHES est rattaché aux dimensions de l'outil là où le corpus pose
+réellement la question (l'immigration en géopolitique et société, la
+redistribution en économie, le climat en environnement, l'anti-élitisme en
+pouvoir et connaissance); quand le répondant a nommé ses combats, les thèmes
+qui tombent dans ces dimensions sont marqués. Deux limites sont dites dans
+l'interface: le CHES ne mesure aucune saillance pour les dimensions
+Connaissance et Morale politique, et les deux partis sous les seuils
+d'inclusion du CHES (UPR, Les Patriotes) affichent le combat déclaré de leur
+propre programme, marqué "Estimation documentée" comme leurs positions.
+
+### 3.6 Un chiffre interprétable à côté du pourcentage
 
 "78% de proximité" ne se lit pas facilement. Le détail de chaque parti indique
 donc aussi le nombre d'énoncés où le répondant et le parti sont du même côté et

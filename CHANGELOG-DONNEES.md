@@ -11,6 +11,26 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-29 (nuit, 3) - Les combats déclarés des partis (saillance CHES 2024)
+
+- **Ajout** (`data/partySalience.ts`): les neuf variables de saillance du
+  CHES 2024 (`eu_salience`, `lrecon_salience`, `galtan_salience`,
+  `immigrate_salience`, `multicult_salience`, `redist_salience`,
+  `climate_change_salience`, `environment_salience`, `anti_elite_salience`,
+  échelle 0-10) copiées du dataset officiel `CHES_2024_final_v2.csv` pour les
+  22 partis du corpus couverts par le panel, arrondies à 2 décimales comme
+  les positions de `data/ches.ts`.
+- **UPR et Les Patriotes** (sous les seuils d'inclusion du CHES): pas de
+  valeurs inventées; le combat déclaré de leur propre programme, marqué
+  "Estimation documentée" (UPR: sortie de l'UE, de l'euro et de l'OTAN;
+  Les Patriotes: Frexit et sortie de l'euro).
+- **Motif**: demande d'un lecteur ("voir si mes combats matchent avec les
+  vrais sujets prioritaires des partis"), servie par une mesure externe
+  plutôt que par notre lecture des programmes. La saillance n'entre pas dans
+  le calcul des scores: affichage seulement (METHODOLOGY.md 3.5).
+- **Source**: CHES 2024, Jolly et al., dataset et codebook publics
+  (chesdata.eu), valeurs relues depuis le CSV officiel le 2026-08-29.
+
 ## 2026-08-29 (nuit, 2) - Chaque famille synthétique décrit les sept dimensions
 
 - **Modification des 14 familles** (`data/syntheticProfiles.ts`): chacune
