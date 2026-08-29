@@ -11,6 +11,164 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-29 (soir) - Correction d'un codage inventé, départage adaptatif
+
+### Ecolo et Groen: la différenciation est retirée
+
+- **Motif**: la différenciation introduite le matin même sur `pw3_be` (Ecolo -1,
+  Groen 0, "fédéralisme rénové") n'était appuyée sur aucune source. Recherche
+  documentaire faite ensuite: **Ecolo et Groen ont présenté une vision
+  institutionnelle commune le 13 janvier 2024**, "du fédéralisme de blocage au
+  fédéralisme collaboratif", avec la même architecture (quatre régions, un
+  fédéral arbitre, refédéralisation ciblée de la santé, du climat, de la justice
+  et de la mobilité). Ils ne divergent pas sur ce sujet.
+- **Correction**: Groen repasse à -1, identique à Ecolo, et les deux positions
+  sont désormais **sourcées** (communiqué commun Ecolo du 13 janvier 2024, page
+  Groen "Samenwerkingsfederalisme in plaats van blokkeringsfederalisme").
+- **Ce que la mesure disait vraiment**: le constat "Groen n'est jamais premier,
+  0 fois sur 20 000" était un artefact de la mesure, qui prenait le premier
+  élément d'une liste triée. L'application, elle, partage les rangs entre partis
+  à score égal. Re-mesuré après correction sur 20 000 répondants: Ecolo et Groen
+  obtiennent exactement les mêmes chiffres (1,5% de rang 1 partagé, 83,7% de
+  présence dans le groupe de tête). Aucun des deux n'est désavantagé.
+- **Règle tirée de l'épisode**: inventer une valeur pour départager deux partis
+  est interdit, même quand l'égalité gêne. Deux tests le tiennent désormais:
+  toute divergence entre deux partis d'un même collège doit être sourcée, et
+  deux partis aux positions identiques doivent recevoir le même score et le
+  même rang.
+
+### Départage adaptatif après le test express
+
+- **Motif**: mesuré par énumération exhaustive de toutes les réponses express
+  possibles, 35 archétypes sur 79 en France et 52 sur 79 en Belgique ne
+  pouvaient jamais être désignés vainqueurs seuls. Aucun n'était invisible, mais
+  le badge partageable retenait le premier archétype déclaré dans le fichier,
+  soit un arbitrage par l'ordre des données.
+- **Changement**: quand une dimension se termine à égalité, l'application pose
+  l'énoncé commun non répondu de cette dimension sur lequel les signatures à
+  égalité divergent le plus, dans la limite de deux par dimension. Aucun énoncé
+  ni aucune signature n'est modifié: c'est l'ordre des questions qui devient
+  adaptatif.
+- **Mesure**: les 79 archétypes deviennent atteignables seuls dans les deux
+  pays, pour +3,3 énoncés en France et +4,7 en Belgique en moyenne.
+- **Ce qui n'a pas été fait, et pourquoi**: allonger le test express à trois
+  énoncés par dimension séparait aussi tous les courants, mais les énoncés qui
+  séparent le mieux les courants ne sont pas ceux qui séparent le mieux les
+  partis (en "rapport à la connaissance", la meilleure paire repose sur un
+  énoncé d'écart-type 0,91 en France, sous le plancher publié de 1,0).
+
+### Liens partagés
+
+- **Deuxième caractère de contrôle**, pondéré par la position. La somme simple
+  ne voyait pas l'échange de deux réponses. Tout échange de deux réponses
+  voisines est désormais rejeté. Un échange entre deux réponses éloignées passe
+  encore quand la distance multipliée par l'écart des caractères est un multiple
+  de 36, et cette limite est publiée.
+- Les codes de version 2 déjà partagés dans la journée ne sont plus lisibles:
+  ils comptaient un caractère de contrôle et non deux. Le format n'avait pas
+  quitté le poste de développement.
+
+### Sourçage
+
+- **Nouvelle règle tenue par un test**: aucune position ne peut porter le statut
+  `verifie` sans une citation datée ET liée. La règle figurait dans
+  GOVERNANCE.md, rien ne l'empêchait d'être contournée.
+
+## 2026-08-29 - Portée par pays, signatures complètes, incertitude publiée
+
+- **Motif**: audit du moteur par simulation (20 000 répondants uniformes, 8 000
+  répondants cohérents, ACP sur la matrice partis x énoncés). Quatre défauts
+  mesurés: un énoncé commun désignait le contraire selon le pays, un archétype
+  était inatteignable, un parti n'était jamais premier, et le classement des
+  partis était annoncé sans son incertitude.
+
+### Énoncés
+
+- **Scindé** `pw3` (décentralisation) en `pw3_fr` et `pw3_be`. L'énoncé
+  n'était pas invariant: orientation -0,35 en France et +0,36 en Belgique sur
+  l'axe galtan de CHES 2024. Les valeurs françaises sont reprises telles
+  quelles; les valeurs belges sont un codage nouveau du clivage communautaire
+  (transfert de compétences fédérales), au statut `a_verifier`.
+- **Ajouté 3 énoncés propres à la France** (`pw3_fr` décentralisation,
+  `ec5_fr` retour de l'âge légal à 62 ans, `so5_fr` application stricte de la
+  laïcité) et **3 propres à la Belgique** (`pw3_be` transfert de compétences,
+  `ec5_be` limitation dans le temps des allocations de chômage, `so5_be`
+  régularisation des personnes sans titre de séjour de longue durée).
+  Motif: sans clivage communautaire ni débat social propre, les partis belges
+  étaient trop resserrés pour être distingués (récupération du bon parti
+  74,2% contre 89,7% côté français).
+- **Total**: 27 énoncés communs + 3 par pays = 30 par répondant.
+- **Nouvelles positions**: 72 (12 partis x 3 énoncés x 2 pays), toutes au
+  statut `a_verifier`.
+
+### Test express
+
+- **Porté de 12 à 14 énoncés**, exactement 2 par dimension et par pays. Avec un
+  seul énoncé de "rapport à la connaissance", 8 des 10 courants de la dimension
+  étaient inatteignables et "Sceptique cartésien" était renvoyé à 80,2% des
+  répondants.
+- **Retiré `ec3`** (protectionnisme) de la sélection express: écart-type 0,88
+  sur 24 partis, il occupait une place sur douze sans séparer les partis.
+  Critère publié et testé: un énoncé express sépare les partis de son pays avec
+  un écart-type d'au moins 1,0.
+
+### Signatures des courants
+
+- **Réécrites en signatures complètes**: chaque archétype d'une dimension porte
+  désormais sur exactement les mêmes énoncés communs. Les signatures partielles
+  favorisaient mécaniquement les plus courtes (15 à 19% de victoires à un
+  énoncé contre 1 à 2% à quatre énoncés).
+- **Corrigé un doublon**: "Technocrate rationaliste" et "Élitiste éclairé"
+  avaient la signature identique `{pw1: 1, pw2: -2}`. "Élitiste éclairé" n'a
+  jamais été renvoyé une seule fois sur 20 000 tirages. Sa signature est
+  désormais distincte (`pw4: 0` au lieu de `pw4: 1`).
+- **Résultat mesuré**: 0 archétype sur 79 inatteignable sur le test complet
+  (contre 1 auparavant, et une distribution dictée par la longueur des
+  signatures).
+- Aucun libellé d'archétype n'a été supprimé ni renommé: `badgeAlphabet.ts`
+  reste inchangé et les liens déjà partagés continuent de désigner la même
+  chose.
+
+### Partis
+
+- **Distingué Ecolo et Groen** sur `pw3_be` (Ecolo -1, refédéralisation;
+  Groen 0, fédéralisme rénové). Leurs vecteurs étaient rigoureusement
+  identiques sur les 28 énoncés, si bien que Groen n'était jamais premier, 0
+  fois sur 20 000. Codage préliminaire au statut `a_verifier`, à sourcer.
+- **Ajouté les collèges électoraux** des 12 partis belges (Wallonie, Bruxelles,
+  Flandre). Motif: un bulletin ne porte que les listes d'un collège, et
+  proposer la N-VA à un électeur wallon est proposer un parti pour lequel il ne
+  peut pas voter.
+
+### Formule
+
+- **Ajouté l'intervalle de confiance à 90%** de chaque proximité et la notion
+  de groupe de tête (intervalles qui se recouvrent). Motif: le premier et le
+  deuxième parti se tenaient dans un point d'écart chez 30% des répondants
+  simulés cohérents, et un vainqueur unique était annoncé quand même.
+- **Ajouté la lecture directionnelle** (Rabinowitz-Macdonald) à côté de la
+  proximité. Motif: le biais centriste de la proximité est mesuré à -0,90
+  (corrélation entre l'extrémité du codage d'un parti et sa probabilité d'être
+  premier); celui de la lecture directionnelle est de +0,65. Publier les deux
+  laisse voir de quoi dépend le classement.
+- **Ajouté la pondération de saillance** (un énoncé peut compter double), sans
+  effet à poids égaux.
+- **Ajouté le décompte "même côté / côté opposé"**, interprétable là où un
+  pourcentage ne l'est pas.
+- **Ajouté le signalement des égalités entre courants** quand les réponses ne
+  les départagent pas.
+
+### Format des liens partagés
+
+- **Code de profil version 2**: il porte désormais le pays et une somme de
+  contrôle. Motif: les deux corpus comptant 30 énoncés, changer le seul
+  caractère de pays d'un code français en faisait un profil belge valide, et un
+  lien abîmé en transit affichait un profil plausible attribué à celui qui
+  l'avait partagé. Toute substitution d'un caractère est désormais rejetée.
+- **Les liens version 1 restent lisibles**. Ne nommant aucun pays, ils
+  conduisent au choix du pays en conservant les réponses, plutôt que d'en
+  supposer un.
+
 ## 2026-06-07 - Fusion "Le Crible Politique": consolidation du corpus
 
 - **Motif**: fusion des deux prototypes en un produit unique (voir

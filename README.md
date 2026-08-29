@@ -7,7 +7,7 @@
   <a href="data/LICENSE"><img src="https://img.shields.io/badge/data-CC%20BY%204.0-blue.svg" alt="Data: CC BY 4.0"></a>
   <img src="https://img.shields.io/badge/Next.js-16-000000.svg" alt="Next.js 16">
   <img src="https://img.shields.io/badge/React-19-149eca.svg" alt="React 19">
-  <img src="https://img.shields.io/badge/tests-44%20passing-brightgreen.svg" alt="Tests: 44 passing">
+  <img src="https://img.shields.io/badge/tests-250%20passing-brightgreen.svg" alt="Tests: 250 passing">
 </p>
 
 # Le Crible Politique
@@ -31,13 +31,18 @@ political data stay in French on purpose.
 
 The app is a Next.js (App Router) site with four surfaces:
 
-- **The test** (`/test`): 12 express statements give a first profile in about 3
-  minutes, refined up to 28 statements. Results are layered: a shareable
-  synthetic profile, a 7-dimension compass, and proximity to 24 parties (FR/BE)
-  explained statement by statement with a sourcing status. Two opt-in modules:
-  moral foundations (Haidt's MFT) and a material impact estimate in euros per
-  month (based on published scales). An optional voice-interview mode reads each
-  statement aloud.
+- **The test** (`/test`): the respondent picks a country first (France or
+  Belgium, then a Belgian electoral college), because that decides which
+  statements are asked and which ballot the parties are actually on. 14 express
+  statements give a first profile in about 3 minutes, refined up to 30. Results
+  are layered: a shareable synthetic profile, a 7-dimension compass, and
+  proximity to the parties of that ballot, each with a confidence interval, a
+  rank and a statement-by-statement explanation carrying a sourcing status. Two
+  opt-in modules: moral foundations (Haidt's MFT) and a material impact estimate
+  in euros per month (based on published scales). An optional voice-interview
+  mode reads each statement aloud. When two currents of a dimension end tied,
+  the test asks up to two extra statements chosen to separate them, rather than
+  picking whichever the data file happens to declare first.
 - **The observatory** (`/crible`): emblematic measures from the public debate
   examined through the lens of the law, in an "established / debated" format,
   never a verdict, with one indexable URL per entry.
@@ -60,7 +65,15 @@ The app is a Next.js (App Router) site with four surfaces:
   corrections are recorded in [CHANGELOG-DONNEES.md](CHANGELOG-DONNEES.md).
 - **External validation.** The internal economic axis is continuously checked
   against the Chapel Hill Expert Survey (CHES 2024) by a test that asserts a
-  strong rank correlation.
+  strong rank correlation. A second test enforces measurement invariance: a
+  statement may only be asked in both countries if it points the same way on
+  every CHES axis in both, which is what forced the old decentralization
+  statement to be split into a French and a Belgian version.
+- **Uncertainty is published, not hidden.** Every proximity carries a 90%
+  confidence interval, parties whose intervals overlap the leader's are named as
+  a leading group rather than arbitrated, and the ranking is offered under two
+  spatial models (proximity and directional) whose biases run in opposite
+  directions.
 
 ### How the scoring works
 
@@ -69,14 +82,23 @@ For each statement the user answers on a 5-point Likert scale
 
 ```
 agreement(statement) = 1 - |user_position - party_position| / 4
-score(party)         = mean of agreements over the statements where
+score(party)         = weighted mean of agreements over the statements where
                        (a) the user took a position and
                        (b) the party position is documented
+standard error       = weighted standard deviation / sqrt(comparisons)
+interval             = score +/- 1.645 * standard error        (90%)
+directional(party)   = 50 + 50 * sum(user_position * party_position)
+                            / (4 * comparisons)
 ```
 
 "No opinion" answers and undocumented party positions are excluded from the
-computation: they are never counted against the user nor against the party. The
-engine is fully deterministic: the same answers always produce the same result.
+computation: they are never counted against the user nor against the party.
+Salience weights default to 1, so the weighted mean reduces to the plain mean
+and the formula above stays recomputable by hand. Parties whose interval
+overlaps the leader's share the lead; parties with the same score share a rank.
+The engine is fully deterministic: the same answers always produce the same
+result. The full rationale, with the measurements that justify each addition,
+is in [METHODOLOGY.md](METHODOLOGY.md).
 
 ## Architecture
 
@@ -99,27 +121,30 @@ flowchart TB
 
 ```mermaid
 flowchart LR
+    Country["Country and electoral college"] --> Scope["Statements and parties in scope"]
+    Scope --> Filter
     Answers["Likert answers across 7 dimensions"] --> Filter["Drop no-opinion and undocumented positions"]
     Filter --> Agree["agreement = 1 - abs(user - party) / 4"]
-    Agree --> Mean["Mean per party over shared statements"]
-    Mean --> Proximity["Per-party proximity, explained statement by statement"]
+    Agree --> Mean["Weighted mean and standard error per party"]
+    Mean --> Proximity["Proximity, interval, rank, leading group"]
+    Filter --> Directional["Directional reading (Rabinowitz-Macdonald)"]
     Answers --> Compass["Per-dimension profile"]
-    Compass --> Archetype["Synthetic profile and dominant archetype"]
+    Compass --> Archetype["Dominant archetype, or the tied archetypes"]
 ```
 
 ### Stateless profile sharing
 
 Nothing is stored, so a shared profile has to travel in the link. Where in the
-link is the whole design, because a set of answers to 28 political statements
+link is the whole design, because a set of answers to 30 political statements
 is special-category data under GDPR article 9 and a URL is not one thing:
 
 | Part of the URL | Transmitted to the server | What it carries |
 | --- | --- | --- |
-| path (`/p/2046354a`) | yes, and to every link-preview crawler | the badge: seven dominant currents and the profile they imply |
-| fragment (`#p=1eeba…`) | never | the answers |
+| path (`/p/26111404`) | yes, and to every link-preview crawler | the badge: seven dominant currents and the profile they imply |
+| fragment (`#p=2fdcb…`) | never | the country and the answers |
 
 A badge code is one character per dimension, so it addresses at most 37^7
-badges against 6^28 answer sets: it is not a lossy encoding of the answers, it
+badges against 6^30 answer sets: it is not a lossy encoding of the answers, it
 cannot be an encoding of them at all. That is what lets the server render the
 page and generate the Open Graph card without ever receiving the answers. The
 recipient's browser reads the fragment and offers to compare profiles;
@@ -141,10 +166,23 @@ sequenceDiagram
     App->>U: profile, and the option to compare
 ```
 
-Links minted before badge codes existed carried the answers in the path, and
-`identityFromShareCode` still reads them, so those links keep resolving to the
-same page. Links that carried a code in a query string (`/compare?a=`,
-`/test?p=`) are honoured too, and rewritten in place to the fragment form.
+An answer code is versioned: `2` + a country character + one character per
+answer + two check characters. They exist because both corpora hold 30
+statements, so before them a single mangled character (`f` for France into `b`
+for Belgium) turned a French link into a valid Belgian profile, and the
+recipient saw a plausible wrong profile attributed to the person who had shared
+it. The first check character is the plain sum modulo 36, which catches every
+single-character substitution. The second weighs each character by its
+position, which catches every swap of two adjacent answers. A swap between two
+distant answers survives only when the distance times the character difference
+is a multiple of 36, and that residue is the stated limit.
+
+Version 1 codes stay readable. Naming no country, they lead to the country
+picker with the answers kept, rather than assuming one. Links minted before
+badge codes existed carried the answers in the path, and `identityFromShareCode`
+still reads them, so those links keep resolving to the same page. Links that
+carried a code in a query string (`/compare?a=`, `/test?p=`) are honoured too,
+and rewritten in place to the fragment form.
 
 ### Data model
 
@@ -225,10 +263,10 @@ it can be read, diffed and audited:
 
 | File | Contents |
 | --- | --- |
-| [`data/statements.ts`](data/statements.ts) | 28 statements (12 of them in the express subset), 4 per dimension, with agree/disagree labels. |
-| [`data/parties.ts`](data/parties.ts) | The 24 parties (France and Belgium) and their reference manifesto. |
+| [`data/statements.ts`](data/statements.ts) | 27 statements common to both countries plus 3 specific to each, so 30 per respondent, 4 per dimension, with agree/disagree labels. Each country has its own 14-statement express subset. |
+| [`data/parties.ts`](data/parties.ts) | The 24 parties (12 French, 12 Belgian) with their reference manifesto, their country and, for the Belgian ones, the electoral colleges they run in. |
 | [`data/partyPositions.ts`](data/partyPositions.ts) | Each party's position on each statement (same Likert scale), with a sourcing status and citation. |
-| [`data/archetypeSignatures.ts`](data/archetypeSignatures.ts) | Expected answer patterns per archetype, used to identify a dominant archetype per dimension. |
+| [`data/archetypeSignatures.ts`](data/archetypeSignatures.ts) | Expected answer patterns per archetype, used to identify a dominant archetype per dimension. Every archetype of a dimension is scored on exactly the same statements, so no current wins by having a shorter signature. |
 | [`data/syntheticProfiles.ts`](data/syntheticProfiles.ts) | The shareable "identity" layer: matching rules from dominant archetypes to a named profile. |
 | [`data/measures.ts`](data/measures.ts) | Legal-feasibility entries for emblematic measures ("established / debated", with norms and sources). |
 | [`data/policies.ts`](data/policies.ts) | Material-impact simulator: euros-per-month estimates per party measure, based on published scales. |
@@ -243,6 +281,16 @@ The pure logic lives in:
   computation (the public formula).
 - [`lib/profileCode.ts`](lib/profileCode.ts): compact URL encoding/decoding of a
   profile, plus `localStorage` validation.
+- [`lib/electoralScope.ts`](lib/electoralScope.ts): which statements are asked
+  and which parties are on the ballot, given a country and a Belgian college.
+- [`lib/measurementInvariance.ts`](lib/measurementInvariance.ts): the rank
+  correlation and the invariance rule the CHES tests are written against.
+- [`lib/resultsReading.ts`](lib/resultsReading.ts): the proximity/directional
+  switch and the ranking that belongs to each reading.
+- [`lib/duoComparison.ts`](lib/duoComparison.ts): the two-profile comparison,
+  including how many statements the two respondents actually share.
+- [`lib/adaptiveClarification.ts`](lib/adaptiveClarification.ts): which extra
+  statement to ask when a dimension ends with two currents tied.
 - [`utils/analysis.ts`](utils/analysis.ts): INSEE social-class classifier and
   moral-foundations interpretation.
 
@@ -256,15 +304,47 @@ French on purpose: they are the actual product copy.
 npm test
 ```
 
-The suite (Vitest, nine files in `__tests__/`) locks the product's central
-promises: data integrity, determinism, external consistency, and the privacy
-properties of the share links.
+The suite (Vitest, twenty-two files in `__tests__/`) locks the product's central
+promises: data integrity, determinism, external consistency, the honesty of what
+the result claims, and the privacy properties of the share links.
 
-- `__tests__/scoringEngine.test.ts`: the 28 statements cover 7 dimensions, every
-  party has a position on every statement, the agreement formula holds, "no
-  opinion" is never penalized, answering a party's exact positions yields 100%,
-  the profile-code roundtrip is lossless, and the economic axis correlates
-  strongly with CHES `lrecon` (Spearman rho > 0.7).
+- `__tests__/scoringEngine.test.ts`: the 30 statements of each country cover 7
+  dimensions, every party has a position on every statement of its country, the
+  agreement formula holds, "no opinion" is never penalized, answering a party's
+  exact positions yields 100%, the profile-code roundtrip is lossless, and the
+  economic axis correlates strongly with CHES `lrecon` (Spearman rho > 0.7).
+- `__tests__/electoralScope.test.ts`: which statements and which parties a
+  country and a college select, that a French respondent is never shown a
+  Belgian statement or a party they cannot vote for, that every Belgian party
+  belongs to at least one college, and that a corrupted country or college is
+  rejected at the boundary rather than defaulted.
+- `__tests__/measurementInvariance.test.ts`: the Spearman implementation
+  (including ties and a constant vector), and the invariance rule itself, which
+  is asserted against the real corpus: no common statement may point in
+  substantially opposite directions on any CHES axis between the two countries.
+- `__tests__/archetypes.test.ts`: every archetype of a dimension is scored on
+  exactly the same statements, no two archetypes share a signature, no party
+  vector is a duplicate of another, and every one of the 79 archetypes is
+  reachable by some set of answers on the full test.
+- `__tests__/scoringUncertainty.test.ts`: the interval narrows as comparisons
+  accumulate, the leading group contains the leader and every party overlapping
+  it, equal scores share a rank (1, 2, 2, 4), the directional reading orders
+  differently from the proximity one, salience weights change nothing at equal
+  weights and are rejected when non-positive or non-finite.
+- `__tests__/profileCode.test.ts`: the version-2 round trip carries the country,
+  every single-character substitution and every adjacent swap are rejected by
+  the two check characters, a version-1 code still decodes and reports no
+  country, and every malformed shape is refused.
+- `__tests__/adaptiveClarification.test.ts`: the tie-break proposes only
+  unanswered statements of a tied dimension over which the tied signatures
+  actually disagree, respects its two-question budget, and makes all 79
+  archetypes uniquely reachable in both countries.
+- `__tests__/clarifySurvey.test.tsx`: the same stage in jsdom. That it asks,
+  records, goes back, completes exactly once, and never names the tied currents
+  before the answer, which would steer the measurement.
+- `__tests__/sourcing.test.ts`: no position claims `verifie` without a dated and
+  linked citation, no party is documented outside its own country, and no two
+  parties sharing a ballot hold rigorously identical vectors.
 - `__tests__/profile.test.ts`: `computeProfile` produces the correct mean
   position per dimension, omits dimensions with no answers, selects exactly one
   dominant archetype per answered dimension, and the low-coverage flag tracks
@@ -294,8 +374,16 @@ properties of the share links.
   than reporting "no profile", that it rewrites a legacy query URL in place,
   and that it keeps up when the fragment changes under the page. Plus the
   erase button, clicked for real.
+- `__tests__/resultsReading.test.ts`: that switching to the directional reading
+  re-ranks the parties instead of relabelling the proximity order, which is the
+  regression it was written for.
+- `__tests__/duoComparison.test.ts`: the two-profile comparison, in particular
+  that two respondents from different countries are compared only on the
+  statements they actually share.
+- `__tests__/tapTargets.test.tsx`: that the survey controls a thumb has to hit
+  are at least 44px tall, rendered in jsdom.
 
-Current status: **123 tests passing across 10 files**. They run in CI on every
+Current status: **250 tests passing across 22 files**. They run in CI on every
 push and pull request, alongside ESLint, `tsc --noEmit`, the production build,
 `npm audit` and the privacy check below. Both jobs are required to merge into
 `main`.
@@ -325,8 +413,9 @@ reaches a server, is not visible to a unit test: it is a property of what a
 browser transmits, not of what a function returns. So
 [`scripts/privacy-check.mjs`](scripts/privacy-check.mjs) starts the production
 build behind a proxy that records the exact request line the server receives,
-drives a real headless browser to the four share links, and fails if an
-answer code appears in one. It also asserts each page rendered, because a
+drives a real headless browser to five share links (a French profile, a Belgian
+one, a badge page, a comparison and a version-1 legacy link), and fails if any
+answer code appears in any of them. It also asserts each page rendered, because a
 check that passes because nothing loaded is worse than no check, and asserts
 who is allowed to put each page inside a frame.
 
@@ -348,14 +437,35 @@ two prototypes. It is honest about what is solid and what still needs hardening.
   between elections. Next step: wire each position to a dated, linked citation
   and surface the coverage ratio prominently.
 - **Test coverage.** The suite locks the scoring invariants, the data
-  integrity and the privacy properties of the share links, all as pure
-  functions, plus the hook and the erase button in jsdom. What it does not
-  cover is the larger components: there is no rendering test for the survey
-  flow, the results view or the embed widget. The share-link behaviour has been
-  verified end to end in a real browser, by recording the request line the
-  server receives, and `npm run check:privacy` now runs that measurement in CI.
+  integrity, the uncertainty arithmetic and the privacy properties of the share
+  links, all as pure functions, plus the hook, the erase button and the survey
+  tap targets in jsdom. What it still does not cover is the larger components
+  rendered end to end: there is no full rendering test of the survey flow, the
+  results view or the embed widget. Those paths were verified in a real browser
+  at a real 375px viewport, and the share-link behaviour is measured in CI by
+  `npm run check:privacy`, which records the request line the server receives.
   Next step: React Testing Library coverage of the results view and the survey
   flow.
+- **Ambivalent respondents still end tied.** The 14 express statements alone
+  could never single out 35 of the 79 archetypes in France and 52 in Belgium
+  (exhaustive enumeration). The adaptive tie-break now asks up to two extra
+  statements per tied dimension, which makes all 79 reachable for a respondent
+  whose answers are consistent. Someone genuinely ambivalent still ends tied,
+  and the tie is displayed rather than arbitrated. Next step: study whether the
+  clarifying statements should also feed the party comparison, which today they
+  do without being chosen for it.
+- **The new country-specific positions are unsourced.** The six statements added
+  to scope the test by country carry 72 party positions coded from manifestos
+  and public statements, all at status `a_verifier`. They need the same
+  adversarial double-coding as the rest before any claim of accuracy. One of
+  them has already been caught and corrected this way: a differentiation
+  invented between Ecolo and Groen was reverted once the sources showed the two
+  parties published a single common institutional vision in January 2024.
+- **Parties with identical positions are ordered by the data file.** Ecolo and
+  Groen hold rigorously identical coded positions, correctly so. They receive
+  the same score and the same displayed rank, but inside that tie one is always
+  listed above the other. Next step: mark an exact tie as such in the list,
+  rather than letting the reading order imply a winner.
 - **Accessibility.** Icons are decorative (`aria-hidden`) and the Likert scale
   uses real buttons rather than a slider, which helps, but there is no audited
   keyboard path through the whole survey, no focus-management review, and the
@@ -404,15 +514,18 @@ document or correct a position with a dated, linked primary source:
 - Keep the engine deterministic: no AI call at runtime, no server-side storage of
   answers. Anything that changes a result must be a published, hand-recomputable
   formula ([METHODOLOGY.md](METHODOLOGY.md)).
-- `npm test` must stay green (117 tests lock determinism, data integrity, the
-  CHES external-consistency check and what a share link is allowed to put in a
-  URL). Ship a test with any behaviour change.
+- `npm test` must stay green (250 tests lock determinism, data integrity, the
+  CHES external-consistency check, measurement invariance across the two
+  countries, and what a share link is allowed to put in a URL). Ship a test with
+  any behaviour change.
 - Never put an answer code anywhere the server sees it: not in a path, not in a
   query string. The fragment is the only place. See
   [Stateless profile sharing](#stateless-profile-sharing); `npm run
   check:privacy` enforces it.
 - `data/badgeAlphabet.ts` is append only. Reordering it changes what every
-  already shared link means.
+  already shared link means. `LEGACY_V1_STATEMENT_IDS` in `lib/profileCode.ts`
+  is frozen for the same reason: it is the corpus the already-shared version-1
+  links were minted against, not the current one.
 - Match the existing style. User-facing copy and political data stay in French;
   code and comments are in English.
 
