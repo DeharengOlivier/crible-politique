@@ -33,6 +33,8 @@ export function EmbedResults({ answers, country }: { answers: AnswerRecord; coun
     const matches = useMemo(() => computePartyMatches(answers, { country }), [answers, country]);
     const leaders = matches.filter((m) => m.inLeadingGroup).slice(0, 4);
     const synth = profile.syntheticProfile;
+    // The families these answers do not separate from the one shown above.
+    const alsoInGroup = profile.syntheticProfileFit.leadingGroup.slice(1);
     const code = encodeAnswers(answers, country);
 
     return (
@@ -46,6 +48,18 @@ export function EmbedResults({ answers, country }: { answers: AnswerRecord; coun
                 </h2>
                 {synth && (
                     <p className="mt-1 text-sm italic text-[var(--color-text-secondary)]">&quot;{synth.tagline}&quot;</p>
+                )}
+                {alsoInGroup.length > 0 && (
+                    <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+                        {alsoInGroup.length + 1} familles à égalité, avec{' '}
+                        {alsoInGroup.map((family, index) => (
+                            <span key={family.id}>
+                                {index > 0 && (index === alsoInGroup.length - 1 ? ' et ' : ', ')}
+                                {family.title}
+                            </span>
+                        ))}
+                        .
+                    </p>
                 )}
             </div>
             <div className="space-y-2">

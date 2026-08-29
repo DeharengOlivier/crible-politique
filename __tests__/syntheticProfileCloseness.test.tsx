@@ -74,6 +74,21 @@ describe('the results say which families the answers cannot separate', () => {
         expect(screen.getByText(/collent autant/)).toBeTruthy();
     });
 
+    it('says it in the widget that runs on someone else\'s page too', async () => {
+        // The embed is the most assertive form of the claim with the least
+        // context around it, so it is the last place where a single title
+        // should be allowed to stand for a whole result.
+        const answers = answersWithGroupOf(3);
+        const [, ...others] = computeProfile(answers).syntheticProfileFit.leadingGroup;
+        const { EmbedResults } = await import('@/app/embed/page');
+        render(<EmbedResults answers={answers} country="FR" />);
+
+        for (const family of others) {
+            expect(screen.getByText(new RegExp(family.title))).toBeTruthy();
+        }
+        expect(screen.getByText(/familles à égalité/)).toBeTruthy();
+    });
+
     it('says so when the closest family stands alone', () => {
         render(
             <ResultsView
