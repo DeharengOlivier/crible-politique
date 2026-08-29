@@ -361,12 +361,17 @@ export const STATEMENTS_BY_DIMENSION = STATEMENTS.reduce<Record<string, Statemen
  * separate the parties of its country (standard deviation at least 1.0).
  */
 export const EXPRESS_IDS_BY_COUNTRY: Record<Country, readonly string[]> = {
-    // Two per dimension, each above the discrimination floor in its own country,
-    // and chosen among the qualifying statements to cover two distinct cleavages
-    // rather than two readings of the same one. France: sovereignty and
-    // immigration rather than two European statements. Belgium: the two
-    // statements that actually separate its parties are the communautaire one
-    // and the unemployment one, which is why they exist.
-    FR: ["pw2", "pw4", "ec1", "ec5_fr", "ge1", "ge3", "so1", "so3", "en1", "en2", "kn2", "kn3", "mo1", "mo4"],
-    BE: ["pw3_be", "pw4", "ec1", "ec5_be", "ge2", "ge3", "so3", "so5_be", "en1", "en2", "kn2", "kn4", "mo2", "mo3"],
+    // Two per dimension and three for geopolitics, each above the
+    // discrimination floor in its own country, chosen among the qualifying
+    // statements to cover distinct cleavages rather than two readings of the
+    // same one. Geopolitics carries NATO, immigration and the Middle East in
+    // both countries because that triple was measured best on 2026-08-29:
+    // recovery of the coded party under noise 93.7% in France (the former
+    // pair: 93.0%) and 90.2% in Belgium (89.4%), while carrying the cleavages
+    // that actually oppose parties the former pairs called neighbours
+    // (RN-LFI distance on the express geopolitics items: 5 -> 9; VB-PTB:
+    // 5 -> 8). Belgium keeps the communautaire and unemployment statements,
+    // the two that actually separate its parties, which is why they exist.
+    FR: ["pw2", "pw4", "ec1", "ec5_fr", "ge2", "ge3", "ge7", "so1", "so3", "en1", "en2", "kn2", "kn3", "mo1", "mo4"],
+    BE: ["pw3_be", "pw4", "ec1", "ec5_be", "ge2", "ge3", "ge7", "so3", "so5_be", "en1", "en2", "kn2", "kn4", "mo2", "mo3"],
 };

@@ -54,13 +54,17 @@ describe('G3: no dimension is ever inferred from a single statement', () => {
     }
   });
 
-  it('carries exactly 2 statements per dimension in the express test', () => {
+  it('carries 2 express statements per dimension, and 3 for geopolitics', () => {
+    // Specification change of 2026-08-29: geopolitics gets a third express
+    // slot because the measured best triple (NATO, immigration, Middle East)
+    // beats every pair on party recovery in both countries while carrying
+    // the cleavages the pairs missed. See data/statements.ts for the numbers.
     for (const country of COUNTRIES) {
       const express = expressStatementsFor(country);
-      expect(express, `${country} express`).toHaveLength(2 * DIMENSION_ORDER.length);
+      expect(express, `${country} express`).toHaveLength(2 * DIMENSION_ORDER.length + 1);
       for (const dimension of DIMENSION_ORDER) {
         const n = express.filter((s) => s.dimension === dimension).length;
-        expect(n, `${country}/${dimension} express`).toBe(2);
+        expect(n, `${country}/${dimension} express`).toBe(dimension === 'geopolitics' ? 3 : 2);
       }
     }
   });
