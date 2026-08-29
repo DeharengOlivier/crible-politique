@@ -129,6 +129,51 @@ export const PARTY_POSITIONS: PartyPositionsTable = {
         be_vooruit: p(0), be_openvld: p(1), be_cdv: p(0), be_groen: p(0), be_defi: p(0)
     },
 
+    // ge5-ge7: coded 2026-08-29 from official statements, parliamentary votes
+    // and party programmes 2024-2026 (see CHANGELOG-DONNEES.md for the full
+    // motivation and the per-party evidence). Status a_verifier throughout:
+    // labels cite the strongest single source found, pending double coding.
+    ge5: { // Continue military support to Ukraine, even at a cost
+        fr_lfi: p(-1, { label: "LFI: cessez-le-feu et négociations, contre l'escalade militaire", url: "https://lafranceinsoumise.fr/2025/03/12/pour-une-paix-juste-et-durable-en-ukraine/", date: "2025-03-12" }),
+        fr_rn: p(-1, { label: "RN: condamnation verbale mais votes contre les résolutions de soutien au Parlement européen", url: "https://rassemblementnational.fr/communiques/resolution-du-parlement-europeen-sur-lukraine-le-rassemblement-national-reitere-son-soutien-a-lukraine", date: "2024-07-17" }),
+        fr_reconquete: p(-1), fr_upr: p(-2), fr_patriotes: p(-2),
+        fr_renaissance: p(2, { label: "Coalition des volontaires: garanties de sécurité et soutien dans la durée", url: "https://www.elysee.fr/", date: "2026-03-13" }),
+        fr_lr: p(2), fr_eelv: p(2, { label: "Les Écologistes: soutien militaire renforcé, fin du pacifisme traditionnel", date: "2024" }),
+        fr_ps: p(2, { label: "PS: résolution pour un soutien indéfectible à l'Ukraine", url: "https://www.parti-socialiste.fr/soutien_indefectible_a_l_ukraine_la_proposition_de_resolution_des_socialistes", date: "2024" }),
+        fr_pcf: p(-1), fr_horizons: p(2), fr_modem: p(2),
+        be_ptb: p(-2, { label: "PTB-PVDA: contre les livraisons d'armes, pour une sortie diplomatique immédiate", url: "https://www.ptb.be/pourquoi-lotan-ne-fait-pas-partie-de-la-solution", date: "2024" }),
+        be_mr: p(1), be_ps: p(1), be_ecolo: p(1),
+        be_engages: p(1), be_nva: p(1), be_vb: p(-1),
+        be_vooruit: p(1), be_openvld: p(1), be_cdv: p(1), be_groen: p(1), be_defi: p(1)
+    },
+    ge6: { // Normalize relations with Russia in time
+        fr_lfi: p(1), fr_rn: p(1, { label: "RN favorable à la levée de certaines sanctions contre la Russie", date: "2022-11" }),
+        fr_reconquete: p(1), fr_upr: p(2), fr_patriotes: p(2),
+        fr_renaissance: p(-1), fr_lr: p(-1),
+        fr_eelv: p(-2, { label: "Les Écologistes: sanctions renforcées et étendues, fin des importations russes", date: "2024" }),
+        fr_ps: p(-1), fr_pcf: p(1),
+        fr_horizons: p(-2, { label: "Édouard Philippe au congrès Horizons: la Russie est une menace", date: "2025-03" }),
+        fr_modem: p(-1),
+        be_ptb: p(1), be_mr: p(-1), be_ps: p(-1), be_ecolo: p(-1),
+        be_engages: p(-1), be_nva: p(-1),
+        be_vb: p(1, { label: "Vlaams Belang: scepticisme sur les sanctions dures, liens historiques avec Moscou", date: "2022-11" }),
+        be_vooruit: p(-1), be_openvld: p(-1), be_cdv: p(-1), be_groen: p(-1), be_defi: p(-1)
+    },
+    ge7: { // Priority support to Israel in the Israeli-Palestinian conflict
+        fr_lfi: p(-2, { label: "LFI: adhésion officielle à la campagne BDS", url: "https://lafranceinsoumise.fr/2024/12/03/face-a-la-colonisation-a-lapartheid-et-au-genocide-a-gaza-la-france-insoumise-adhere-officiellement-a-la-campagne-de-bds/", date: "2024-12-03" }),
+        fr_rn: p(2, { label: "RN: opposition à la reconnaissance de la Palestine, soutien affirmé à Israël", date: "2024-2025" }),
+        fr_reconquete: p(2), fr_upr: p(-1), fr_patriotes: p(0),
+        fr_renaissance: p(0, { label: "Reconnaissance de l'État de Palestine par la France à l'ONU, ligne des deux États", date: "2025-09-22" }),
+        fr_lr: p(1), fr_eelv: p(-2, { label: "Les Écologistes: embargo sur les armes, légitimité du mouvement BDS (conseil fédéral)", date: "2025-06-15" }),
+        fr_ps: p(-1), fr_pcf: p(-2, { label: "PCF: reconnaissance immédiate de l'État palestinien, déclaration commune avec l'OLP", date: "2024-06" }),
+        fr_horizons: p(1), fr_modem: p(0),
+        be_ptb: p(-2), be_mr: p(2, { label: "Ligne Bouchez: opposition aux sanctions et à la reconnaissance de la Palestine", date: "2025-03" }),
+        be_ps: p(-1, { label: "PS: pression pour la reconnaissance de la Palestine", date: "2025" }),
+        be_ecolo: p(-1), be_engages: p(-1, { label: "Les Engagés (Prévot): reconnaissance de la Palestine et sanctions contre Israël", date: "2025-09-02" }),
+        be_nva: p(1), be_vb: p(1),
+        be_vooruit: p(-1), be_openvld: p(1), be_cdv: p(-1), be_groen: p(-1), be_defi: p(0)
+    },
+
     // --- SOCIETY ---
     so1: { // Expansion of individual societal rights
         fr_lfi: p(2), fr_rn: p(-1), fr_reconquete: p(-2), fr_upr: p(0), fr_patriotes: p(-1),

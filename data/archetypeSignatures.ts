@@ -88,17 +88,17 @@ export const ARCHETYPE_SIGNATURES: DimensionSignatures[] = [
         // ge3 immigration as an opportunity | ge4 military intervention abroad
         dimension: "geopolitics",
         signatures: {
-            [GeopoliticsArchetype.GaullisteSouverainiste]: { ge1: 2, ge2: -2, ge3: 0, ge4: 1 },
-            [GeopoliticsArchetype.AtlantisteLiberal]: { ge1: -1, ge2: 2, ge3: 1, ge4: 1 },
-            [GeopoliticsArchetype.EurasiatisteContinental]: { ge1: 1, ge2: -2, ge3: -1, ge4: -1 },
-            [GeopoliticsArchetype.NonInterventionnisteIsolationniste]: { ge1: 1, ge2: -1, ge3: 0, ge4: -2 },
-            [GeopoliticsArchetype.InterventionnisteNeoconservateur]: { ge1: -1, ge2: 2, ge3: 0, ge4: 2 },
-            [GeopoliticsArchetype.MultilateralisteOnusien]: { ge1: -1, ge2: 0, ge3: 1, ge4: 0 },
-            [GeopoliticsArchetype.InternationalisteTiersMondiste]: { ge1: 0, ge2: -2, ge3: 2, ge4: -1 },
-            [GeopoliticsArchetype.DecolonialPostOccidental]: { ge1: -1, ge2: -2, ge3: 2, ge4: -2 },
-            [GeopoliticsArchetype.CivilisationnisteCulturaliste]: { ge1: 1, ge2: 1, ge3: -2, ge4: 0 },
-            [GeopoliticsArchetype.MondialisteCosmopolite]: { ge1: -2, ge2: 1, ge3: 2, ge4: 0 },
-            [GeopoliticsArchetype.SouverainisteProtectionniste]: { ge1: 2, ge2: -1, ge3: -1, ge4: -1 }
+            [GeopoliticsArchetype.GaullisteSouverainiste]: { ge1: 2, ge2: -2, ge3: 0, ge4: 1, ge5: 0, ge6: 1, ge7: -1 },
+            [GeopoliticsArchetype.AtlantisteLiberal]: { ge1: -1, ge2: 2, ge3: 1, ge4: 1, ge5: 2, ge6: -1, ge7: 1 },
+            [GeopoliticsArchetype.EurasiatisteContinental]: { ge1: 1, ge2: -2, ge3: -1, ge4: -1, ge5: -2, ge6: 2, ge7: 0 },
+            [GeopoliticsArchetype.NonInterventionnisteIsolationniste]: { ge1: 1, ge2: -1, ge3: 0, ge4: -2, ge5: -1, ge6: 1, ge7: 0 },
+            [GeopoliticsArchetype.InterventionnisteNeoconservateur]: { ge1: -1, ge2: 2, ge3: 0, ge4: 2, ge5: 2, ge6: -2, ge7: 2 },
+            [GeopoliticsArchetype.MultilateralisteOnusien]: { ge1: -1, ge2: 0, ge3: 1, ge4: 0, ge5: 1, ge6: 0, ge7: -1 },
+            [GeopoliticsArchetype.InternationalisteTiersMondiste]: { ge1: 0, ge2: -2, ge3: 2, ge4: -1, ge5: -1, ge6: 0, ge7: -2 },
+            [GeopoliticsArchetype.DecolonialPostOccidental]: { ge1: -1, ge2: -2, ge3: 2, ge4: -2, ge5: -1, ge6: 1, ge7: -2 },
+            [GeopoliticsArchetype.CivilisationnisteCulturaliste]: { ge1: 1, ge2: 1, ge3: -2, ge4: 0, ge5: 0, ge6: 0, ge7: 2 },
+            [GeopoliticsArchetype.MondialisteCosmopolite]: { ge1: -2, ge2: 1, ge3: 2, ge4: 0, ge5: 1, ge6: -1, ge7: 0 },
+            [GeopoliticsArchetype.SouverainisteProtectionniste]: { ge1: 2, ge2: -1, ge3: -1, ge4: -1, ge5: -1, ge6: 1, ge7: 0 }
         }
     },
     {

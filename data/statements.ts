@@ -112,6 +112,34 @@ export const STATEMENTS: Statement[] = [
         agreeLabel: "Interventionnisme assumé",
         disagreeLabel: "Non-intervention",
     },
+    // ge5-ge7 added 2026-08-29 (CHANGELOG-DONNEES.md): measured on the coded
+    // positions, the dimension separated RN from LFI by 2 points out of 12
+    // outside immigration, because the cleavages that actually divide them
+    // (Ukraine, Russia, the Middle East) were absent from the corpus.
+    {
+        id: "ge5",
+        scope: "common",
+        dimension: "geopolitics",
+        text: "Mon pays doit poursuivre son soutien militaire à l'Ukraine, même si cela a un coût pour lui.",
+        agreeLabel: "Soutien militaire à l'Ukraine dans la durée",
+        disagreeLabel: "Arrêt ou réduction du soutien militaire",
+    },
+    {
+        id: "ge6",
+        scope: "common",
+        dimension: "geopolitics",
+        text: "À terme, mon pays devra renouer des relations économiques et diplomatiques normales avec la Russie.",
+        agreeLabel: "Normalisation avec la Russie à terme",
+        disagreeLabel: "Endiguement durable de la Russie",
+    },
+    {
+        id: "ge7",
+        scope: "common",
+        dimension: "geopolitics",
+        text: "Dans le conflit israélo-palestinien, mon pays doit soutenir en priorité Israël.",
+        agreeLabel: "Alignement prioritaire sur Israël",
+        disagreeLabel: "Soutien aux Palestiniens ou équidistance",
+    },
 
     // --- IV. SOCIETY ---
     {
