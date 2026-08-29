@@ -269,9 +269,46 @@ function compareOneParty(
 }
 
 /**
+ * Whether the answers really put the leading party ahead of another, or the
+ * gap between their scores is noise.
+ *
+ * Paired, statement by statement, over the statements where both parties are
+ * documented, for the same reason as the family layer: both parties are judged
+ * by the same respondent on the same corpus, so the two scores are not
+ * independent samples. The question is not "how sure are we of each score" but
+ * "how consistently does this respondent side with one party over the other".
+ *
+ * Until 2026-08-29 the group was decided by overlap of the two independent
+ * confidence intervals, and a reader reported the result: 80/76/75/69 all
+ * called "à égalité en tête". Measured that day on seeded random respondents,
+ * the median leading group was all 12 parties, gaps up to 20 points were
+ * called ties, and the group was not even a prefix of the ranking. The paired
+ * rule brings a realistic respondent (a party's positions with 20% of answers
+ * re-rolled) to a median group of 1.
+ */
+function separatedOnSharedStatements(leader: ScoredParty, other: ScoredParty): boolean {
+    const otherAgreements = new Map(other.comparisons.map((c) => [c.statement.id, c.agreement]));
+    const differences: number[] = [];
+    const weights: number[] = [];
+    for (const comparison of leader.comparisons) {
+        const otherAgreement = otherAgreements.get(comparison.statement.id);
+        if (otherAgreement === undefined) continue;
+        differences.push(comparison.agreement - otherAgreement);
+        weights.push(comparison.weight);
+    }
+    const sumWeights = weights.reduce((sum, w) => sum + w, 0);
+    if (sumWeights === 0) return false;
+    const mean = differences.reduce((sum, d, i) => sum + weights[i] * d, 0) / sumWeights;
+    const standardError = standardErrorOfWeightedMean(differences, weights, mean);
+    if (standardError === null) return false;
+    return mean - CONFIDENCE_Z * standardError > 0;
+}
+
+/**
  * Proximity of the respondent to every party they could vote for, best first.
  *
- * O(parties x statements) comparisons, at most 12 x 30 here, plus one sort.
+ * O(parties x statements) comparisons, at most 12 x 30 here, plus one sort and
+ * O(parties x statements) paired separations against the leader.
  */
 export function computePartyMatches(answers: AnswerRecord, options: ScoringOptions): PartyMatch[] {
     const statements = statementsFor(options.country);
@@ -279,9 +316,16 @@ export function computePartyMatches(answers: AnswerRecord, options: ScoringOptio
         .map((party) => compareOneParty(party, answers, statements, options.weights))
         .sort((a, b) => b.proximity - a.proximity);
 
-    // A leader with no answers behind it leads nothing: the group is then every
-    // party, which is the honest reading of "we cannot tell them apart".
-    const leaderLowerBound = scored.length ? scored[0].lowerBound : 0;
+    // A prefix of the ranking, never a filter over it: "à égalité en tête" is
+    // read as "the top of the list", so the group must not skip a rank and
+    // keep a lower one. A leader the answers separate from nobody leads
+    // nothing: the group is then every party, which is the honest reading of
+    // "we cannot tell them apart".
+    const inLeadingGroup = scored.map(() => false);
+    for (let index = 0; index < scored.length; index += 1) {
+        if (index > 0 && separatedOnSharedStatements(scored[0], scored[index])) break;
+        inLeadingGroup[index] = true;
+    }
 
     let rank = 0;
     let previousScore: number | null = null;
@@ -297,7 +341,7 @@ export function computePartyMatches(answers: AnswerRecord, options: ScoringOptio
             lowerBound: entry.lowerBound,
             upperBound: entry.upperBound,
             rank,
-            inLeadingGroup: entry.upperBound >= leaderLowerBound,
+            inLeadingGroup: inLeadingGroup[index],
             directionalScore: entry.directionalScore,
             sameSideCount: entry.sameSideCount,
             oppositeSideCount: entry.oppositeSideCount,

@@ -51,8 +51,11 @@ describe('the results say which families the answers cannot separate', () => {
         const [, ...others] = computeProfile(answers).syntheticProfileFit.leadingGroup;
         render(<ResultsView answers={answers} respondent={RESPONDENT} onRestart={() => {}} />);
 
+        // getAllByText since 2026-08-29: each family of the group is now also
+        // named by its composition card, so appearing more than once is the
+        // feature, not a defect. The invariant stays: named at least once.
         for (const family of others) {
-            expect(screen.getByText(new RegExp(family.title))).toBeTruthy();
+            expect(screen.getAllByText(new RegExp(family.title)).length).toBeGreaterThan(0);
         }
         expect(screen.getByText(/collent autant à vos réponses/)).toBeTruthy();
     });

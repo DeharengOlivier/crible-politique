@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { identityFromShareCode } from '@/lib/badgeCode';
+import { familyCompositionOf } from '@/lib/familyComposition';
 import { DIMENSION_LABELS, DIMENSION_ORDER } from '@/types/positions';
 import { ProfileIcon } from '@/lib/icons';
 import SharedProfileActions from '@/components/SharedProfileActions';
@@ -43,6 +44,9 @@ export default async function SharedProfilePage({ params }: PageProps) {
     const synth = identity.syntheticProfile;
     // Everything these dominant currents do not separate from the family shown.
     const alsoInGroup = identity.leadingGroup.slice(1);
+    // What the shown family is made of: the card must not display a title as if
+    // it came from nowhere while the results page explains its composition.
+    const composition = synth ? familyCompositionOf(synth) : null;
 
     return (
         <div className="min-h-screen bg-[var(--color-bg)]">
@@ -88,6 +92,25 @@ export default async function SharedProfilePage({ params }: PageProps) {
                                     </span>
                                 ))}
                                 . Le titre ci-dessus est la plus proche, pas un verdict.
+                            </p>
+                        )}
+                        {composition && (
+                            <p className="mx-auto mt-3 max-w-xl text-sm text-[var(--color-text-secondary)]">
+                                Cette famille se définit par{' '}
+                                {composition.constrained.map((reading, index) => (
+                                    <span key={reading.dimension}>
+                                        {index > 0 &&
+                                            (index === composition.constrained.length - 1
+                                                ? ' et '
+                                                : ', ')}
+                                        <span className="font-semibold text-[var(--color-text)]">
+                                            {DIMENSION_LABELS[reading.dimension].toLowerCase()}
+                                        </span>{' '}
+                                        ({reading.expected.join(' ou ')})
+                                    </span>
+                                ))}
+                                . Les autres dimensions ci-dessous n&apos;entrent pas dans sa
+                                définition.
                             </p>
                         )}
                     </div>

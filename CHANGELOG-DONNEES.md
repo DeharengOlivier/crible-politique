@@ -11,6 +11,31 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-29 (nuit) - Sorties formulées de l'UE et de l'OTAN + groupe de tête apparié
+
+- **Ajout de 2 énoncés à portée France** (ge8_fr "La France devrait quitter
+  l'Union européenne", ge9_fr "La France devrait quitter l'OTAN, et pas
+  seulement son commandement intégré") et de 24 positions.
+- **Motif**: signalement d'un lecteur. Seuls l'UPR et Les Patriotes ont inscrit
+  la sortie de l'UE à leur programme (et, avec LFI, la sortie de l'OTAN), mais
+  le corpus ne les distinguait pas des partis qui veulent renégocier de
+  l'intérieur: sur "reprendre des compétences à l'UE" (ge1), le RN était codé
+  +2 comme l'UPR. Le +2 des nouveaux énoncés est réservé aux partis dont le
+  programme formule la sortie elle-même; renégocier, désobéir aux traités ou
+  quitter le seul commandement intégré sont codés comme des réponses
+  différentes (-1). Statut "a_verifier" comme le reste du corpus, sources en
+  libellé sur les positions non triviales. Aucune surpondération éditoriale:
+  la séparation vient de l'écart des positions documentées (+2 contre -1/-2).
+- **Portée France uniquement**: aucun parti belge disposant d'un élu ne propose
+  l'une ou l'autre sortie; l'énoncé n'y séparerait rien.
+- **Changement de règle du groupe de tête des partis**: le recouvrement des
+  deux intervalles individuels est remplacé par la comparaison appariée énoncé
+  par énoncé, la même que pour les familles (METHODOLOGY.md §3.1). Mesuré avant
+  correction: 12 partis sur 12 "à égalité en tête" en médiane pour un répondant
+  peu cohérent, écarts jusqu'à 20 points appelés égalité, groupe non préfixe du
+  classement. Après: groupe médian de 1 pour un sympathisant simulé (80% des
+  réponses de son parti). Batterie: __tests__/partyLeadingGroup.test.ts.
+
 ## 2026-08-29 (soir) - La famille affichée devient la plus proche, et le groupe de tête est publié
 
 - **Motif, mesuré**: les 14 familles synthétiques étaient des prédicats booléens

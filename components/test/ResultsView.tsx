@@ -7,10 +7,13 @@ import {
     AnswerRecord,
     DIMENSION_LABELS,
     DIMENSION_ORDER,
+    DimensionKey,
     LIKERT_LABELS,
     Respondent,
     SOURCE_STATUS_LABELS
 } from '@/types/positions';
+import { DEFINITIONS } from '@/data/definitions';
+import FamilyCompositionCard from '@/components/FamilyCompositionCard';
 import { COLLEGE_LABELS, COUNTRY_LABELS } from '@/lib/electoralScope';
 import { rankedForReading, READINGS, READING_LABELS, Reading } from '@/lib/resultsReading';
 import { computeProfile, computePartyMatches, PartyMatch } from '@/lib/scoringEngine';
@@ -110,6 +113,16 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
     const fit = profile.syntheticProfileFit;
     // Everything the answers cannot separate from the family shown above them.
     const alsoInGroup = fit.leadingGroup.slice(1);
+    // The respondent's dominant current per dimension, to lay against what
+    // each family of the leading group expects.
+    const heldCurrents = useMemo(() => {
+        const held: Partial<Record<DimensionKey, string>> = {};
+        for (const dim of DIMENSION_ORDER) {
+            const archetype = profile.dimensionArchetypes[dim];
+            if (archetype) held[dim] = archetype.label;
+        }
+        return held;
+    }, [profile]);
     const leaders = matches.filter((m) => m.inLeadingGroup);
     const rankedMatches = useMemo(() => rankedForReading(matches, reading), [matches, reading]);
     const perimeter =
@@ -206,6 +219,26 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                     </div>
                 )}
 
+                {/* The bridge between the two layers: what each named family is
+                    made of, against the currents this respondent holds. */}
+                {synth && (
+                    <div className="mx-auto max-w-2xl space-y-3 text-left">
+                        <p className="text-sm text-[var(--color-text-secondary)]">
+                            Une famille est une combinaison nommée de quelques courants de votre
+                            boussole (détaillée plus bas): elle ne se prononce que sur les
+                            dimensions qu&apos;elle liste, et ne dit rien des autres.
+                        </p>
+                        {fit.leadingGroup.map((family, index) => (
+                            <FamilyCompositionCard
+                                key={family.id}
+                                family={family}
+                                held={heldCurrents}
+                                open={index === 0}
+                            />
+                        ))}
+                    </div>
+                )}
+
                 {/* Sharing: identity only, never the parties */}
                 <div className="flex flex-wrap justify-center gap-3 pt-1">
                     <button
@@ -273,32 +306,58 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                     {DIMENSION_ORDER.map((dim) => {
                         const archetype = profile.dimensionArchetypes[dim];
                         const tied = profile.dimensionTies[dim] ?? [];
+                        const definitions = DEFINITIONS[dim] as Record<string, string>;
                         return (
-                            <div key={dim} className="rounded-xl border border-[var(--color-border-light)] bg-white p-4">
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
-                                    {DIMENSION_LABELS[dim]}
-                                </p>
-                                <p className="mt-1 text-sm font-semibold text-[var(--color-primary)]">
-                                    {archetype?.label ?? 'Non renseigné'}
-                                </p>
-                                {tied.length > 1 && (
-                                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">
-                                        À égalité avec {tied.filter((l) => l !== archetype?.label).join(', ')}
-                                        {' '}: vos réponses sur cette dimension ne les départagent pas.
+                            <details key={dim} className="rounded-xl border border-[var(--color-border-light)] bg-white p-4">
+                                <summary className="min-h-[44px] cursor-pointer list-none sm:min-h-0">
+                                    <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
+                                        {DIMENSION_LABELS[dim]}
                                     </p>
-                                )}
-                                {archetype && (
-                                    <div className="mt-2 flex items-center gap-2">
-                                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--color-bg-elevated)]">
-                                            <div
-                                                className="h-full rounded-full bg-[var(--color-primary)]"
-                                                style={{ width: `${archetype.score}%` }}
-                                            />
+                                    <p className="mt-1 text-sm font-semibold text-[var(--color-primary)]">
+                                        {archetype?.label ?? 'Non renseigné'}
+                                    </p>
+                                    {tied.length > 1 && (
+                                        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                                            À égalité avec {tied.filter((l) => l !== archetype?.label).join(', ')}
+                                            {' '}: vos réponses sur cette dimension ne les départagent pas.
+                                        </p>
+                                    )}
+                                    {archetype && (
+                                        <div className="mt-2 flex items-center gap-2">
+                                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--color-bg-elevated)]">
+                                                <div
+                                                    className="h-full rounded-full bg-[var(--color-primary)]"
+                                                    style={{ width: `${archetype.score}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-xs text-[var(--color-text-muted)]">{archetype.score}%</span>
                                         </div>
-                                        <span className="text-xs text-[var(--color-text-muted)]">{archetype.score}%</span>
-                                    </div>
-                                )}
-                            </div>
+                                    )}
+                                    <p className="mt-2 text-[10px] font-semibold text-[var(--color-primary)]">
+                                        Comprendre ce courant
+                                    </p>
+                                </summary>
+                                <div className="mt-2 space-y-1.5 border-t border-[var(--color-border-light)] pt-2">
+                                    {archetype && (
+                                        <p className="text-xs leading-relaxed text-[var(--color-text-secondary)]">
+                                            {definitions[archetype.label]}
+                                        </p>
+                                    )}
+                                    {tied
+                                        .filter((label) => label !== archetype?.label)
+                                        .map((label) => (
+                                            <p key={label} className="text-xs leading-relaxed text-[var(--color-text-secondary)]">
+                                                <span className="font-semibold">{label}:</span> {definitions[label]}
+                                            </p>
+                                        ))}
+                                    <Link
+                                        href={`/concepts#${dim}`}
+                                        className="inline-block text-xs font-semibold text-[var(--color-primary)] hover:underline"
+                                    >
+                                        Tous les courants de cette dimension
+                                    </Link>
+                                </div>
+                            </details>
                         );
                     })}
                 </div>
@@ -338,20 +397,22 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                                 <span className="font-semibold">
                                     {leaders.length} partis sont à égalité statistique
                                 </span>{' '}
-                                en tête ({leaders.map((m) => m.party.name).join(', ')}). Leurs intervalles de
-                                confiance se recouvrent&nbsp;: les départager sur ces réponses serait lire du
-                                bruit.
+                                en tête ({leaders.map((m) => m.party.name).join(', ')}). Comparés énoncé
+                                par énoncé sur vos réponses, aucun ne devance l&apos;autre assez
+                                systématiquement&nbsp;: les départager serait lire du bruit, même si
+                                leurs pourcentages diffèrent.
                             </>
                         ) : (
                             <>
                                 <span className="font-semibold">{leaders[0]?.party.name}</span> est seul en
-                                tête&nbsp;: son intervalle ne recouvre celui d&apos;aucun autre parti.
+                                tête&nbsp;: énoncé par énoncé, vos réponses penchent systématiquement de
+                                son côté face à chaque autre parti.
                             </>
                         )}
                     </p>
                     <p className="text-xs text-[var(--color-text-muted)]">
                         {reading === 'proximity'
-                            ? "Lecture par proximité: la distance moyenne entre vos réponses et celles du parti. Elle favorise mécaniquement les partis codés au centre de chaque échelle."
+                            ? "Lecture par proximité: la distance moyenne entre vos réponses et celles du parti. Elle favorise mécaniquement les partis codés au centre de chaque échelle. L'échelle utile va d'environ 40 à 100, pas de 0 à 100: même le pire adversaire d'un répondant parfaitement cohérent reste vers 40, car aucun parti réel n'est à l'opposé exact sur chaque énoncé. Des scores entre 50 et 80 sont donc des écarts réels, pas des quasi-égalités."
                             : "Lecture directionnelle: elle récompense l'accord intense dans le même sens plutôt que la faible distance. Les deux lectures peuvent diverger, et c'est l'information."}
                     </p>
                 </div>

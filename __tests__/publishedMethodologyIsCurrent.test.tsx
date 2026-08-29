@@ -31,7 +31,9 @@ describe('the published methodology describes the engine that is running', () =>
         // The glossary is where a reader goes to find out what the title on
         // their results means. It has to say that several of these names can be
         // true of them at once, or the gallery reads as fourteen boxes.
+        // Wording updated 2026-08-29 when the glossary gained the two-layer
+        // explanation; the claim it asserts is unchanged.
         render(<ConceptsPage />);
-        expect(screen.getByText(/plusieurs de ces familles/)).toBeTruthy();
+        expect(screen.getByText(/Plusieurs familles peuvent coller également/)).toBeTruthy();
     });
 });

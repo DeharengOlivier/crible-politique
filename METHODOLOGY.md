@@ -37,11 +37,15 @@ ici, les deux le sont.
 
 ## 2. Les énoncés
 
-Le corpus compte 30 énoncés communs aux deux pays et 3 propres à chacun, soit
-33 énoncés par répondant, couvrant 7 dimensions: rapport au pouvoir, économie,
+Le corpus compte 30 énoncés communs aux deux pays, 5 propres à la France et 3
+propres à la Belgique, soit 35 énoncés pour un répondant français et 33 pour un
+répondant belge, couvrant 7 dimensions: rapport au pouvoir, économie,
 géopolitique, société, environnement, rapport à la connaissance, morale
 politique. Chaque dimension porte 4 énoncés communs, sauf la géopolitique qui
-en porte 7. La liste intégrale est visible dans l'application et publiée avec
+en porte 7, plus, côté français, deux énoncés sur les sorties formulées de
+l'UE et de l'OTAN: vouloir renégocier de l'intérieur et vouloir sortir sont
+deux réponses documentées différentes, pas deux nuances de la même (ajout du
+29 août 2026, CHANGELOG-DONNEES.md). La liste intégrale est visible dans l'application et publiée avec
 les données.
 
 Le déséquilibre géopolitique est un choix mesuré, pas un accident. Hors
@@ -185,7 +189,25 @@ parti est codé -1, l'accord vaut 1 - |2 - (-1)| / 4 = 0,25. Le score global est
 la moyenne de ces accords. Quiconque relève ses réponses et les positions
 affichées peut refaire le calcul.
 
-### 3.1 L'intervalle de confiance et le groupe de tête
+### 3.1 La plage effective des scores
+
+La formule accord = 1 - |écart| / 4 va de 0 à 100 en théorie, mais pas en
+pratique: un score de 0 exigerait d'être à l'opposé exact (+2 contre -2) sur
+chaque énoncé, et aucun couple de partis réels n'est dans ce cas. Mesuré le
+29 août 2026 sur des répondants reproduisant exactement le codage d'un parti:
+leur pire adversaire score encore entre 34 et 58, plancher médian autour de
+40 dans les deux pays. La plage effective est donc d'environ 40 à 100.
+
+Conséquence de lecture: 53 ne signifie pas "d'accord une fois sur deux" mais
+"presque aussi loin qu'un parti réel peut l'être", et des scores entre 50 et
+80 sont des écarts réels. L'application l'écrit sous le classement. L'échelle
+n'est pas étirée à l'affichage: la méthodologie promet un score recalculable à
+la main, et un score réétalonné ne le serait plus. La lecture directionnelle,
+qui note le fait de militer dans le même sens plutôt que la faible distance,
+s'étale davantage (27 à 84 sur les mêmes répondants) et reste le meilleur
+révélateur des oppositions franches.
+
+### 3.2 L'intervalle de confiance et le groupe de tête
 
 Une proximité est une estimation sur un échantillon d'énoncés, pas une mesure
 exacte. Elle est donc publiée avec son intervalle:
@@ -199,11 +221,24 @@ Avec des poids de saillance, l'erreur-type est celle d'une moyenne pondérée à
 poids de fiabilité; elle se ramène exactement à la formule ci-dessus quand tous
 les poids valent 1.
 
-Un parti appartient au **groupe de tête** si son intervalle recouvre celui du
-premier. Quand ce groupe compte plusieurs partis, l'application le dit et ne
-désigne pas de vainqueur: sur 8 000 répondants simulés cohérents, le premier et
-le deuxième parti se tenaient dans un point d'écart trois fois sur dix. Nommer
-un gagnant unique dans cette situation, c'est lire du bruit.
+Un parti appartient au **groupe de tête** tant que la comparaison **appariée**
+avec le premier ne le sépare pas. Les deux partis sont jugés par la même
+personne sur les mêmes énoncés, leurs deux scores ne sont donc pas des mesures
+indépendantes: pour chaque énoncé où les deux positions sont documentées, on
+calcule la différence d'accord, et le premier ne devance l'autre que si la
+moyenne de ces différences dépasse 1,645 fois son erreur-type. Le groupe est un
+préfixe du classement: il s'arrête au premier parti séparé.
+
+Jusqu'au 29 août 2026, le groupe était décidé par le recouvrement des deux
+intervalles individuels. Mesuré sur des répondants simulés, ce critère laissait
+en médiane les 12 partis du bulletin "à égalité en tête" pour un répondant peu
+cohérent, appelait égalité des écarts allant jusqu'à 20 points, et pouvait
+exclure un parti tout en gardant un parti classé derrière lui. Avec la règle
+appariée, un sympathisant simulé (les positions d'un parti dont 20% des
+réponses sont retirées) obtient un groupe de tête médian de 1. Quand le groupe
+compte plusieurs partis, l'application le dit et ne désigne pas de vainqueur:
+les départager sur ces réponses serait lire du bruit, même si les pourcentages
+affichés diffèrent.
 
 Deux partis à score égal partagent le même rang (1, 2, 2, 4). Le cas existe
 réellement: Ecolo et Groen sont codés à l'identique, et les sources disent que
@@ -221,7 +256,7 @@ quand l'égalité gêne: deux tests le tiennent, l'un exigeant qu'une divergence
 entre partis d'un même collège soit sourcée, l'autre que deux partis identiques
 reçoivent le même score et le même rang.
 
-### 3.2 La double lecture: proximité et directionnelle
+### 3.3 La double lecture: proximité et directionnelle
 
 La proximité récompense mécaniquement un parti codé au centre de chaque
 échelle, parce qu'il minimise la distance moyenne à n'importe qui. C'est
@@ -242,13 +277,13 @@ corrélation y vaut +0,65 et +0,64. Les deux lectures peuvent donc désigner des
 partis différents, et c'est l'information: un premier rang qui ne survit qu'à
 une seule des deux métriques n'en était pas un.
 
-### 3.3 La saillance
+### 3.4 La saillance
 
 Le répondant peut déclarer qu'un énoncé compte double pour lui. La proximité
 devient une moyenne pondérée; à poids égaux le résultat est exactement le
 résultat non pondéré. La formule reste recalculable à la main.
 
-### 3.4 Un chiffre interprétable à côté du pourcentage
+### 3.5 Un chiffre interprétable à côté du pourcentage
 
 "78% de proximité" ne se lit pas facilement. Le détail de chaque parti indique
 donc aussi le nombre d'énoncés où le répondant et le parti sont du même côté et
@@ -470,7 +505,7 @@ pas un sondage.
 
 ## 9. Limites connues
 
-- 33 énoncés ne couvrent pas tout le champ politique.
+- 33 à 35 énoncés ne couvrent pas tout le champ politique.
 - Les positions des partis évoluent; chaque codage référence un programme daté.
   Les 72 positions ajoutées avec les six énoncés propres à un pays sont au
   statut `a_verifier` et attendent le double codage contradictoire. Aucune

@@ -335,6 +335,31 @@ export const PARTY_POSITIONS: PartyPositionsTable = {
         fr_renaissance: p(1), fr_lr: p(2), fr_eelv: p(-1), fr_ps: p(0),
         fr_pcf: p(0), fr_horizons: p(1), fr_modem: p(0)
     },
+    // Added 2026-08-29 (CHANGELOG-DONNEES.md): the formulated exits. +2 is
+    // reserved for parties whose program states the exit itself; wanting to
+    // renegotiate, disobey the treaties or leave only NATO's integrated
+    // command is a different documented answer, not a milder shade of the
+    // same one.
+    ge8_fr: { // France should leave the European Union
+        fr_lfi: p(-1, { label: "L'Avenir en commun: désobéir aux traités, pas de sortie" }),
+        fr_rn: p(-1, { label: "Abandon du Frexit, réforme de l'UE de l'intérieur", date: "2019" }),
+        fr_reconquete: p(-1, { label: "Europe des nations, pas de sortie" }),
+        fr_upr: p(2, { label: "UPR: sortie de l'UE par l'article 50, cœur du programme" }),
+        fr_patriotes: p(2, { label: "Les Patriotes: Frexit par référendum" }),
+        fr_renaissance: p(-2), fr_lr: p(-2), fr_eelv: p(-2), fr_ps: p(-2),
+        fr_pcf: p(-1, { label: "Sortie des traités demandée, pas de l'Union" }),
+        fr_horizons: p(-2), fr_modem: p(-2)
+    },
+    ge9_fr: { // France should leave NATO altogether, not only its integrated command
+        fr_lfi: p(2, { label: "L'Avenir en commun: sortir de l'OTAN" }),
+        fr_rn: p(-1, { label: "Sortie du seul commandement intégré" }),
+        fr_reconquete: p(-1, { label: "Sortie du seul commandement intégré" }),
+        fr_upr: p(2, { label: "UPR: sortie de l'OTAN" }),
+        fr_patriotes: p(2, { label: "Les Patriotes: sortie de l'OTAN" }),
+        fr_renaissance: p(-2), fr_lr: p(-2), fr_eelv: p(-2), fr_ps: p(-2),
+        fr_pcf: p(1, { label: "Sortie du commandement intégré, dissolution des blocs à terme" }),
+        fr_horizons: p(-2), fr_modem: p(-2)
+    },
 
     // --- BELGIUM-SPECIFIC STATEMENTS ---
     pw3_be: { // Further transfer of federal competences to Regions and Communities

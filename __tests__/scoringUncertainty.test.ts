@@ -79,23 +79,25 @@ describe('E2: the interval always contains the point estimate', () => {
   });
 });
 
-describe('E3: the leading group is exactly the parties whose interval overlaps the leader', () => {
+describe('E3: the leading group', () => {
+  // Specification changed 2026-08-29. The group used to be "every party whose
+  // interval overlaps the leader's", and this file asserted that rule; a
+  // reader then showed a ranking of 80/76/75/69 all called "à égalité en
+  // tête". The two scores are paired (same respondent, same statements), so
+  // the group is now decided statement by statement; the full battery lives in
+  // partyLeadingGroup.test.ts. What survives here is what was true of both
+  // rules.
   it('always contains the leader', () => {
     const matches = computePartyMatches(answersLike('be_ecolo', 'BE'), BE);
     expect(matches[0].inLeadingGroup).toBe(true);
   });
 
-  it('includes a party if and only if its interval reaches the leader lower bound', () => {
-    for (const country of ['FR', 'BE'] as const) {
-      for (const party of partiesFor(country)) {
-        const matches = computePartyMatches(answersLike(party.id, country), { country });
-        const leaderLower = matches[0].lowerBound;
-        for (const match of matches) {
-          expect(match.inLeadingGroup, `${country}/${party.id}/${match.party.id}`).toBe(
-            match.upperBound >= leaderLower
-          );
-        }
-      }
+  it('keeps publishing the per-party interval it no longer groups by', () => {
+    // The interval still quantifies how precisely one score is measured, and
+    // the results page still displays it. Only the tie decision left it.
+    for (const match of computePartyMatches(answersLike('fr_ps', 'FR'), FR)) {
+      expect(match.lowerBound).toBeLessThanOrEqual(match.score);
+      expect(match.upperBound).toBeGreaterThanOrEqual(match.score);
     }
   });
 });

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DIMENSIONS, DEFINITIONS } from '@/data/definitions';
 import { SYNTHETIC_PROFILES } from '@/data/syntheticProfiles';
+import { familyCompositionOf } from '@/lib/familyComposition';
 import { ProfileIcon } from '@/lib/icons';
 import PageHeader from '@/components/PageHeader';
 
@@ -64,17 +65,21 @@ export default function ConceptsPage() {
                     Les profils synthétiques
                 </h2>
                 <p className="mb-5 text-sm text-[var(--color-text-secondary)]">
-                    Le profil affiché en haut de vos résultats. Chaque profil a une force et un point
-                    de vigilance, avec la même bienveillance pour tous: un titre doit pouvoir être
-                    revendiqué fièrement par la personne décrite. Ce ne sont pas quatorze cases:
-                    plusieurs de ces familles peuvent coller également à vos réponses, et vos
-                    résultats les nomment toutes plutôt que d&apos;en désigner une seule.
+                    Le profil affiché en haut de vos résultats n&apos;est pas une huitième dimension:
+                    chaque famille est une <strong className="text-[var(--color-text)]">combinaison</strong>{' '}
+                    nommée de un à trois courants ci-dessus, et ne dit rien des autres dimensions. Sa
+                    composition exacte figure sur chaque carte. Plusieurs familles peuvent coller
+                    également à vos réponses: vos résultats les nomment toutes plutôt que d&apos;en
+                    désigner une seule.
                 </p>
                 <div className="grid gap-4 sm:grid-cols-2">
-                    {SYNTHETIC_PROFILES.map((profile) => (
+                    {SYNTHETIC_PROFILES.map((profile) => {
+                        const composition = familyCompositionOf(profile);
+                        return (
                         <div
                             key={profile.id}
-                            className="rounded-2xl border border-[var(--color-border-light)] bg-white p-5"
+                            id={profile.id}
+                            className="scroll-mt-24 rounded-2xl border border-[var(--color-border-light)] bg-white p-5"
                         >
                             <div
                                 className="flex h-11 w-11 items-center justify-center rounded-xl"
@@ -89,8 +94,34 @@ export default function ConceptsPage() {
                             <p className="mt-2 text-sm leading-relaxed text-[var(--color-text-secondary)]">
                                 {profile.description}
                             </p>
+                            <p className="mt-2 text-xs leading-relaxed text-[var(--color-text-secondary)]">
+                                <span className="font-semibold text-emerald-700">Leviers:</span>{' '}
+                                {profile.strategy}
+                            </p>
+                            <p className="mt-1 text-xs leading-relaxed text-[var(--color-text-secondary)]">
+                                <span className="font-semibold text-amber-700">Vigilance:</span>{' '}
+                                {profile.weakness}
+                            </p>
+                            <div className="mt-3 space-y-1 border-t border-[var(--color-border-light)] pt-3">
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
+                                    Composition
+                                </p>
+                                {composition.constrained.map((reading) => (
+                                    <p key={reading.dimension} className="text-xs leading-relaxed text-[var(--color-text-secondary)]">
+                                        <span className="font-semibold text-[var(--color-text)]">
+                                            {DIMENSIONS[reading.dimension].title}:
+                                        </span>{' '}
+                                        {reading.expected.join(' ou ')}
+                                    </p>
+                                ))}
+                                <p className="text-xs leading-relaxed text-[var(--color-text-muted)]">
+                                    Ne dit rien sur:{' '}
+                                    {composition.silent.map((d) => DIMENSIONS[d].title).join(', ')}.
+                                </p>
+                            </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 <div className="mt-10 text-center">

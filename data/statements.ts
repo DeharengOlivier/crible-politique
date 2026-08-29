@@ -304,6 +304,28 @@ export const STATEMENTS: Statement[] = [
         agreeLabel: "Laïcité d'application stricte",
         disagreeLabel: "Laïcité d'accommodement",
     },
+    // Added 2026-08-29: leaving is not reforming. Without these two statements
+    // a party that wrote the exit into its program (UPR, Les Patriotes; LFI for
+    // NATO) was indistinguishable from a party that wants to renegotiate from
+    // inside: on "reprendre des compétences" both camps are coded +2. France
+    // only: no Belgian party with a parliamentary seat proposes either exit,
+    // so the statement would separate nothing there.
+    {
+        id: "ge8_fr",
+        scope: "FR",
+        dimension: "geopolitics",
+        text: "La France devrait quitter l'Union européenne.",
+        agreeLabel: "Sortie de l'UE (Frexit)",
+        disagreeLabel: "Maintien dans l'UE",
+    },
+    {
+        id: "ge9_fr",
+        scope: "FR",
+        dimension: "geopolitics",
+        text: "La France devrait quitter l'OTAN, et pas seulement son commandement intégré.",
+        agreeLabel: "Sortie complète de l'OTAN",
+        disagreeLabel: "Maintien dans l'OTAN",
+    },
 
     // --- IX. BELGIUM-SPECIFIC CLEAVAGES ---
     // The communautaire cleavage structures Belgian politics and has no French
