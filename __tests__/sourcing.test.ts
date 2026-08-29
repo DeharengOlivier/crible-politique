@@ -4,7 +4,6 @@ import { STATEMENTS } from "@/data/statements";
 import { PARTIES } from "@/data/parties";
 import { statementsFor } from "@/lib/electoralScope";
 import { computePartyMatches } from "@/lib/scoringEngine";
-import { rankedForReading } from "@/lib/resultsReading";
 import type { AnswerRecord, Country } from "@/types/positions";
 
 // The sourcing rule the project states about itself, enforced rather than
@@ -69,8 +68,9 @@ describe("sourcing status", () => {
         const belgian = PARTIES.filter((p) => p.country === "BE");
         const answers: AnswerRecord = {};
         for (const statement of belgianStatements) answers[statement.id] = 1;
-        const matches = computePartyMatches(answers, { country: "BE" });
-        const ranked = rankedForReading(matches, "proximity");
+        // The engine returns the ranking itself since 2026-08-29 (night), the
+        // reading selector having been removed: one score, one order, one rank.
+        const ranked = computePartyMatches(answers, { country: "BE" });
 
         for (let i = 0; i < belgian.length; i++) {
             for (let j = i + 1; j < belgian.length; j++) {
@@ -80,10 +80,10 @@ describe("sourcing status", () => {
                     (s) => PARTY_POSITIONS[s.id]?.[a.id]?.value === PARTY_POSITIONS[s.id]?.[b.id]?.value
                 );
                 if (!identical) continue;
-                const rankedA = ranked.find((r) => r.match.party.id === a.id)!;
-                const rankedB = ranked.find((r) => r.match.party.id === b.id)!;
-                expect(rankedA.match.score, `${a.id}/${b.id}`).toBe(rankedB.match.score);
-                expect(rankedA.displayRank, `${a.id}/${b.id}`).toBe(rankedB.displayRank);
+                const rankedA = ranked.find((r) => r.party.id === a.id)!;
+                const rankedB = ranked.find((r) => r.party.id === b.id)!;
+                expect(rankedA.score, `${a.id}/${b.id}`).toBe(rankedB.score);
+                expect(rankedA.rank, `${a.id}/${b.id}`).toBe(rankedB.rank);
             }
         }
     });

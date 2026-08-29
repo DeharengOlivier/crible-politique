@@ -1,22 +1,16 @@
 'use client';
 
 import type { DimensionKey } from '@/types/positions';
-import { DIMENSION_LABELS } from '@/types/positions';
+import { SOURCE_STATUS_LABELS } from '@/types/positions';
 import type { PoliticalParty } from '@/types/archetypes';
-import { SALIENCE_THEME_LABELS } from '@/data/partySalience';
-import { fightInPriorities, topDeclaredFights } from '@/lib/partyFights';
+import { fightInPriorities, fightsFor } from '@/lib/partyFights';
 
-// The other half of "Vos combats prioritaires": what each party itself fights
-// for. Salience is direction-neutral, so this panel never says which side a
-// party takes, only how central a theme is in its own public stance. Measured
-// values come from CHES 2024; the two parties CHES does not cover show their
-// program's declared fight, marked as a documented estimate.
-
-const CHES_URL = 'https://www.chesdata.eu/2024-chapel-hill-expert-survey-ches';
-
-function frenchValue(value: number): string {
-    return value.toLocaleString('fr-FR', { maximumFractionDigits: 2 });
-}
+// The other half of "Vos combats prioritaires": what each party says it fights
+// for, read in its own programme and linked to it. A declared fight is not a
+// position: it says what a party talks about, not which side it takes, and it
+// never enters the score. Every party is shown the same way, from the same
+// kind of document, which is the whole point of having replaced an expert
+// panel that covered only twenty-two of them.
 
 interface PartyFightsPanelProps {
     parties: PoliticalParty[];
@@ -36,25 +30,16 @@ export default function PartyFightsPanel({ parties, priorities }: PartyFightsPan
                 </span>
             </summary>
             <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-                Pour chaque parti, les trois thèmes les plus centraux de son discours public,
-                mesurés par le panel d&apos;experts{' '}
-                <a
-                    href={CHES_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline"
-                >
-                    CHES 2024
-                </a>{' '}
-                (saillance de 0 à 10). La saillance dit ce dont un parti parle, pas le camp
-                qu&apos;il défend. Quand vous nommez vos combats ci-dessus, les thèmes qui y
-                tombent sont marqués.
+                Pour chaque parti, ce qu&apos;il met lui-même en avant, dans l&apos;ordre où son
+                programme le présente, avec le document en lien pour vérifier. Un combat déclaré dit
+                de quoi un parti parle, jamais quel camp il défend, et n&apos;entre pas dans le
+                calcul des scores. Quand vous nommez vos combats plus haut, ceux qui tombent dans
+                les mêmes dimensions sont marqués.
             </p>
             <div className="mt-3 space-y-2">
                 {parties.map((party) => {
-                    const fights = topDeclaredFights(party.id);
-                    if (fights.length === 0) return null;
-                    const estimated = fights[0].source === 'Estimation documentée';
+                    const entry = fightsFor(party.id);
+                    if (entry === null) return null;
                     return (
                         <div
                             key={party.id}
@@ -65,47 +50,69 @@ export default function PartyFightsPanel({ parties, priorities }: PartyFightsPan
                                 <span className="text-sm font-medium text-[var(--color-text)]">
                                     {party.name}
                                 </span>
-                                {estimated && (
-                                    <span className="rounded border border-amber-400 px-1.5 py-0.5 text-[10px] text-amber-600">
-                                        Estimation documentée
-                                    </span>
-                                )}
+                                <span className="rounded border border-[var(--color-border)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)]">
+                                    {SOURCE_STATUS_LABELS[entry.status]}
+                                </span>
                             </div>
-                            <div className="mt-1.5 flex flex-wrap gap-1.5">
-                                {fights.map((fight) => (
-                                    <span
-                                        key={fight.theme}
-                                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${
-                                            fightInPriorities(fight.theme, priorities)
-                                                ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
-                                                : 'border-[var(--color-border-light)] text-[var(--color-text-secondary)]'
-                                        }`}
-                                    >
-                                        <span>
-                                            {fight.detail ?? SALIENCE_THEME_LABELS[fight.theme]}
-                                        </span>
-                                        {fight.value !== null && (
-                                            <span className="font-semibold tabular-nums">
-                                                {frenchValue(fight.value)}/10
+                            <ul className="mt-2 space-y-2">
+                                {entry.fights.map((fight) => {
+                                    const named = fightInPriorities(fight, priorities);
+                                    return (
+                                        <li
+                                            key={fight.theme}
+                                            className={`rounded-lg border px-3 py-2 text-xs ${
+                                                named
+                                                    ? 'border-emerald-500 bg-emerald-50'
+                                                    : 'border-[var(--color-border-light)]'
+                                            }`}
+                                        >
+                                            <span className="flex flex-wrap items-center gap-2">
+                                                <span className="text-sm font-semibold text-[var(--color-text)]">
+                                                    {fight.theme}
+                                                </span>
+                                                {named && (
+                                                    <span className="rounded border border-emerald-500 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">
+                                                        dans vos priorités
+                                                    </span>
+                                                )}
+                                                {fight.dimensions.length === 0 && (
+                                                    <span className="rounded border border-[var(--color-border)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-muted)]">
+                                                        hors questionnaire
+                                                    </span>
+                                                )}
                                             </span>
-                                        )}
-                                        {fightInPriorities(fight.theme, priorities) && (
-                                            <span className="font-semibold">
-                                                dans vos priorités
-                                            </span>
-                                        )}
-                                    </span>
-                                ))}
-                            </div>
+                                            <p className="mt-1 text-[var(--color-text-secondary)]">
+                                                {fight.claim}
+                                            </p>
+                                            {fight.quote !== undefined && (
+                                                <p className="mt-1 border-l-2 border-[var(--color-border)] pl-2 italic text-[var(--color-text-muted)]">
+                                                    «&nbsp;{fight.quote}&nbsp;»
+                                                </p>
+                                            )}
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                            <p className="mt-2 text-[11px] text-[var(--color-text-muted)]">
+                                Source&nbsp;:{' '}
+                                <a
+                                    href={entry.source.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline"
+                                >
+                                    {entry.source.label}
+                                </a>{' '}
+                                ({entry.source.year})
+                            </p>
                         </div>
                     );
                 })}
             </div>
             <p className="mt-3 text-xs text-[var(--color-text-muted)]">
-                Limite dite clairement&nbsp;: le CHES ne mesure aucune saillance pour les
-                dimensions {DIMENSION_LABELS.knowledge} et {DIMENSION_LABELS.moral}. Un combat
-                nommé dans ces deux dimensions ne peut donc marquer aucun thème ici, sans que
-                cela dise quoi que ce soit des partis.
+                Limite dite clairement&nbsp;: un combat marqué «&nbsp;hors questionnaire&nbsp;» est
+                un sujet que le parti porte et sur lequel aucun des énoncés ne vous a interrogé. Il
+                ne peut donc jamais rejoindre vos priorités, et cela ne dit rien du parti.
             </p>
         </details>
     );

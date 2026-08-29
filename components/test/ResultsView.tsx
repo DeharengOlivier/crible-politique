@@ -15,7 +15,6 @@ import {
 import { DEFINITIONS } from '@/data/definitions';
 import FamilyCompositionCard from '@/components/FamilyCompositionCard';
 import { COLLEGE_LABELS, COUNTRY_LABELS } from '@/lib/electoralScope';
-import { rankedForReading, READINGS, READING_LABELS, Reading } from '@/lib/resultsReading';
 import { computeProfile, computePartyMatches, PartyMatch } from '@/lib/scoringEngine';
 import { MAX_PRIORITY_DIMENSIONS, weightsForPriorities } from '@/lib/priorityWeights';
 import { encodeAnswers } from '@/lib/profileCode';
@@ -53,7 +52,7 @@ function PartyDetail({ match }: { match: PartyMatch }) {
             </p>
             <p className="text-xs text-[var(--color-text-muted)]">
                 Proximité {match.score}%, intervalle de confiance à 90% de {match.lowerBound} à{' '}
-                {match.upperBound}%. Lecture directionnelle {match.directionalScore}%.
+                {match.upperBound}%.
                 {match.party.program?.label ? ` Référence: ${match.party.program.label}.` : ''}
             </p>
             {agreements.length > 0 && (
@@ -122,7 +121,6 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
         );
     const [activeModule, setActiveModule] = useState<'mft' | 'impact' | null>(null);
     const [copied, setCopied] = useState<string | null>(null);
-    const [reading, setReading] = useState<Reading>('proximity');
     // Pending duo invitation (arrived via a /compare#a=... link). Read once
     // on initialization; this component only renders client-side.
     const [compareRef] = useState<string | null>(() => {
@@ -147,8 +145,13 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
         }
         return held;
     }, [profile]);
-    const leaders = matches.filter((m) => m.inLeadingGroup);
-    const rankedMatches = useMemo(() => rankedForReading(matches, reading), [matches, reading]);
+    // Two different things, and conflating them was a defect (2026-08-29):
+    // `undecided` is what the statistics say (the answers do not separate these
+    // parties, whatever their percentages), `tiedAtTop` is what the reader
+    // sees (the very same percentage). Only the second one earns a badge.
+    const undecided = matches.filter((m) => m.inLeadingGroup);
+    const leaderScore = matches[0]?.score ?? 0;
+    const tiedAtTop = matches.filter((m) => m.score === leaderScore);
     const perimeter =
         respondent.college === undefined
             ? COUNTRY_LABELS[respondent.country]
@@ -391,26 +394,10 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
 
             {/* LAYER 3: PARTIES EXPLAINED */}
             <section>
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="mb-3">
                     <h3 className="font-[family-name:var(--font-heading)] text-xl font-semibold text-[var(--color-primary)]">
                         Proximité avec les partis
                     </h3>
-                    <div className="flex gap-1 rounded-lg border border-[var(--color-border-light)] bg-white p-1 text-xs font-semibold">
-                        {READINGS.map((key) => (
-                            <button
-                                key={key}
-                                type="button"
-                                onClick={() => setReading(key)}
-                                className={`min-h-[44px] rounded-md px-3 py-1.5 transition-colors sm:min-h-0 ${
-                                    reading === key
-                                        ? 'bg-[var(--color-primary)] text-white'
-                                        : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'
-                                }`}
-                            >
-                                {READING_LABELS[key]}
-                            </button>
-                        ))}
-                    </div>
                 </div>
 
                 {/* The reader's fights: what counts double, chosen here, said here. */}
@@ -461,7 +448,7 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
 
                 {/* The mirror of the block above: what the parties themselves fight for. */}
                 <PartyFightsPanel
-                    parties={rankedMatches.map(({ match }) => match.party)}
+                    parties={matches.map((match) => match.party)}
                     priorities={priorities}
                 />
 
@@ -470,28 +457,40 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                     <p className="text-[var(--color-text)]">
                         Périmètre&nbsp;: <span className="font-semibold">{perimeter}</span>, {matches.length}{' '}
                         partis.{' '}
-                        {leaders.length > 1 ? (
+                        {undecided.length > 1 ? (
                             <>
+                                Vos réponses{' '}
                                 <span className="font-semibold">
-                                    {leaders.length} partis sont à égalité statistique
+                                    ne départagent pas les {undecided.length} premiers
                                 </span>{' '}
-                                en tête ({leaders.map((m) => m.party.name).join(', ')}). Comparés énoncé
-                                par énoncé sur vos réponses, aucun ne devance l&apos;autre assez
-                                systématiquement&nbsp;: les départager serait lire du bruit, même si
-                                leurs pourcentages diffèrent.
+                                ({undecided.map((m) => m.party.name).join(', ')}). Comparés énoncé par
+                                énoncé, aucun ne devance l&apos;autre assez systématiquement&nbsp;: les
+                                classer entre eux serait lire du bruit, même si leurs pourcentages
+                                diffèrent.
                             </>
                         ) : (
                             <>
-                                <span className="font-semibold">{leaders[0]?.party.name}</span> est seul en
+                                <span className="font-semibold">{matches[0]?.party.name}</span> est seul en
                                 tête&nbsp;: énoncé par énoncé, vos réponses penchent systématiquement de
                                 son côté face à chaque autre parti.
                             </>
                         )}
+                        {tiedAtTop.length > 1 && (
+                            <>
+                                {' '}
+                                {tiedAtTop.length} partis affichent{' '}
+                                <span className="font-semibold">exactement le même score</span> (
+                                {leaderScore}%)&nbsp;: {tiedAtTop.map((m) => m.party.name).join(', ')}.
+                            </>
+                        )}
                     </p>
                     <p className="text-xs text-[var(--color-text-muted)]">
-                        {reading === 'proximity'
-                            ? "Lecture par proximité: la distance moyenne entre vos réponses et celles du parti. Elle favorise mécaniquement les partis codés au centre de chaque échelle. L'échelle utile va d'environ 40 à 100, pas de 0 à 100: même le pire adversaire d'un répondant parfaitement cohérent reste vers 40, car aucun parti réel n'est à l'opposé exact sur chaque énoncé. Des scores entre 50 et 80 sont donc des écarts réels, pas des quasi-égalités."
-                            : "Lecture directionnelle: elle récompense l'accord intense dans le même sens plutôt que la faible distance. Les deux lectures peuvent diverger, et c'est l'information."}
+                        Le score est la distance moyenne entre vos réponses et celles du parti, énoncé
+                        par énoncé. Il favorise mécaniquement les partis codés au centre de chaque
+                        échelle. L&apos;échelle utile va d&apos;environ 40 à 100, pas de 0 à 100&nbsp;:
+                        même le pire adversaire d&apos;un répondant parfaitement cohérent reste vers 40,
+                        car aucun parti réel n&apos;est à l&apos;opposé exact sur chaque énoncé. Des
+                        scores entre 50 et 80 sont donc des écarts réels, pas des quasi-égalités.
                     </p>
                 </div>
 
@@ -500,7 +499,7 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                     pourquoi, énoncé par énoncé, avec le statut de sourçage de chaque position.
                 </p>
                 <div className="space-y-2">
-                    {rankedMatches.map(({ match, displayRank }) => (
+                    {matches.map((match) => (
                         <details
                             key={match.party.id}
                             className="group rounded-xl border border-[var(--color-border-light)] bg-white px-4 py-3"
@@ -508,12 +507,12 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                             <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
                                 <span className="flex min-w-0 items-center gap-2">
                                     <span className="w-6 shrink-0 text-right text-xs font-semibold tabular-nums text-[var(--color-text-muted)]">
-                                        {displayRank}
+                                        {match.rank}
                                     </span>
                                     <span className="truncate text-sm font-medium text-[var(--color-text)]">
                                         {match.party.name}
                                     </span>
-                                    {match.inLeadingGroup && leaders.length > 1 && (
+                                    {tiedAtTop.length > 1 && match.score === leaderScore && (
                                         <span className="rounded border border-[var(--color-primary)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-primary)]">
                                             à égalité en tête
                                         </span>
@@ -532,16 +531,10 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                                         />
                                     </span>
                                     <span className="text-right font-[family-name:var(--font-heading)] font-bold text-[var(--color-primary)]">
-                                        {reading === 'proximity' ? (
-                                            <>
-                                                {match.score}%
-                                                <span className="ml-1 block text-[10px] font-normal tabular-nums text-[var(--color-text-muted)] sm:inline sm:ml-2">
-                                                    {match.lowerBound}-{match.upperBound}
-                                                </span>
-                                            </>
-                                        ) : (
-                                            <>{match.directionalScore}%</>
-                                        )}
+                                        {match.score}%
+                                        <span className="ml-1 block text-[10px] font-normal tabular-nums text-[var(--color-text-muted)] sm:inline sm:ml-2">
+                                            {match.lowerBound}-{match.upperBound}
+                                        </span>
                                     </span>
                                 </span>
                             </summary>

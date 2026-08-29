@@ -44,10 +44,14 @@ describe('the published methodology describes the engine that is running', () =>
         expect(screen.getByText(/décrit les sept dimensions/)).toBeTruthy();
     });
 
-    it('names the declared party fights and their source', () => {
+    it('names the declared party fights and where they are read', () => {
         render(<MethodologyPage />);
         expect(screen.getByText(/combats déclarés/i)).toBeTruthy();
-        expect(screen.getAllByText(/saillance/i).length).toBeGreaterThan(0);
+        // Wording updated the same night: the fights stopped being CHES
+        // salience scores and became programme readings, so the page must not
+        // keep promising a measurement that no longer exists.
+        expect(screen.queryAllByText(/saillance/i)).toHaveLength(0);
+        expect(screen.getByText(/dans son propre programme/)).toBeTruthy();
     });
 
     it('says the same thing in the glossary that defines a family', () => {

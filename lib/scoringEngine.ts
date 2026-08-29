@@ -31,7 +31,11 @@ import { partiesFor, statementsFor } from "@/lib/electoralScope";
 //     confidence interval, and two parties whose intervals overlap are tied,
 //     not first and second;
 //   - the proximity model rewards a party coded near the middle of every scale,
-//     so a directional reading is published beside it;
+//     which is said on the page rather than corrected by a second metric: a
+//     directional reading was published beside it until 2026-08-29, and it made
+//     a party more radical than the respondent beat the party that says exactly
+//     what they say. The same-side / opposite-side counts carry the directional
+//     intuition without that trap;
 //   - a respondent is only compared against parties they could vote for.
 //
 // No randomness, no clock, no I/O: same answers and same options always produce
@@ -56,14 +60,12 @@ export interface PartyMatch {
     upperBound: number;
     /** Competition rank, 1-based. Equal scores share a rank: 1, 2, 2, 4. */
     rank: number;
-    /** Whether this party's interval reaches the leader's, i.e. it may be first. */
-    inLeadingGroup: boolean;
     /**
-     * Directional reading, 0..100, 50 meaning orthogonal. Rewards agreeing
-     * intensely on the same side rather than sitting at a short distance, which
-     * is what a proximity score cannot distinguish.
+     * Whether the answers fail to separate this party from the leader, statement
+     * by statement. It is not "the same percentage": the page says the two
+     * things separately, because a reader reads a badge, not a test.
      */
-    directionalScore: number;
+    inLeadingGroup: boolean;
     /** Statements where user and party are on the same side, neutrality excluded. */
     sameSideCount: number;
     oppositeSideCount: number;
@@ -183,7 +185,6 @@ interface ScoredParty {
     proximity: number;
     lowerBound: number;
     upperBound: number;
-    directionalScore: number;
     sameSideCount: number;
     oppositeSideCount: number;
     dimensionScores: Partial<Record<DimensionKey, number>>;
@@ -227,13 +228,6 @@ function compareOneParty(
     );
     const margin = standardError === null ? Infinity : CONFIDENCE_Z * standardError;
 
-    // Directional reading: the sum of signed products, normalised by the
-    // strongest possible agreement. 0.5 is orthogonality, not indifference.
-    const directional = sumWeights
-        ? comparisons.reduce((sum, c) => sum + c.weight * c.userValue * c.partyValue, 0) /
-          (MAX_DISTANCE * sumWeights)
-        : 0;
-
     const sameSideCount = comparisons.filter(
         (c) => c.userValue !== 0 && c.partyValue !== 0 && Math.sign(c.userValue) === Math.sign(c.partyValue)
     ).length;
@@ -261,7 +255,6 @@ function compareOneParty(
         proximity,
         lowerBound: asPercentage(proximity - margin),
         upperBound: asPercentage(proximity + margin),
-        directionalScore: asPercentage(0.5 + directional / 2),
         sameSideCount,
         oppositeSideCount,
         dimensionScores
@@ -342,7 +335,6 @@ export function computePartyMatches(answers: AnswerRecord, options: ScoringOptio
             upperBound: entry.upperBound,
             rank,
             inLeadingGroup: inLeadingGroup[index],
-            directionalScore: entry.directionalScore,
             sameSideCount: entry.sameSideCount,
             oppositeSideCount: entry.oppositeSideCount,
             comparisons: entry.comparisons,

@@ -1,29 +1,17 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import Home from "@/app/page";
 import { computeProfile } from "@/lib/scoringEngine";
-import { encryptProfile } from "@/lib/profileVault";
 import { statementsFor } from "@/lib/electoralScope";
-import { TEST_SESSION_STORAGE_KEY, loadSavedSession } from "@/lib/testSession";
+import { TEST_SESSION_STORAGE_KEY } from "@/lib/testSession";
 import type { AnswerRecord, LikertValue } from "@/types/positions";
 
 // Requested 2026-08-29 (night): the home page recognises a returning
-// respondent. Signing in with Google lives on the landing page itself, and a
-// reader with a profile (restored from the vault, or simply saved on this
-// device by a previous test) is greeted with their own family and a way back
-// to their results, instead of the generic funnel.
-
-vi.mock("@/components/profile/GoogleSignInButton", () => ({
-    default: ({ onIdToken }: { onIdToken: (t: string) => void }) => (
-        <button type="button" onClick={() => onIdToken("fake-google-token")}>
-            FAKE_GOOGLE
-        </button>
-    )
-}));
-
-const KEY_BYTES = new Uint8Array(32).fill(4);
-const KEY_B64 = btoa(String.fromCharCode(...KEY_BYTES));
+// respondent, in one line and without a card. Signing in lives in the account
+// badge in the page corner (see accountBadge.test.tsx); what is left here is
+// the greeting itself, which must name the reader's own family and lead back
+// to their results rather than to the generic funnel.
 
 function deterministicAnswers(): AnswerRecord {
     const values: LikertValue[] = [-2, -1, 0, 1, 2];
@@ -34,33 +22,6 @@ function deterministicAnswers(): AnswerRecord {
         answers[id] = values[seed % 5];
     }
     return answers;
-}
-
-/** A server holding one sealed profile, reachable through the real crypto. */
-async function fakeServerWithVault(answers: AnswerRecord) {
-    const sealed = await encryptProfile(
-        { country: "FR", college: null, answers, savedAt: "2026-08-29T12:00:00.000Z" },
-        { raw: KEY_BYTES }
-    );
-    vi.stubGlobal(
-        "fetch",
-        vi.fn(async (url: string) => {
-            const target = String(url);
-            if (target.endsWith("/vault/key")) {
-                return new Response(JSON.stringify({ key: KEY_B64 }), {
-                    status: 200,
-                    headers: { "content-type": "application/json" }
-                });
-            }
-            if (target.endsWith("/vault")) {
-                return new Response(JSON.stringify(sealed), {
-                    status: 200,
-                    headers: { "content-type": "application/json" }
-                });
-            }
-            return new Response(null, { status: 404 });
-        })
-    );
 }
 
 beforeEach(() => {
@@ -105,56 +66,15 @@ describe("the home page and a respondent who already has a profile", () => {
         expect(screen.getByRole("link", { name: /Reprendre mon test/ })).toBeTruthy();
     });
 
-    it("signs in from the landing page and lands on the saved profile", async () => {
-        const answers = deterministicAnswers();
-        const family = computeProfile(answers).syntheticProfileFit.family!;
-        await fakeServerWithVault(answers);
-        render(<Home />);
-
-        fireEvent.click(screen.getByText("FAKE_GOOGLE"));
-
-        // "Bon retour" only exists in the identity block, never in the profile
-        // gallery below it, which lists every family title: a family-title
-        // match would pass before the restore even ran.
-        await waitFor(() => expect(screen.getByText(/Bon retour/)).toBeTruthy());
-        expect(screen.getAllByText(new RegExp(family.title)).length).toBeGreaterThan(1);
-        const session = loadSavedSession();
-        expect(session?.stage).toBe("results");
-        expect(session?.respondent).toEqual({ country: "FR" });
-    });
-
-    it("says so when the account has no saved profile", async () => {
-        // A valid sign-in against an account that never saved: key answered,
-        // vault 404. The all-500 stub from beforeEach would read as an outage.
-        vi.stubGlobal(
-            "fetch",
-            vi.fn(async (url: string) => {
-                if (String(url).endsWith("/vault/key")) {
-                    return new Response(JSON.stringify({ key: KEY_B64 }), {
-                        status: 200,
-                        headers: { "content-type": "application/json" }
-                    });
-                }
-                return new Response(null, { status: 404 });
-            })
-        );
-        render(<Home />);
-        fireEvent.click(screen.getByText("FAKE_GOOGLE"));
-        await waitFor(() => expect(screen.getByText(/Aucun profil sauvegardé/)).toBeTruthy());
-    });
 });
 
-describe("a deployment without the vault", () => {
-    it("shows no sign-in on the home page, but still greets a local profile", () => {
-        vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "");
-        const answers = deterministicAnswers();
-        localStorage.setItem(
-            TEST_SESSION_STORAGE_KEY,
-            JSON.stringify({ stage: "results", answers, respondent: { country: "FR" } })
-        );
+describe("the home page and a respondent with nothing saved", () => {
+    it("says nothing at all rather than offering a door", () => {
+        // Signing in lives in the account badge since 2026-08-29 (night), and
+        // this block is a greeting, not a funnel: with no session there is
+        // nothing to greet, so it renders nothing.
         render(<Home />);
-
-        expect(screen.queryByText("FAKE_GOOGLE")).toBeNull();
-        expect(screen.getByRole("link", { name: /Revoir mes résultats/ })).toBeTruthy();
+        expect(screen.queryByText(/Bon retour/)).toBeNull();
+        expect(screen.queryByText(/Un test est en cours/)).toBeNull();
     });
 });

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Lexend, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
+import AccountBadge from "@/components/AccountBadge";
 
 const lexend = Lexend({
   variable: "--font-heading",
@@ -66,6 +67,9 @@ export default function RootLayout({
       <body
         className={`${lexend.variable} ${sourceSans.variable} font-[family-name:var(--font-body)] antialiased`}
       >
+        {/* The account corner, on every page that has chrome. It decides for
+            itself to stay off the test page. */}
+        <AccountBadge />
         {children}
         <script
           dangerouslySetInnerHTML={{

@@ -1,57 +1,53 @@
 import type { DimensionKey } from '@/types/positions';
-import type { CHESSource } from '@/data/ches';
-import {
-    PARTY_SALIENCE,
-    SALIENCE_THEMES,
-    SALIENCE_THEME_DIMENSIONS,
-    SalienceTheme
-} from '@/data/partySalience';
+import { PARTY_FIGHTS, PartyFight, PartyFightsEntry } from '@/data/partyFights';
 
-// The declared fights of a party, read for display: the few themes the party
-// itself treats as most important, with their measured salience when CHES
-// covers the party and the program's own words when it does not.
+// Reading the declared fights of a party, and policing how they are sourced.
+//
+// The sourcing rule is the one the project already applies to positions, and
+// it lives here as a function rather than as a promise in a comment: a status
+// "verifie" without a verbatim quote is a defect the suite catches, not an
+// editorial intention.
 
-export const TOP_FIGHTS_COUNT = 3;
-
-export interface DeclaredFight {
-    theme: SalienceTheme;
-    /** CHES salience 0-10, or null when the fight is a documented estimate. */
-    value: number | null;
-    source: CHESSource;
-    /** Clear-text statement, present only on estimated fights. */
-    detail?: string;
+export function fightsFor(partyId: string): PartyFightsEntry | null {
+    return PARTY_FIGHTS[partyId] ?? null;
 }
 
-/**
- * The party's top declared fights, most salient first. Ties break on the
- * codebook order of SALIENCE_THEMES (Array.prototype.sort is stable).
- * O(T log T) with T = 9 themes. Unknown party: empty list, the caller shows
- * nothing rather than crashing a results page.
- */
-export function topDeclaredFights(partyId: string): DeclaredFight[] {
-    const entry = PARTY_SALIENCE[partyId];
-    if (entry === undefined) return [];
-    if (entry.source === 'Estimation documentée') {
-        return entry.declaredFights.map((fight) => ({
-            theme: fight.theme,
-            value: null,
-            source: entry.source,
-            detail: fight.detail
-        }));
-    }
-    return SALIENCE_THEMES.map((theme) => ({
-        theme,
-        value: entry.values[theme],
-        source: entry.source
-    }))
-        .sort((a, b) => b.value - a.value)
-        .slice(0, TOP_FIGHTS_COUNT);
-}
-
-/** Whether a fight's theme falls inside one of the reader's named dimensions. */
+/** Whether a fight touches one of the dimensions the reader named. O(d). */
 export function fightInPriorities(
-    theme: SalienceTheme,
+    fight: Pick<PartyFight, 'dimensions'>,
     priorities: readonly DimensionKey[]
 ): boolean {
-    return SALIENCE_THEME_DIMENSIONS[theme].some((dimension) => priorities.includes(dimension));
+    return fight.dimensions.some((dimension) => priorities.includes(dimension));
 }
+
+/** Shortest claim that a reader can actually check against the source. */
+const MIN_CLAIM_LENGTH = 20;
+
+/**
+ * Everything wrong with how an entry is sourced, as a list of reasons.
+ *
+ * O(fights). An empty list is the only acceptable result for shipped data.
+ */
+export function fightsSourcingIssues(entry: PartyFightsEntry): string[] {
+    const issues: string[] = [];
+    if (!entry.source.url.startsWith('https://')) issues.push('source.url must be an https URL');
+    if (entry.source.label.trim().length === 0) {
+        issues.push('source.label must say which document was read');
+    }
+    if (!/^\d{4}$/.test(entry.source.year)) issues.push('source.year must be a four-digit year');
+    if (entry.status === 'non_documente') {
+        issues.push('status "non_documente" has no meaning here');
+    }
+    if (entry.status === 'verifie' && entry.fights.some((fight) => fight.quote === undefined)) {
+        issues.push('status "verifie" requires a quote on every fight');
+    }
+    for (const fight of entry.fights) {
+        if (fight.theme.trim().length === 0) issues.push('a fight must carry a theme');
+        if (fight.claim.trim().length < MIN_CLAIM_LENGTH) {
+            issues.push(`claim too short to be checkable: "${fight.claim}"`);
+        }
+    }
+    return issues;
+}
+
+export type { PartyFight, PartyFightsEntry };

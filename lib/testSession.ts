@@ -61,10 +61,42 @@ export function loadSavedSession(): SavedSession | null {
     }
 }
 
+const listeners = new Set<() => void>();
+
+/**
+ * Subscribes to session writes, in this tab and in the others.
+ *
+ * A component reading the session with useSyncExternalStore used to subscribe
+ * to nothing, which was true while the only writer lived inside it. Since the
+ * account badge restores a vault profile from the page header, the home
+ * greeting has to hear a write it did not make.
+ */
+export function subscribeToSession(listener: () => void): () => void {
+    listeners.add(listener);
+    const onStorage = (event: StorageEvent) => {
+        if (event.key === null || event.key === TEST_SESSION_STORAGE_KEY) listener();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => {
+        listeners.delete(listener);
+        window.removeEventListener("storage", onStorage);
+    };
+}
+
+/** The raw stored string: the snapshot identity useSyncExternalStore needs. */
+export function rawStoredSession(): string | null {
+    try {
+        return localStorage.getItem(TEST_SESSION_STORAGE_KEY);
+    } catch {
+        return null;
+    }
+}
+
 export function saveSession(state: SavedSession): void {
     try {
         localStorage.setItem(TEST_SESSION_STORAGE_KEY, JSON.stringify(state));
     } catch {
         // storage unavailable: the app stays functional
     }
+    for (const listener of listeners) listener();
 }

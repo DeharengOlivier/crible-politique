@@ -5,11 +5,11 @@ import ResultsView from '@/components/test/ResultsView';
 import { statementsFor } from '@/lib/electoralScope';
 import type { AnswerRecord } from '@/types/positions';
 
-// "Vos combats prioritaires" only makes sense next to the other half of the
-// comparison: what each party itself fights for. The results page shows the
-// declared fights of every ranked party, sourced (CHES 2024 salience, or a
-// documented estimate for the two parties CHES does not cover), and marks the
-// fights that fall inside the dimensions the reader named.
+// "Vos combats prioritaires" only means something next to the other half of
+// the comparison: what each party itself says it fights for. Every party is
+// shown the same way, from its own programme, with the document linked so a
+// reader can go and check. A fight the questionnaire does not ask about says
+// so instead of being marked.
 
 vi.mock('next/navigation', () => ({
     useRouter: () => ({ push: () => {}, replace: () => {}, refresh: () => {}, back: () => {}, prefetch: () => {} })
@@ -27,31 +27,51 @@ function renderResults() {
     render(<ResultsView answers={neutralAnswers()} respondent={RESPONDENT} onRestart={() => {}} />);
 }
 
+function rowOf(partyName: string): HTMLElement {
+    const row = screen
+        .getByText(partyName, { selector: '[data-fights-row] *' })
+        .closest('[data-fights-row]');
+    expect(row).not.toBeNull();
+    return row as HTMLElement;
+}
+
 afterEach(cleanup);
 
 describe('the declared fights of the parties', () => {
-    it('shows the panel with its source named', () => {
+    it('shows the panel and says where the fights come from', () => {
         renderResults();
         expect(screen.getByText('Les combats déclarés des partis')).toBeTruthy();
-        expect(screen.getAllByText(/CHES 2024/).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(/Codage préliminaire/).length).toBeGreaterThan(0);
     });
 
-    it('gives the RN its measured fights, value included, in French notation', () => {
+    it('gives the RN its own words, with the document linked', () => {
         renderResults();
-        const row = screen.getByText('Rassemblement National', { selector: '[data-fights-row] *' })
-            .closest('[data-fights-row]');
-        expect(row).not.toBeNull();
-        expect(row!.textContent).toContain('Multiculturalisme');
-        expect(row!.textContent).toContain('9,7');
+        const row = rowOf('Rassemblement National');
+        expect(row.textContent).toContain('Immigration');
+        expect(row.textContent).toContain('submersion migratoire');
+        const source = row.querySelector('a');
+        expect(source?.getAttribute('href')).toContain('rassemblementnational.fr');
     });
 
-    it('marks the UPR as estimated and states its declared fight in clear text', () => {
+    it('treats the UPR exactly like the others, with its programme linked', () => {
         renderResults();
-        const row = screen.getByText('Union Populaire Républicaine (UPR)', { selector: '[data-fights-row] *' })
-            .closest('[data-fights-row]');
-        expect(row).not.toBeNull();
-        expect(row!.textContent).toMatch(/[Ee]stimation/);
-        expect(row!.textContent).toMatch(/OTAN/);
+        const row = rowOf('Union Populaire Républicaine (UPR)');
+        expect(row.textContent).toMatch(/OTAN/);
+        expect(row.textContent).not.toMatch(/Estimation/);
+        expect(row.querySelector('a')?.getAttribute('href')).toContain('upr.fr');
+    });
+
+    it('quotes the Patriotes programme on the Frexit being the keystone', () => {
+        renderResults();
+        const row = rowOf('Les Patriotes');
+        expect(row.textContent).toMatch(/Frexit/);
+        expect(row.querySelector('a')?.getAttribute('href')).toContain('les-patriotes.fr');
+    });
+
+    it('shows no expert-panel score any more', () => {
+        renderResults();
+        expect(screen.queryAllByText(/\/10/)).toHaveLength(0);
+        expect(screen.queryAllByText(/saillance/i)).toHaveLength(0);
     });
 
     it('marks the fights that fall inside the dimensions the reader named', () => {
@@ -65,9 +85,18 @@ describe('the declared fights of the parties', () => {
         expect(screen.queryAllByText('dans vos priorités')).toHaveLength(0);
     });
 
-    it('says out loud which dimensions CHES measures no salience for', () => {
-        renderResults();
-        expect(screen.getByText(/Connaissance/, { selector: '[data-fights-panel] p' }).textContent)
-            .toMatch(/Morale politique/);
+    it('says which fights the questionnaire simply does not ask about', () => {
+        render(
+            <ResultsView
+                answers={(() => {
+                    const answers: AnswerRecord = {};
+                    for (const s of statementsFor('BE')) answers[s.id] = 0;
+                    return answers;
+                })()}
+                respondent={{ country: 'BE', college: 'wallonie' }}
+                onRestart={() => {}}
+            />
+        );
+        expect(screen.getAllByText('hors questionnaire').length).toBeGreaterThan(0);
     });
 });

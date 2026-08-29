@@ -104,12 +104,14 @@ score(parti)   = moyenne des accords sur les énoncés où
                         </p>
                         <p>
                             <strong className="text-[var(--color-text)]">Les combats déclarés des
-                            partis</strong>: en miroir, les résultats affichent pour chaque parti les trois
-                            thèmes les plus centraux de son discours public, mesurés par la saillance du
-                            CHES 2024 (échelle 0-10). La saillance dit de quoi un parti parle, jamais quel
-                            camp il défend, et n&apos;entre pas dans le calcul des scores. Les deux partis
-                            hors du panel CHES (UPR, Les Patriotes) affichent le combat déclaré de leur
-                            programme, marqué &quot;Estimation documentée&quot;.
+                            partis</strong>: en miroir, les résultats affichent pour chaque parti deux à
+                            quatre combats qu&apos;il met lui-même en avant, lus dans son propre programme,
+                            dans l&apos;ordre où ce programme les présente, avec le document en lien. Un
+                            combat déclaré dit de quoi un parti parle, jamais quel camp il défend, et
+                            n&apos;entre pas dans le calcul des scores. Tous les partis sont traités de la
+                            même façon, et un combat que les {STATEMENTS.length} énoncés ne posent pas
+                            (le logement, l&apos;école) est marqué &quot;hors questionnaire&quot; plutôt
+                            que rattaché de force à une dimension.
                         </p>
                     </Section>
 

@@ -44,7 +44,17 @@ function loadGsiScript(): Promise<void> {
     return gsiScript;
 }
 
-export default function GoogleSignInButton({ onIdToken }: { onIdToken: (idToken: string) => void }) {
+interface GoogleSignInButtonProps {
+    onIdToken: (idToken: string) => void;
+    /**
+     * "icon" draws Google's own icon-sized button, for the account corner
+     * where a 200-pixel bar would cover the page title on a phone. Google's
+     * branding rules forbid drawing our own, so the size is asked of theirs.
+     */
+    variant?: 'standard' | 'icon';
+}
+
+export default function GoogleSignInButton({ onIdToken, variant = 'standard' }: GoogleSignInButtonProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     // The callback identity changes on every parent render; the ref keeps the
     // one Google holds pointing at the latest without re-initializing.
@@ -64,18 +74,18 @@ export default function GoogleSignInButton({ onIdToken }: { onIdToken: (idToken:
                     client_id: clientId,
                     callback: (response) => onIdTokenRef.current(response.credential)
                 });
-                window.google.accounts.id.renderButton(containerRef.current, {
-                    theme: 'outline',
-                    size: 'large',
-                    text: 'continue_with',
-                    locale: 'fr'
-                });
+                window.google.accounts.id.renderButton(
+                    containerRef.current,
+                    variant === 'icon'
+                        ? { type: 'icon', shape: 'circle', theme: 'outline', size: 'large', locale: 'fr' }
+                        : { theme: 'outline', size: 'large', text: 'continue_with', locale: 'fr' }
+                );
             })
             .catch(() => undefined); // offline: the card keeps its explanatory text
         return () => {
             disposed = true;
         };
-    }, []);
+    }, [variant]);
 
     return <div ref={containerRef} className="flex min-h-[44px] items-center justify-center" />;
 }

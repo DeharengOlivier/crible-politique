@@ -240,6 +240,15 @@ compte plusieurs partis, l'application le dit et ne désigne pas de vainqueur:
 les départager sur ces réponses serait lire du bruit, même si les pourcentages
 affichés diffèrent.
 
+**Ce que le lecteur voit, et ce que le test dit, sont deux choses.** Depuis le
+29 août 2026 (nuit), la mention "à égalité en tête" à côté d'un parti signifie
+une seule chose: ce parti affiche exactement le même pourcentage que le
+premier. Le résultat du test apparié, lui, est écrit en toutes lettres sous la
+liste ("vos réponses ne départagent pas les N premiers"). Les deux
+informations restent publiées, mais un badge d'égalité posé à côté de 61% et
+de 59% se lisait comme un défaut d'affichage, ce qu'un lecteur a signalé, et
+il avait raison.
+
 Deux partis à score égal partagent le même rang (1, 2, 2, 4). Le cas existe
 réellement: Ecolo et Groen sont codés à l'identique, et les sources disent que
 c'est exact, les deux partis ayant présenté une vision institutionnelle commune
@@ -256,26 +265,31 @@ quand l'égalité gêne: deux tests le tiennent, l'un exigeant qu'une divergence
 entre partis d'un même collège soit sourcée, l'autre que deux partis identiques
 reçoivent le même score et le même rang.
 
-### 3.3 La double lecture: proximité et directionnelle
+### 3.3 Une seule lecture, et son biais dit à voix haute
 
 La proximité récompense mécaniquement un parti codé au centre de chaque
 échelle, parce qu'il minimise la distance moyenne à n'importe qui. C'est
 mesurable: la corrélation entre l'extrémité du codage d'un parti et sa
 probabilité d'être premier vaut -0,90 en France et -0,91 en Belgique.
 
-Une seconde lecture est donc publiée à côté, le modèle directionnel
-(Rabinowitz et Macdonald):
+Jusqu'au 29 août 2026 (nuit), une seconde lecture était publiée à côté, le
+modèle directionnel de Rabinowitz et Macdonald (`50 + 50 × somme des produits
+position_utilisateur × position_parti / (4 × nombre d'énoncés)`), dont le biais
+est inverse (+0,65 et +0,64). Elle a été retirée, pour une raison qui n'est pas
+statistique mais de sens: cette lecture récompense l'intensité et non la
+ressemblance. Un répondant qui répond +1 partout y voit un parti codé +2
+partout (75%) passer devant le parti codé +1 partout, c'est-à-dire celui qui
+dit exactement ce qu'il dit (62%). Aucun lecteur ne peut lire ce classement
+comme une meilleure correspondance, et un outil qui affiche deux scores dont
+l'un contredit l'intuition sans être explicable en une phrase complique sans
+informer.
 
-```
-directionnel = 50 + 50 × (somme des produits position_utilisateur ×
-                          position_parti) / (4 × nombre d'énoncés)
-```
-
-50 signifie orthogonal. Cette lecture récompense l'accord intense dans le même
-sens plutôt que la faible distance, et son biais est inverse: la même
-corrélation y vaut +0,65 et +0,64. Les deux lectures peuvent donc désigner des
-partis différents, et c'est l'information: un premier rang qui ne survit qu'à
-une seule des deux métriques n'en était pas un.
+Ce qui reste, et qui portait déjà l'intuition directionnelle: le détail de
+chaque parti indique sur combien d'énoncés le répondant et le parti sont du
+**même côté** et du **côté opposé** (la neutralité n'étant d'aucun côté). Le
+biais central de la proximité, lui, n'est pas corrigé en douce par une seconde
+métrique: il est écrit sur la page des résultats, avec la plage effective des
+scores (3.1).
 
 ### 3.4 La saillance: vos combats prioritaires
 
@@ -290,24 +304,32 @@ anonymes, qui restent non pondérées.
 
 ### 3.5 Les combats déclarés des partis
 
-Le miroir de la saillance du répondant: pour chaque parti du classement, les
-résultats affichent les trois thèmes les plus centraux de son discours public,
-mesurés par le panel d'experts du CHES 2024 (variables de saillance du
-codebook: `eu_salience`, `lrecon_salience`, `galtan_salience`,
-`immigrate_salience`, `multicult_salience`, `redist_salience`,
-`climate_change_salience`, `environment_salience`, `anti_elite_salience`,
-échelle 0-10). La saillance est neutre en direction: elle dit de quoi un parti
-parle, jamais quel camp il défend, et n'entre pas dans le calcul des scores.
+Le miroir des combats du répondant: pour chaque parti du classement, les
+résultats affichent deux à quatre combats qu'il met lui-même en avant, lus
+dans son propre programme, dans l'ordre où ce programme les présente, avec le
+document en lien et, quand elle existe, la formulation exacte du parti. Un
+combat déclaré dit de quoi un parti parle, jamais quel camp il défend, et
+n'entre pas dans le calcul des scores.
 
-Chaque thème CHES est rattaché aux dimensions de l'outil là où le corpus pose
-réellement la question (l'immigration en géopolitique et société, la
-redistribution en économie, le climat en environnement, l'anti-élitisme en
-pouvoir et connaissance); quand le répondant a nommé ses combats, les thèmes
-qui tombent dans ces dimensions sont marqués. Deux limites sont dites dans
-l'interface: le CHES ne mesure aucune saillance pour les dimensions
-Connaissance et Morale politique, et les deux partis sous les seuils
-d'inclusion du CHES (UPR, Les Patriotes) affichent le combat déclaré de leur
-propre programme, marqué "Estimation documentée" comme leurs positions.
+Trois règles, identiques à celles qui gouvernent les positions:
+
+- chaque entrée nomme le document lu, avec lien et année, et porte le même
+  statut de sourçage qu'une position (tout est aujourd'hui en "codage
+  préliminaire", en attente de double codage contradictoire);
+- **tous les partis sont traités de la même façon**, sans exception ni statut
+  dégradé pour l'un d'eux;
+- un combat que les 35 énoncés ne posent pas ne reçoit **aucune** dimension et
+  est marqué "hors questionnaire". Le logement et l'école sont des combats
+  déclarés réels de plusieurs partis, et le questionnaire est muet sur les
+  deux: le dire vaut mieux que d'étirer une dimension pour faire croire que
+  les priorités du lecteur les couvrent.
+
+Une version antérieure de cette section, publiée quelques heures plus tôt le
+29 août 2026, reposait sur les variables de saillance du CHES 2024 (échelle
+0-10). Elle a été retirée: le panel note 22 des 24 partis du corpus et ignore
+les deux qui n'atteignent pas ses seuils d'inclusion, si bien que le panneau
+renseignait davantage sur la portée du jeu de données que sur les partis. Un
+lecteur l'a signalé, et la règle du traitement identique a tranché.
 
 ### 3.6 Un chiffre interprétable à côté du pourcentage
 

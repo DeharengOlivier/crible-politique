@@ -11,6 +11,58 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-29 (nuit, 5) - Les combats déclarés, relus dans les programmes
+
+- **Retrait de la couche de saillance CHES 2024** (`data/partySalience.ts`,
+  ajoutée quelques heures plus tôt le même soir) et **remplacement** par
+  `data/partyFights.ts`: pour chacun des 24 partis, deux à quatre combats lus
+  dans son propre programme, dans l'ordre où le document les présente, avec le
+  document en lien, l'année, la citation exacte quand elle existe, et le même
+  statut de sourçage que les positions ("codage préliminaire").
+- **Motif**: signalé par un lecteur. Le panel CHES note 22 partis sur 24 et
+  ignore ceux qui n'atteignent pas ses seuils d'inclusion (UPR, Les
+  Patriotes), qui portaient donc une "estimation documentée" pendant que les
+  autres portaient un chiffre. Le panneau renseignait sur la portée du jeu de
+  données plus que sur les partis. Règle retenue: tous les partis, même
+  traitement, même type de source.
+- **Nouvelle règle explicite**: un combat déclaré que les 35 énoncés ne posent
+  pas (logement, école) ne reçoit aucune dimension et est marqué "hors
+  questionnaire", au lieu d'être rattaché de force à une dimension voisine.
+- **Sources ajoutées** (une par parti, exemples): UPR, "Libérons-nous de l'UE,
+  de l'€, de l'OTAN" (upr.fr); Les Patriotes, "Grandes orientations pour un
+  projet patriote" (livret de septembre 2025), qui pose le Frexit comme "clé
+  de voute" et énumère UE, Euro, Schengen, CEDH, OTAN, OMS; Reconquête, les
+  huit priorités en "I"; PTB, ses quatre engagements affichés; Vlaams Belang,
+  "Vlaanderen onafhankelijk" en tête de programme; N-VA, "Voor Vlaamse
+  welvaart" (programme 2024).
+- **À corriger prochainement (signalé par cette relecture)**: Open Vld a changé
+  de nom en janvier 2026 et s'appelle désormais "Anders". Le corpus affiche
+  encore "Open Vld"; l'entrée de combats le mentionne, le nom du parti n'a pas
+  encore été modifié.
+- **Effet sur les résultats**: aucun. Les combats déclarés sont un affichage,
+  jamais une entrée du calcul (METHODOLOGY.md 3.5).
+
+## 2026-08-29 (nuit, 4) - Une seule lecture, et "à égalité" veut dire égalité
+
+- **Retrait de la lecture directionnelle** (`lib/resultsReading.ts` supprimé,
+  `directionalScore` retiré du moteur): le modèle de Rabinowitz-Macdonald
+  classait devant un parti plus radical que le répondant, avant le parti qui
+  dit exactement ce qu'il dit. Deux scores dont l'un contredit l'intuition
+  sans être explicable en une phrase compliquent sans informer. Ce qui reste:
+  la proximité, son biais central écrit sur la page, et les comptes "même
+  côté / côté opposé" qui portaient déjà l'intuition directionnelle.
+- **Nouvelle règle du badge "à égalité en tête"**: il n'apparaît que si le
+  pourcentage affiché est identique à celui du premier. Le résultat du test
+  apparié (les partis que les réponses ne départagent pas) est désormais écrit
+  en toutes lettres sous la liste, au lieu d'être posé en badge à côté de
+  chiffres différents.
+- **Motif**: signalé par un lecteur, "arrête d'écrire à égalité en tête quand
+  il n'y a pas le pourcentage exact". Un badge se lit, un test statistique se
+  lit en phrase; les deux informations restent publiées, chacune sous la forme
+  qui ne ment pas.
+- **Effet sur les résultats**: aucun changement de calcul, ni de scores, ni de
+  classement. Le groupe de tête apparié reste calculé et publié.
+
 ## 2026-08-29 (nuit, 3) - Les combats déclarés des partis (saillance CHES 2024)
 
 - **Ajout** (`data/partySalience.ts`): les neuf variables de saillance du

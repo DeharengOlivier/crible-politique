@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { computePartyMatches } from '@/lib/scoringEngine';
 import { PARTY_POSITIONS } from '@/data/partyPositions';
 import { statementsFor, partiesFor } from '@/lib/electoralScope';
-import type { AnswerRecord, LikertValue } from '@/types/positions';
+import type { AnswerRecord } from '@/types/positions';
 
 // E1..E5. A single winner announced with no interval was the product's most
 // misleading claim: on simulated coherent respondents the first and second
@@ -175,56 +175,11 @@ describe('E5: uniform weights change nothing', () => {
   });
 });
 
-describe('the directional reading', () => {
-  it('ranks first the party a respondent amplifies, and well above orthogonality', () => {
-    // Amplifying every LFI position to full intensity must make LFI the most
-    // directionally aligned party. It does not reach 100: the ceiling is the
-    // party's own intensity, and LFI holds moderate positions on some
-    // statements. That ceiling is the point of the directional reading.
-    const answers: AnswerRecord = {};
-    for (const s of statementsFor('FR')) {
-      const v = PARTY_POSITIONS[s.id]['fr_lfi'].value;
-      answers[s.id] = (v === 0 ? 0 : v > 0 ? 2 : -2) as LikertValue;
-    }
-    const matches = computePartyMatches(answers, FR);
-    const best = [...matches].sort((a, b) => b.directionalScore - a.directionalScore)[0];
-    expect(best.party.id).toBe('fr_lfi');
-    expect(best.directionalScore).toBeGreaterThan(75);
-  });
-
-  it('separates the two readings: the directional order is not the proximity order', () => {
-    // If both readings always agreed, publishing two would be theatre. They
-    // disagree because proximity rewards short distances and the directional
-    // reading rewards intensity on the same side.
-    const answers: AnswerRecord = {};
-    for (const s of statementsFor('FR')) {
-      answers[s.id] = PARTY_POSITIONS[s.id]['fr_eelv'].value;
-    }
-    const matches = computePartyMatches(answers, FR);
-    const byProximity = matches.map((m) => m.party.id);
-    const byDirection = [...matches]
-      .sort((a, b) => b.directionalScore - a.directionalScore)
-      .map((m) => m.party.id);
-    expect(byDirection).not.toEqual(byProximity);
-  });
-
-  it('sits at 50 for a respondent with no opinion anywhere it could count', () => {
-    const answers: AnswerRecord = {};
-    for (const s of statementsFor('FR')) answers[s.id] = 0;
-    for (const match of computePartyMatches(answers, FR)) {
-      expect(match.directionalScore).toBe(50);
-    }
-  });
-
-  it('falls below 50 for a respondent who mirrors a party', () => {
-    const answers: AnswerRecord = {};
-    for (const s of statementsFor('FR')) {
-      answers[s.id] = -PARTY_POSITIONS[s.id]['fr_lfi'].value as LikertValue;
-    }
-    const lfi = computePartyMatches(answers, FR).find((m) => m.party.id === 'fr_lfi')!;
-    expect(lfi.directionalScore).toBeLessThan(50);
-  });
-});
+// The directional reading was removed on 2026-08-29 (night): it made a party
+// more radical than the respondent beat the party saying exactly what they
+// say, which no reader could read as a better match. The battery that policed
+// it went with it; the same-side / opposite-side counts below are what carries
+// the directional intuition now.
 
 describe('the interpretable count', () => {
   it('counts every statement where the respondent and the party are on the same side', () => {

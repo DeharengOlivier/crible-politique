@@ -70,10 +70,11 @@ The app is a Next.js (App Router) site with four surfaces:
   every CHES axis in both, which is what forced the old decentralization
   statement to be split into a French and a Belgian version.
 - **Uncertainty is published, not hidden.** Every proximity carries a 90%
-  confidence interval, parties whose intervals overlap the leader's are named as
-  a leading group rather than arbitrated, and the ranking is offered under two
-  spatial models (proximity and directional) whose biases run in opposite
-  directions.
+  confidence interval, and the parties a respondent's answers cannot separate
+  from the leader (paired, statement by statement) are named as a leading group
+  rather than arbitrated. The proximity model's own bias, favouring parties
+  coded near the middle of every scale, is stated on the results page instead of
+  being offset by a second metric.
 
 ### How the scoring works
 
@@ -87,8 +88,6 @@ score(party)         = weighted mean of agreements over the statements where
                        (b) the party position is documented
 standard error       = weighted standard deviation / sqrt(comparisons)
 interval             = score +/- 1.645 * standard error        (90%)
-directional(party)   = 50 + 50 * sum(user_position * party_position)
-                            / (4 * comparisons)
 ```
 
 "No opinion" answers and undocumented party positions are excluded from the
@@ -285,8 +284,6 @@ The pure logic lives in:
   and which parties are on the ballot, given a country and a Belgian college.
 - [`lib/measurementInvariance.ts`](lib/measurementInvariance.ts): the rank
   correlation and the invariance rule the CHES tests are written against.
-- [`lib/resultsReading.ts`](lib/resultsReading.ts): the proximity/directional
-  switch and the ranking that belongs to each reading.
 - [`lib/duoComparison.ts`](lib/duoComparison.ts): the two-profile comparison,
   including how many statements the two respondents actually share.
 - [`lib/adaptiveClarification.ts`](lib/adaptiveClarification.ts): which extra
@@ -350,9 +347,8 @@ the result claims, and the privacy properties of the share links.
   reachable by some set of answers on the full test.
 - `__tests__/scoringUncertainty.test.ts`: the interval narrows as comparisons
   accumulate, the leading group contains the leader and every party overlapping
-  it, equal scores share a rank (1, 2, 2, 4), the directional reading orders
-  differently from the proximity one, salience weights change nothing at equal
-  weights and are rejected when non-positive or non-finite.
+  it, equal scores share a rank (1, 2, 2, 4), salience weights change nothing at
+  equal weights and are rejected when non-positive or non-finite.
 - `__tests__/profileCode.test.ts`: the version-2 round trip carries the country,
   every single-character substitution and every adjacent swap are rejected by
   the two check characters, a version-1 code still decodes and reports no
@@ -396,9 +392,10 @@ the result claims, and the privacy properties of the share links.
   than reporting "no profile", that it rewrites a legacy query URL in place,
   and that it keeps up when the fragment changes under the page. Plus the
   erase button, clicked for real.
-- `__tests__/resultsReading.test.ts`: that switching to the directional reading
-  re-ranks the parties instead of relabelling the proximity order, which is the
-  regression it was written for.
+- `__tests__/leadingGroupLabel.test.tsx`: that "à égalité en tête" is written
+  only next to parties showing the same percentage, that the parties the answers
+  do not separate are named in a sentence instead, and that no reading selector
+  remains.
 - `__tests__/duoComparison.test.ts`: the two-profile comparison, in particular
   that two respondents from different countries are compared only on the
   statements they actually share.
