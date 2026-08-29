@@ -1,23 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import { computeProfile, computePartyMatches } from '@/lib/scoringEngine';
-import { STATEMENTS } from '@/data/statements';
-import { PARTY_POSITIONS } from '@/data/partyPositions';
 import { ARCHETYPE_SIGNATURES } from '@/data/archetypeSignatures';
+import { statementsFor } from '@/lib/electoralScope';
 import { DIMENSION_ORDER } from '@/types/positions';
 import type { AnswerRecord, DimensionKey, LikertValue } from '@/types/positions';
+import { answersLikeParty, scopeOfParty } from './support/respondents';
 
 // Direct coverage of computeProfile(): the layer that turns raw answers into
 // per-dimension positions and dominant archetypes. The existing suite only
 // exercised it for determinism and the empty case.
 
-// Build a full answer set from one party's documented positions.
-function answersFromParty(partyId: string): AnswerRecord {
-  const answers: AnswerRecord = {};
-  for (const s of STATEMENTS) {
-    answers[s.id] = PARTY_POSITIONS[s.id][partyId].value;
-  }
-  return answers;
-}
+const answersFromParty = answersLikeParty;
 
 describe('computeProfile: dimension positions', () => {
   it('returns the mean answer per dimension, rounded to 2 decimals', () => {
@@ -25,7 +18,7 @@ describe('computeProfile: dimension positions', () => {
     const profile = computeProfile(answers);
 
     for (const dim of DIMENSION_ORDER) {
-      const values = STATEMENTS
+      const values = statementsFor('FR')
         .filter((s) => s.dimension === dim)
         .map((s) => answers[s.id] as number);
       const expected = Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100;
@@ -33,17 +26,20 @@ describe('computeProfile: dimension positions', () => {
     }
   });
 
-  it('counts every answered statement', () => {
-    const answers = answersFromParty('fr_rn');
-    const profile = computeProfile(answers);
-    expect(profile.answeredCount).toBe(STATEMENTS.length);
-    expect(profile.totalCount).toBe(STATEMENTS.length);
+  it('counts every answered statement, and only the ones this respondent saw', () => {
+    const profile = computeProfile(answersFromParty('fr_rn'));
+    expect(profile.answeredCount).toBe(statementsFor('FR').length);
+    // A French respondent never answers the Belgian statements, so they must
+    // not be counted as unanswered either.
+    expect(profile.answeredCount).toBeLessThan(
+      statementsFor('FR').length + statementsFor('BE').length
+    );
   });
 
   it('omits a dimension entirely when no statement in it is answered', () => {
     // Answer only the economy statements, leave everything else as "no opinion".
     const answers: AnswerRecord = {};
-    for (const s of STATEMENTS) {
+    for (const s of statementsFor('FR')) {
       answers[s.id] = s.dimension === 'economy' ? (1 as LikertValue) : null;
     }
     const profile = computeProfile(answers);
@@ -80,11 +76,11 @@ describe('computePartyMatches: low coverage flag', () => {
   it('flags low coverage below the confidence threshold and clears it above', () => {
     // A single answered statement: every match has only one comparison.
     const sparse: AnswerRecord = { ec1: 2 };
-    expect(computePartyMatches(sparse).every((m) => m.lowCoverage)).toBe(true);
+    expect(computePartyMatches(sparse, { country: 'FR' }).every((m) => m.lowCoverage)).toBe(true);
 
     // A full answer set: documented parties clear the threshold.
     const full = answersFromParty('fr_renaissance');
-    const matches = computePartyMatches(full);
+    const matches = computePartyMatches(full, scopeOfParty('fr_renaissance'));
     const target = matches.find((m) => m.party.id === 'fr_renaissance')!;
     expect(target.lowCoverage).toBe(false);
     expect(target.answeredAndDocumented).toBeGreaterThanOrEqual(10);

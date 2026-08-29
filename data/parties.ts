@@ -4,6 +4,11 @@ import { PoliticalParty } from "@/types/archetypes";
 // (an unverifiable global judgment), but by their positions statement by
 // statement in partyPositions.ts, each with a sourcing status.
 // The program field documents the main reference used for the coding.
+//
+// Belgian parties carry their electoral colleges. Belgian federal elections are
+// held in three of them and a voter only ever sees the lists of their own, so
+// showing a Walloon respondent how close they are to the N-VA would be showing
+// them a party they cannot vote for.
 
 export const PARTIES: PoliticalParty[] = [
     // --- FRANCE ---
@@ -85,72 +90,84 @@ export const PARTIES: PoliticalParty[] = [
         id: "be_ptb",
         name: "PTB-PVDA",
         country: "BE",
+        colleges: ["wallonie", "bruxelles", "flandre"],
         program: { label: "Programme fédéral 2024", url: "https://www.ptb.be", year: "2024" }
     },
     {
         id: "be_mr",
         name: "Mouvement Réformateur (MR)",
         country: "BE",
+        colleges: ["wallonie", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://www.mr.be", year: "2024" }
     },
     {
         id: "be_ps",
         name: "Parti Socialiste (PS)",
         country: "BE",
+        colleges: ["wallonie", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://www.ps.be", year: "2024" }
     },
     {
         id: "be_ecolo",
         name: "Ecolo",
         country: "BE",
+        colleges: ["wallonie", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://ecolo.be", year: "2024" }
     },
     {
         id: "be_engages",
         name: "Les Engagés",
         country: "BE",
+        colleges: ["wallonie", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://lesengages.be", year: "2024" }
     },
     {
         id: "be_nva",
         name: "N-VA",
         country: "BE",
+        colleges: ["flandre", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://www.n-va.be", year: "2024" }
     },
     {
         id: "be_vb",
         name: "Vlaams Belang",
         country: "BE",
+        colleges: ["flandre", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://www.vlaamsbelang.org", year: "2024" }
     },
     {
         id: "be_vooruit",
         name: "Vooruit",
         country: "BE",
+        colleges: ["flandre", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://www.vooruit.org", year: "2024" }
     },
     {
         id: "be_openvld",
         name: "Open VLD",
         country: "BE",
+        colleges: ["flandre", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://www.openvld.be", year: "2024" }
     },
     {
         id: "be_cdv",
         name: "CD&V",
         country: "BE",
+        colleges: ["flandre", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://www.cdenv.be", year: "2024" }
     },
     {
         id: "be_groen",
         name: "Groen",
         country: "BE",
+        colleges: ["flandre", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://www.groen.be", year: "2024" }
     },
     {
         id: "be_defi",
         name: "DéFI",
         country: "BE",
+        colleges: ["wallonie", "bruxelles"],
         program: { label: "Programme fédéral 2024", url: "https://defi.eu", year: "2024" }
     }
 ];

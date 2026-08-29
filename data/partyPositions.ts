@@ -10,6 +10,8 @@ import { LikertValue, PartyPositionsTable, PartyStance } from "@/types/positions
 // (2) self-positioning offered to the parties themselves (see GOVERNANCE.md).
 // A position moves to status "verifie" only with a dated and linked citation.
 // A party absent from a statement = not documented = not evaluated on that statement.
+// A country-scoped statement only carries the parties of that country: asking a
+// French party where it stands on Belgian state reform would be inventing data.
 //
 // To contest a value: public contestation procedure (GOVERNANCE.md §3),
 // backed by a source. Any change must be logged, dated and justified
@@ -40,15 +42,6 @@ export const PARTY_POSITIONS: PartyPositionsTable = {
         be_engages: p(1), be_nva: p(-1), be_vb: p(1),
         fr_pcf: p(1), fr_horizons: p(-1), fr_modem: p(0),
         be_vooruit: p(0), be_openvld: p(0), be_cdv: p(-1), be_groen: p(1), be_defi: p(1)
-    },
-    pw3: { // Decentralization to regions and municipalities
-        fr_lfi: p(-1), fr_rn: p(-1), fr_reconquete: p(-1), fr_upr: p(-1), fr_patriotes: p(-1),
-        fr_renaissance: p(1), fr_lr: p(1), fr_eelv: p(2), fr_ps: p(1),
-        be_ptb: p(-1, { label: "PTB: position unitariste (refédéralisation)" }),
-        be_mr: p(0), be_ps: p(0), be_ecolo: p(1),
-        be_engages: p(1), be_nva: p(2, { label: "N-VA: confédéralisme" }), be_vb: p(2),
-        fr_pcf: p(-1), fr_horizons: p(1), fr_modem: p(1),
-        be_vooruit: p(1), be_openvld: p(1), be_cdv: p(1), be_groen: p(1), be_defi: p(-1)
     },
     pw4: { // Expansion of surveillance powers
         fr_lfi: p(-2), fr_rn: p(2), fr_reconquete: p(2), fr_upr: p(-1), fr_patriotes: p(0),
@@ -277,5 +270,60 @@ export const PARTY_POSITIONS: PartyPositionsTable = {
         be_engages: p(0), be_nva: p(2), be_vb: p(2),
         fr_pcf: p(0), fr_horizons: p(1), fr_modem: p(1),
         be_vooruit: p(-1), be_openvld: p(0), be_cdv: p(1), be_groen: p(-2), be_defi: p(-1)
+    },
+
+    // --- FRANCE-SPECIFIC STATEMENTS ---
+    pw3_fr: { // Decentralization to regions and municipalities
+        fr_lfi: p(-1), fr_rn: p(-1), fr_reconquete: p(-1), fr_upr: p(-1), fr_patriotes: p(-1),
+        fr_renaissance: p(1), fr_lr: p(1), fr_eelv: p(2), fr_ps: p(1),
+        fr_pcf: p(-1), fr_horizons: p(1), fr_modem: p(1)
+    },
+    ec5_fr: { // Legal retirement age back to 62
+        fr_lfi: p(2, { label: "L'Avenir en commun: retraite à 60 ans, a minima abrogation de 2023" }),
+        fr_rn: p(2), fr_reconquete: p(0), fr_upr: p(2), fr_patriotes: p(1),
+        fr_renaissance: p(-2, { label: "Réforme des retraites 2023, portée par la majorité" }),
+        fr_lr: p(-2), fr_eelv: p(2), fr_ps: p(2),
+        fr_pcf: p(2), fr_horizons: p(-2), fr_modem: p(-1)
+    },
+    so5_fr: { // Stricter application of laicite, including in public space
+        fr_lfi: p(-1), fr_rn: p(2), fr_reconquete: p(2), fr_upr: p(1), fr_patriotes: p(2),
+        fr_renaissance: p(1), fr_lr: p(2), fr_eelv: p(-1), fr_ps: p(0),
+        fr_pcf: p(0), fr_horizons: p(1), fr_modem: p(0)
+    },
+
+    // --- BELGIUM-SPECIFIC STATEMENTS ---
+    pw3_be: { // Further transfer of federal competences to Regions and Communities
+        be_ptb: p(-2, { label: "PTB-PVDA: refédéralisation, position unitariste assumée" }),
+        be_mr: p(-1), be_ps: p(-2),
+        // Ecolo and Groen published ONE common institutional vision, so they
+        // carry one identical coding. A differentiating value was briefly
+        // written here to break their tie in the ranking; the sources say they
+        // do not differ, and inventing a difference to help the algorithm is
+        // exactly what this file forbids. See CHANGELOG-DONNEES.md, 2026-08-29.
+        be_ecolo: p(-1, {
+            label: "Ecolo-Groen, vision commune: du fédéralisme de blocage au fédéralisme collaboratif",
+            url: "https://ecolo.be/actualites/ecolo-et-groen-avancent-une-vision-commune-du-federalisme-de-blocage-au-federalisme-collaboratif/",
+            date: "2024-01-13"
+        }),
+        be_engages: p(-1),
+        be_nva: p(2, { label: "N-VA: confédéralisme" }),
+        be_vb: p(2), be_vooruit: p(0), be_openvld: p(1), be_cdv: p(1),
+        be_groen: p(-1, {
+            label: "Ecolo-Groen, vision commune: samenwerkingsfederalisme in plaats van blokkeringsfederalisme",
+            url: "https://www.groen.be/staatshervorming-samenwerkingsfederalisme",
+            date: "2024-01-13"
+        }),
+        be_defi: p(-2, { label: "DéFI: refédéralisation, défense des francophones" })
+    },
+    ec5_be: { // Unemployment benefits limited in time
+        be_ptb: p(-2), be_mr: p(2, { label: "MR: limitation dans le temps, accord de gouvernement fédéral 2025" }),
+        be_ps: p(-2), be_ecolo: p(-2), be_engages: p(1),
+        be_nva: p(2), be_vb: p(1), be_vooruit: p(-1), be_openvld: p(2), be_cdv: p(1),
+        be_groen: p(-2), be_defi: p(0)
+    },
+    so5_be: { // Regularisation of long-term undocumented residents
+        be_ptb: p(2), be_mr: p(-1), be_ps: p(2), be_ecolo: p(2), be_engages: p(1),
+        be_nva: p(-2), be_vb: p(-2), be_vooruit: p(0), be_openvld: p(-1), be_cdv: p(0),
+        be_groen: p(2), be_defi: p(1)
     }
 };

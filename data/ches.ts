@@ -374,6 +374,43 @@ export const chesRawData: Record<string, CHESPartyData> = {
 
 // ==================== CHES -> APP NORMALIZATION ====================
 
+/**
+ * Mapping from our party ids to the CHES dataset keys.
+ *
+ * Single source of truth: every external-validation check reads this map, so a
+ * party added on one side and forgotten on the other shows up as a coverage
+ * failure instead of silently shrinking the validation sample.
+ *
+ * Les Patriotes has no CHES entry (below the inclusion thresholds) and is
+ * therefore absent: an external check cannot validate what the external source
+ * never measured.
+ */
+export const CHES_ID_BY_PARTY_ID: Record<string, string> = {
+  fr_lfi: 'lfi',
+  fr_rn: 'rn',
+  fr_reconquete: 'reconquete',
+  fr_upr: 'upr',
+  fr_renaissance: 'renaissance',
+  fr_lr: 'lr',
+  fr_eelv: 'eelv',
+  fr_ps: 'ps',
+  fr_pcf: 'pcf',
+  fr_horizons: 'horizons',
+  fr_modem: 'modem',
+  be_ptb: 'ptb',
+  be_mr: 'mr',
+  be_ps: 'ps-be',
+  be_ecolo: 'ecolo',
+  be_engages: 'les-engages',
+  be_nva: 'nva',
+  be_vb: 'vlaams-belang',
+  be_vooruit: 'vooruit',
+  be_openvld: 'open-vld',
+  be_cdv: 'cdv',
+  be_groen: 'groen',
+  be_defi: 'defi',
+};
+
 export interface NormalizedPartyProfile {
   economic_redistribution: number; // 1-5, 5 = strong redistribution
   eu_critical: number;             // 1-5, 5 = very critical of the EU
