@@ -208,8 +208,10 @@ score(parti)   = moyenne des accords sur les énoncés où
                             </li>
                             <li>
                                 Les profils synthétiques sont une simplification assumée, conçue pour la
-                                discussion, pas pour l&apos;assignation; en cas de correspondances multiples,
-                                l&apos;ordre de la liste publiée tranche.
+                                discussion, pas pour l&apos;assignation. La famille affichée est la plus
+                                proche de vos réponses, et toutes les familles que vos réponses ne
+                                séparent pas de celle-là sont nommées avec elle: en médiane 4 sur 14,
+                                parce que chaque famille ne décrit qu&apos;une à trois des sept dimensions.
                             </li>
                             <li>
                                 Les estimations d&apos;impact en euros dépendent de barèmes simplifiés et

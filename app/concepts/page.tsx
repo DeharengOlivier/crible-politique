@@ -66,7 +66,9 @@ export default function ConceptsPage() {
                 <p className="mb-5 text-sm text-[var(--color-text-secondary)]">
                     Le profil affiché en haut de vos résultats. Chaque profil a une force et un point
                     de vigilance, avec la même bienveillance pour tous: un titre doit pouvoir être
-                    revendiqué fièrement par la personne décrite.
+                    revendiqué fièrement par la personne décrite. Ce ne sont pas quatorze cases:
+                    plusieurs de ces familles peuvent coller également à vos réponses, et vos
+                    résultats les nomment toutes plutôt que d&apos;en désigner une seule.
                 </p>
                 <div className="grid gap-4 sm:grid-cols-2">
                     {SYNTHETIC_PROFILES.map((profile) => (
