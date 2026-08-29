@@ -22,8 +22,10 @@ enabled = false # request bodies and tokens must never end up in logs
 # record for crible.eu exists; drop it from this list once the switch is done,
 # or the old address keeps a working write path to the API.
 ALLOWED_ORIGINS = "https://crible.eu,https://www.crible.eu,https://crible.deploy-env.net,http://localhost:3000"
-# Public OAuth client id (not a secret); filled once the Google client exists.
-GOOGLE_CLIENT_ID = ""
+# Public OAuth client id. Not a secret: it ships in every browser bundle. It is
+# the audience every Google ID token is pinned to, so a token minted for any
+# other application is refused here.
+GOOGLE_CLIENT_ID = "206230920239-qog420lgsqev0q9earq6lgtrflj07no5.apps.googleusercontent.com"
 
 [[d1_databases]]
 binding = "DB"
