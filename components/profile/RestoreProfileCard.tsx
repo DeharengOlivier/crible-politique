@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import type { VaultProfile } from '@/lib/profileVault';
-import { cribleApiBaseUrl } from '@/lib/cribleApi';
+import { profileVaultEnabled } from '@/lib/optionalFeatures';
 import { recallRecoveryCode, rememberRecoveryCode, restoreProfileFromVault } from '@/lib/vaultClient';
-import GoogleSignInButton, { googleClientId } from '@/components/profile/GoogleSignInButton';
+import GoogleSignInButton from '@/components/profile/GoogleSignInButton';
 
 // The other side of the vault: sign in, fetch the sealed blob, decrypt it
 // here. On the device that saved it the stored recovery code opens it
@@ -26,7 +26,7 @@ export default function RestoreProfileCard({
     const [state, setState] = useState<CardState>({ step: 'idle' });
     const [typedCode, setTypedCode] = useState('');
 
-    if (googleClientId() === null || cribleApiBaseUrl() === null) return null;
+    if (!profileVaultEnabled()) return null;
 
     const attemptRestore = async (idToken: string, code: string, typed: boolean) => {
         setState({ step: 'working' });

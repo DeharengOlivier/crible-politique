@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { MEASURES } from '@/data/measures';
+import { publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
 // Sitemap generated from the data: each observatory sheet has its own
 // indexable URL (this is the product's organic acquisition engine).
@@ -14,7 +15,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
         '/concepts',
         '/methodology',
         '/confidentialite',
-        '/statistiques',
+        // offered to crawlers only where it exists: without an API the route 404s
+        ...(publicStatisticsEnabled() ? ['/statistiques'] : []),
         '/a-propos',
         '/partners',
         '/legal'

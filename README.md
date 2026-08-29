@@ -313,7 +313,12 @@ backend, a Cloudflare Worker + D1 in `api/` (see `api/README.md`):
 
 Both features switch on only when `NEXT_PUBLIC_CRIBLE_API_URL` and (for the
 vault) `NEXT_PUBLIC_GOOGLE_CLIENT_ID` are set; without them the site behaves
-exactly as before.
+exactly as before. Unconfigured means invisible, not merely inert: the flags
+are read in one place (`lib/optionalFeatures.ts`), and a build without them
+serves `/statistiques` as a 404, keeps it out of the sitemap and the footer,
+and drops the sentences that would announce a counter or a vault this
+deployment never calls. `__tests__/optionalFeatureExposure.test.tsx` holds
+that both ways round.
 
 ## Tests
 

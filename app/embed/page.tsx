@@ -12,6 +12,7 @@ import ClarifySurvey from '@/components/test/ClarifySurvey';
 import { nextClarifyingStatement } from '@/lib/adaptiveClarification';
 import { statEventOf } from '@/lib/analysisStatEvent';
 import { reportAnalysis } from '@/lib/cribleApi';
+import { publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
 /**
  * Embeddable widget for partner media: the express test (15 statements)
@@ -27,7 +28,7 @@ import { reportAnalysis } from '@/lib/cribleApi';
  * must never do is turn a reader's answers into a request to ours.
  */
 
-function EmbedResults({ answers, country }: { answers: AnswerRecord; country: Country }) {
+export function EmbedResults({ answers, country }: { answers: AnswerRecord; country: Country }) {
     const profile = useMemo(() => computeProfile(answers), [answers]);
     const matches = useMemo(() => computePartyMatches(answers, { country }), [answers, country]);
     const leaders = matches.filter((m) => m.inLeadingGroup).slice(0, 4);
@@ -74,9 +75,11 @@ function EmbedResults({ answers, country }: { answers: AnswerRecord; country: Co
                 Affiner mon profil sur Le Crible Politique →
             </a>
             <p className="text-[10px] text-[var(--color-text-muted)]">
-                Calcul local et déterministe. Vos réponses ne quittent pas votre navigateur;
-                seul un compteur anonyme (pays, partis en tête) alimente les statistiques
-                publiques. Proximité n&apos;est pas consigne de vote.
+                Calcul local et déterministe. Vos réponses ne quittent pas votre navigateur
+                {publicStatisticsEnabled()
+                    ? '; seul un compteur anonyme (pays, partis en tête) alimente les statistiques publiques.'
+                    : '.'}{' '}
+                Proximité n&apos;est pas consigne de vote.
             </p>
         </div>
     );

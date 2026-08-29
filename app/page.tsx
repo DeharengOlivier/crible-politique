@@ -5,6 +5,7 @@ import { STATEMENTS } from '@/data/statements';
 import { PARTIES } from '@/data/parties';
 import { MEASURES } from '@/data/measures';
 import ProfileGallery from '@/components/home/ProfileGallery';
+import { publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
 export default function Home() {
   return (
@@ -205,7 +206,9 @@ export default function Home() {
                 <li><Link href="/a-propos" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Qui sommes-nous</Link></li>
                 <li><Link href="/concepts" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Les profils &amp; concepts</Link></li>
                 <li><Link href="/confidentialite" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Confidentialité</Link></li>
-                <li><Link href="/statistiques" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Statistiques publiques</Link></li>
+                {publicStatisticsEnabled() && (
+                  <li><Link href="/statistiques" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Statistiques publiques</Link></li>
+                )}
                 <li><Link href="/partners" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Médias &amp; partenaires</Link></li>
               </ul>
               <h3 className="mb-3 font-[family-name:var(--font-heading)] font-semibold text-[var(--color-text)]">Pays couverts</h3>

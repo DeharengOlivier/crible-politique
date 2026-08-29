@@ -2,14 +2,15 @@
 
 import { useState } from 'react';
 import type { AnswerRecord, Respondent } from '@/types/positions';
-import { cribleApiBaseUrl, deleteVault } from '@/lib/cribleApi';
+import { deleteVault } from '@/lib/cribleApi';
+import { profileVaultEnabled } from '@/lib/optionalFeatures';
 import {
     forgetRecoveryCode,
     recallRecoveryCode,
     rememberRecoveryCode,
     saveProfileToVault
 } from '@/lib/vaultClient';
-import GoogleSignInButton, { googleClientId } from '@/components/profile/GoogleSignInButton';
+import GoogleSignInButton from '@/components/profile/GoogleSignInButton';
 
 // "Save my profile", 16personalities-style but with the opposite data deal:
 // the profile is encrypted in this browser before upload, the key never
@@ -34,7 +35,7 @@ export default function SaveProfileCard({
     const [state, setState] = useState<CardState>({ step: 'idle' });
     const [copied, setCopied] = useState(false);
 
-    if (googleClientId() === null || cribleApiBaseUrl() === null) return null;
+    if (!profileVaultEnabled()) return null;
 
     const handleIdToken = async (idToken: string) => {
         setState({ step: 'saving' });

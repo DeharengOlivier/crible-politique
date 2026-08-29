@@ -19,6 +19,7 @@ import { gzipSync } from 'node:zlib';
 const EXPECTED_ROUTES = {
     '/': 'static',
     '/a-propos': 'static',
+    '/apple-icon.png': 'static',
     '/compare': 'static',
     '/concepts': 'static',
     '/confidentialite': 'static',
@@ -26,11 +27,14 @@ const EXPECTED_ROUTES = {
     '/crible/[id]': 'static',
     '/embed': 'static',
     '/favicon.ico': 'static',
+    '/icon.svg': 'static',
     '/legal': 'static',
     '/methodology': 'static',
     '/p/[code]': 'dynamic',
     '/p/[code]/opengraph-image': 'dynamic',
     '/partners': 'static',
+    // Emitted either way, but it answers 404 unless NEXT_PUBLIC_CRIBLE_API_URL
+    // is configured: the page exists only where the counters do.
     '/statistiques': 'static',
     '/test': 'static'
 };

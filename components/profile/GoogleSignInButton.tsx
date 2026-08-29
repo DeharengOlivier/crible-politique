@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { googleClientId } from '@/lib/optionalFeatures';
 
 // The official "Sign in with Google" button (Google Identity Services).
 // Google's script draws it and hands back a signed ID token; nothing else of
@@ -23,12 +24,6 @@ declare global {
     interface Window {
         google?: { accounts: { id: GoogleAccountsId } };
     }
-}
-
-export function googleClientId(): string | null {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    if (clientId === undefined || clientId.length === 0) return null;
-    return clientId;
 }
 
 // One script tag for the whole app, whatever mounts first.

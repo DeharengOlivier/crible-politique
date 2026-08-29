@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import PageHeader from '@/components/PageHeader';
 import PublicStatsBoard from '@/components/stats/PublicStatsBoard';
+import { publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
 export const metadata: Metadata = {
     title: 'Statistiques publiques | Le Crible Politique',
@@ -10,6 +12,11 @@ export const metadata: Metadata = {
 };
 
 export default function StatistiquesPage() {
+    // No counters are collected in a deployment without an API, so there is no
+    // page to serve: an empty board explaining itself away would be a promise
+    // this build cannot keep.
+    if (!publicStatisticsEnabled()) notFound();
+
     return (
         <div className="min-h-screen bg-[var(--color-bg)]">
             <PageHeader title="Statistiques publiques" />

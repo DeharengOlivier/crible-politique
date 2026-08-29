@@ -9,15 +9,16 @@ import { rememberRecoveryCode } from "@/lib/vaultClient";
 
 // The two faces of the vault as the user sees them. Google's real widget is
 // replaced by a plain button handing over a fake token: what is under test is
-// everything that happens after the token, with the real crypto.
+// everything that happens after the token, with the real crypto. Whether the
+// cards appear at all is decided by the real flags, stubbed below like any
+// other configured deployment.
 
 vi.mock("@/components/profile/GoogleSignInButton", () => ({
     default: ({ onIdToken }: { onIdToken: (t: string) => void }) => (
         <button type="button" onClick={() => onIdToken("fake-google-token")}>
             FAKE_GOOGLE
         </button>
-    ),
-    googleClientId: () => "client-123.apps.googleusercontent.com"
+    )
 }));
 
 const RESPONDENT = { country: "FR" as const };
@@ -25,6 +26,7 @@ const ANSWERS = { pw1: 2 as const, ge7: -2 as const };
 
 beforeEach(() => {
     vi.stubEnv("NEXT_PUBLIC_CRIBLE_API_URL", "https://api.example");
+    vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "client-123.apps.googleusercontent.com");
 });
 
 afterEach(() => {

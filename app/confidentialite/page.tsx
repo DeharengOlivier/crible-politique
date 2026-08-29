@@ -1,11 +1,30 @@
 import Link from 'next/link';
 import ClearLocalDataButton from '@/components/ClearLocalDataButton';
 import PageHeader from '@/components/PageHeader';
+import { profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
 // Privacy as an architectural property, not as a promise.
 // Political opinions are sensitive data (art. 9 GDPR):
 // our answer is to not collect them at all. Page served server-side;
 // only the clear button is a client island.
+//
+// This page describes the deployment it is served from, not the feature set
+// the repository can build: a paragraph announcing a vault or a counter that
+// this build never calls would be a declaration of a data flow that does not
+// exist, which is the same defect as hiding one.
+
+// The page invites the reader to open the network tab and count the calls, so
+// the number it announces has to be the number this build can make. Promising
+// two calls where none exist would fail the check it asks the reader to run.
+function expectedApiCallsSentence(): string {
+    if (profileVaultEnabled()) {
+        return "Vous y verrez au plus deux appels vers notre API: le compteur anonyme de fin d'analyse (pays et partis en tête, jamais vos réponses) et, si vous sauvegardez votre profil, un bloc chiffré illisible.";
+    }
+    if (publicStatisticsEnabled()) {
+        return "Vous y verrez au plus un appel vers notre API: le compteur anonyme de fin d'analyse (pays et partis en tête, jamais vos réponses).";
+    }
+    return "Vous n'y verrez aucun appel vers une API: ce déploiement n'en a aucune, le site n'est que des pages.";
+}
 
 export default function ConfidentialitePage() {
     return (
@@ -33,6 +52,7 @@ export default function ConfidentialitePage() {
                                 votre navigateur. Par défaut, rien n&apos;en sort: le serveur sert des pages
                                 et ne reçoit jamais vos réponses.
                             </li>
+                            {profileVaultEnabled() && (
                             <li>
                                 <strong className="text-[var(--color-text)]">La sauvegarde de profil est chiffrée avant de partir.</strong>{' '}
                                 Si vous choisissez de sauvegarder votre profil avec votre compte Google, il
@@ -45,6 +65,8 @@ export default function ConfidentialitePage() {
                                 garde, votre profil est indéchiffrable, pour nous aussi. Vous pouvez le
                                 supprimer du serveur à tout moment depuis vos résultats.
                             </li>
+                            )}
+                            {publicStatisticsEnabled() && (
                             <li>
                                 <strong className="text-[var(--color-text)]">Des statistiques publiques, anonymes par construction.</strong>{' '}
                                 À la fin d&apos;une analyse, le site incrémente un compteur: le pays, le
@@ -58,6 +80,7 @@ export default function ConfidentialitePage() {
                                 </Link>{' '}
                                 montre à tout le monde, vous compris, la totalité de ce que nous voyons.
                             </li>
+                            )}
                             <li>
                                 <strong className="text-[var(--color-text)]">L&apos;IA n&apos;intervient jamais pendant l&apos;utilisation.</strong>{' '}
                                 Le calcul est une formule déterministe publiée; aucune de vos réponses n&apos;est
@@ -117,10 +140,8 @@ export default function ConfidentialitePage() {
                             . Vous pouvez y lire exactement ce que fait le site, et vous n&apos;avez même pas
                             besoin du code pour vérifier l&apos;essentiel: ouvrez les outils de développement de
                             votre navigateur (F12, onglet &quot;Réseau&quot;) pendant le test, et constatez
-                            qu&apos;aucune requête ne transmet vos réponses. Vous y verrez au plus deux
-                            appels vers notre API: le compteur anonyme de fin d&apos;analyse (pays et
-                            partis en tête, jamais vos réponses) et, si vous sauvegardez votre profil,
-                            un bloc chiffré illisible. N&apos;importe qui peut faire cette
+                            qu&apos;aucune requête ne transmet vos réponses. {expectedApiCallsSentence()}
+                            {' '}N&apos;importe qui peut faire cette
                             vérification, ou la demander à quelqu&apos;un de confiance. Et tout ce qui détermine
                             vos résultats (énoncés, positions des partis, formule) est publié:{' '}
                             <Link href="/methodology" className="font-semibold text-[var(--color-primary)] hover:underline">
