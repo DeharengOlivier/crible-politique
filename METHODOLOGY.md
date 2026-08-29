@@ -110,12 +110,20 @@ parti passe de 3,8 à 5,9 points en France et de 2,8 à 5,3 en Belgique.
 
 ### 2.2 Le test express
 
-Le test express compte 14 énoncés, exactement 2 par dimension, propres à chaque
+Le test express compte 15 énoncés, 2 par dimension et 3 en géopolitique, propres à chaque
 pays. Deux et non un: avec un seul énoncé de "rapport à la connaissance", 8 des
 10 courants de cette dimension devenaient inatteignables et un seul d'entre eux
 était renvoyé à 80% des répondants. Chaque énoncé express doit séparer les
 partis de son pays (écart-type d'au moins 1,0 sur les 12 partis), propriété
 tenue par un test.
+
+La géopolitique reçoit trois places express et non deux, dans les deux pays le
+même triplet: OTAN, immigration, conflit israélo-palestinien. Mesuré sur des
+répondants simulés (bruit d'écart-type 1,0), ce triplet bat toutes les paires
+possibles sur la récupération du bon parti: 93,7% en France contre 93,0% pour
+l'ancienne paire, 90,2% en Belgique contre 89,4%. Il porte surtout les clivages
+que les paires manquaient: sur les seuls énoncés géopolitiques express, l'écart
+RN-LFI passe de 5 à 9 points et l'écart Vlaams Belang-PTB de 5 à 8.
 
 ### 2.3 Le départage adaptatif
 
@@ -147,7 +155,7 @@ entière est recalculable à la main.
 Mesuré sur des répondants qui répondent exactement une signature: les 79
 archétypes deviennent atteignables seuls dans les deux pays, pour un coût de
 **+3,3 énoncés en France et +4,7 en Belgique** en moyenne, jamais plus de deux
-par dimension. Le test express reste un test de 14 énoncés auquel s'ajoutent
+par dimension. Le test express reste un test de 15 énoncés auquel s'ajoutent
 quelques départages, pas un test de 21.
 
 Au-delà de deux départages, une égalité qui persiste n'est plus un défaut de

@@ -22,7 +22,7 @@ import { Compass, Check, Mic } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 
 // Time-to-value optimized flow:
-// intro (1 screen) → country → express (14 statements, ~3 min) → clarify
+// intro (1 screen) → country → express (15 statements, ~3 min) → clarify
 // (0 to a few adaptive tie-break statements) → teaser (profile reveal) →
 // opt-in refinement (remaining statements) → full layered results.
 // Socio-economic situation is NEVER asked here: it lives in the
@@ -197,7 +197,7 @@ function IntroView({
                     Où vous situez-vous, vraiment ?
                 </h2>
                 <p className="text-[var(--color-text-secondary)]">
-                    14 énoncés pour un premier profil en 3 minutes. Vous vous positionnez vous-même sur
+                    15 énoncés pour un premier profil en 3 minutes. Vous vous positionnez vous-même sur
                     chaque énoncé: aucun algorithme n&apos;interprète vos réponses à votre place, et un
                     &quot;sans opinion&quot; ne vous est jamais compté.
                 </p>

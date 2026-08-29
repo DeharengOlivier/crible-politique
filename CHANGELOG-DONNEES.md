@@ -11,6 +11,29 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-29 (nuit, suite) - Le test express pose la question du Proche-Orient
+
+- **Motif**: les trois clivages géopolitiques ajoutés dans la nuit n'entraient
+  pas dans le test express, qui posait UE + immigration (France) et OTAN +
+  immigration (Belgique). Un répondant express ne voyait donc jamais l'énoncé
+  israélo-palestinien, alors que c'est lui qui sépare des partis que les paires
+  d'origine disaient voisins.
+- **Changement**: la géopolitique reçoit une troisième place express, le même
+  triplet dans les deux pays: OTAN (`ge2`), immigration (`ge3`),
+  conflit israélo-palestinien (`ge7`). Le test express passe de 14 à
+  15 énoncés. La France perd l'énoncé UE (`ge1`) de l'express, qui reste dans
+  le test complet.
+- **Mesure qui a décidé** (simulation, bruit d'écart-type 1,0, 300 tirages par
+  parti, énumération de toutes les paires et tous les triplets éligibles au
+  plancher d'écart-type 1,0): le triplet retenu bat toutes les paires et tous
+  les autres triplets sur la récupération du bon parti en France (93,7% contre
+  93,0% pour l'ancienne paire) et fait mieux que l'ancienne paire en Belgique
+  (90,2% contre 89,4%). Sur les seuls énoncés géopolitiques express, l'écart
+  RN-LFI passe de 5 à 9 points, l'écart Vlaams Belang-PTB de 5 à 8.
+- Aucun changement de codage ni de signature; seule la sélection express
+  change, et la règle passe de "exactement 2 par dimension" à "2 par
+  dimension, 3 en géopolitique", tenue par le test mis à jour.
+
 ## 2026-08-29 (nuit) - La géopolitique gagne trois clivages qui lui manquaient
 
 - **Motif, mesuré**: hors immigration, les quatre énoncés géopolitiques (UE,

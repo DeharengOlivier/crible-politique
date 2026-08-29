@@ -12,7 +12,7 @@ import ClarifySurvey from '@/components/test/ClarifySurvey';
 import { nextClarifyingStatement } from '@/lib/adaptiveClarification';
 
 /**
- * Embeddable widget for partner media: the express test (14 statements)
+ * Embeddable widget for partner media: the express test (15 statements)
  * on the deterministic engine, inside an iframe.
  * Usage: <iframe src="https://criblepolitique.fr/embed?pays=FR" width="100%" height="720" />
  *
@@ -117,7 +117,7 @@ export default function EmbedPage() {
                         Où vous situez-vous, vraiment ?
                     </h2>
                     <p className="text-sm text-[var(--color-text-secondary)]">
-                        14 énoncés, 3 minutes, calcul local: vos réponses ne quittent pas votre
+                        15 énoncés, 3 minutes, calcul local: vos réponses ne quittent pas votre
                         navigateur.
                     </p>
                     <button

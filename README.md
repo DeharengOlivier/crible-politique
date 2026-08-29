@@ -263,7 +263,7 @@ it can be read, diffed and audited:
 
 | File | Contents |
 | --- | --- |
-| [`data/statements.ts`](data/statements.ts) | 30 statements common to both countries plus 3 specific to each, so 33 per respondent: 4 per dimension, except geopolitics which carries 7 (Ukraine, Russia and the Middle East were measured missing). Each country has its own 14-statement express subset. |
+| [`data/statements.ts`](data/statements.ts) | 30 statements common to both countries plus 3 specific to each, so 33 per respondent: 4 per dimension, except geopolitics which carries 7 (Ukraine, Russia and the Middle East were measured missing). Each country has its own 15-statement express subset (2 per dimension, 3 for geopolitics). |
 | [`data/parties.ts`](data/parties.ts) | The 24 parties (12 French, 12 Belgian) with their reference manifesto, their country and, for the Belgian ones, the electoral colleges they run in. |
 | [`data/partyPositions.ts`](data/partyPositions.ts) | Each party's position on each statement (same Likert scale), with a sourcing status and citation. |
 | [`data/archetypeSignatures.ts`](data/archetypeSignatures.ts) | Expected answer patterns per archetype, used to identify a dominant archetype per dimension. Every archetype of a dimension is scored on exactly the same statements, so no current wins by having a shorter signature. |
