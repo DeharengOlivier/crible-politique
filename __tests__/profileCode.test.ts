@@ -34,7 +34,7 @@ describe('the code carries the country it was taken in', () => {
     const code = encodeAnswers(answersLikeParty('be_ps'), 'BE');
     // version + country + one character per statement + two check characters
     expect(code).toHaveLength(4 + statementsFor('BE').length);
-    expect(code[0]).toBe('2');
+    expect(code[0]).toBe('3');
   });
 });
 
@@ -205,5 +205,47 @@ describe('a single altered character is rejected, not read as another profile', 
     expect(code[j]).toBe('d');
     const swapped = code.slice(0, i) + code[j] + code.slice(i + 1, j) + code[i] + code.slice(j + 1);
     expect(decodeProfile(swapped)).not.toBeNull();
+  });
+});
+
+describe('a version 2 link keeps resolving after the corpus grew', () => {
+  // Golden fixtures minted on 2026-08-29 with the version 2 format, before
+  // the geopolitics statements were added. They are in people's messages, so
+  // they decode over the frozen version 2 corpus: same country, same answers,
+  // and simply no answer for the statements that did not exist yet.
+  const V2_FR = '2fdcbedcbbdddedcdcdbdedccdbebdecsy'; // fr_ps answers
+  const V2_BE = '2bdcbeecbbddcedcdbdbdddcbdbebaaegx'; // be_ps answers
+
+  it('decodes with its country and its answers', () => {
+    const decoded = decodeProfile(V2_FR);
+    expect(decoded).not.toBeNull();
+    expect(decoded!.country).toBe('FR');
+    expect(decoded!.answers.pw1).toBe(1);
+    expect(decoded!.answers.pw3_fr).toBeDefined();
+  });
+
+  it('decodes the Belgian fixture too', () => {
+    const decoded = decodeProfile(V2_BE);
+    expect(decoded).not.toBeNull();
+    expect(decoded!.country).toBe('BE');
+    expect(decoded!.answers.pw3_be).toBeDefined();
+  });
+
+  it('leaves unknown to a version 2 link only what did not exist yet', () => {
+    // Every decoded id must belong to the current corpus of its country.
+    const decoded = decodeProfile(V2_FR)!;
+    const known = new Set(statementsFor('FR').map((st) => st.id));
+    for (const id of Object.keys(decoded.answers)) expect(known.has(id), id).toBe(true);
+  });
+
+  it('still rejects a mangled version 2 link', () => {
+    expect(decodeProfile('2b' + V2_FR.slice(2))).toBeNull();
+    expect(decodeProfile(V2_FR.slice(0, -1))).toBeNull();
+    const swapped = V2_FR.slice(0, 2) + V2_FR[3] + V2_FR[2] + V2_FR.slice(4);
+    if (V2_FR[2] !== V2_FR[3]) expect(decodeProfile(swapped)).toBeNull();
+  });
+
+  it('mints version 3 codes now', () => {
+    expect(encodeAnswers(answersLikeParty('fr_ps'), 'FR')[0]).toBe('3');
   });
 });

@@ -33,11 +33,13 @@ import { statementsFor, parseCountry } from "@/lib/electoralScope";
 // escapes only when that product is a multiple of 36 (for example "b" and "d"
 // exchanged 18 positions apart). That residue is the stated limit.
 //
-// Version 1 was "1" + 28 characters over a single corpus with no country. Those
-// links are in people's messages, so they keep resolving: their order is frozen
-// below and read as "answers, country unknown".
+// Version 2 was the same layout over the thirty-statement corpora of
+// 2026-08-29, before the geopolitics statements were added. Version 1 was
+// "1" + 28 characters over a single corpus with no country. Links of both
+// generations are in people's messages, so they keep resolving: their corpora
+// are frozen below, and a statement added since simply has no answer in them.
 
-const VERSION = "2";
+const VERSION = "3";
 
 const COUNTRY_TO_CHAR: Record<Country, string> = { FR: "f", BE: "b" };
 const CHAR_TO_COUNTRY: Record<string, Country> = { f: "FR", b: "BE" };
@@ -79,10 +81,38 @@ export const LEGACY_V1_STATEMENT_IDS: readonly string[] = [
 ] as const;
 
 const LEGACY_VERSION = "1";
+const LEGACY_V2_VERSION = "2";
+
+/**
+ * The per-country statement order of version 2 codes, frozen for ever. It is
+ * today's corpus minus everything added since, which is exactly why it cannot
+ * be derived from the current corpus.
+ */
+const LEGACY_V2_STATEMENT_IDS: Record<Country, readonly string[]> = {
+    FR: [
+        "pw1", "pw2", "pw4", "ec1", "ec2", "ec3", "ec4",
+        "ge1", "ge2", "ge3", "ge4", "so1", "so2", "so3", "so4",
+        "en1", "en2", "en3", "en4", "kn1", "kn2", "kn3", "kn4",
+        "mo1", "mo2", "mo3", "mo4", "pw3_fr", "ec5_fr", "so5_fr"
+    ],
+    BE: [
+        "pw1", "pw2", "pw4", "ec1", "ec2", "ec3", "ec4",
+        "ge1", "ge2", "ge3", "ge4", "so1", "so2", "so3", "so4",
+        "en1", "en2", "en3", "en4", "kn1", "kn2", "kn3", "kn4",
+        "mo1", "mo2", "mo3", "mo4", "pw3_be", "ec5_be", "so5_be"
+    ]
+};
 
 /** Longest code worth parsing at all: the largest corpus plus its markers. */
 const MAX_CODE_LENGTH =
-    4 + Math.max(statementsFor("FR").length, statementsFor("BE").length, LEGACY_V1_STATEMENT_IDS.length);
+    4 +
+    Math.max(
+        statementsFor("FR").length,
+        statementsFor("BE").length,
+        LEGACY_V2_STATEMENT_IDS.FR.length,
+        LEGACY_V2_STATEMENT_IDS.BE.length,
+        LEGACY_V1_STATEMENT_IDS.length
+    );
 
 const CHECKSUM_SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyz";
 
@@ -131,22 +161,28 @@ export function decodeProfile(code: string | null | undefined): DecodedProfile |
     if (!code || code.length > MAX_CODE_LENGTH) return null;
 
     if (code[0] === LEGACY_VERSION) return decodeLegacy(code.slice(1));
-    if (code[0] !== VERSION) return null;
+    if (code[0] !== VERSION && code[0] !== LEGACY_V2_VERSION) return null;
 
     const country = parseCountry(CHAR_TO_COUNTRY[code[1]]);
     if (country === null) return null;
 
-    const statements = statementsFor(country);
+    const statementIds =
+        code[0] === VERSION
+            ? statementsFor(country).map((statement) => statement.id)
+            : LEGACY_V2_STATEMENT_IDS[country];
     const payload = code.slice(1, -2);
     const body = payload.slice(1);
-    if (body.length !== statements.length) return null;
+    if (body.length !== statementIds.length) return null;
     if (code.slice(-2) !== checksOf(payload)) return null;
 
     const answers: AnswerRecord = {};
-    for (let i = 0; i < statements.length; i++) {
+    for (let i = 0; i < statementIds.length; i++) {
         const char = body[i];
         if (!(char in CHAR_TO_VALUE)) return null;
-        answers[statements[i].id] = CHAR_TO_VALUE[char];
+        // A version 2 id is always in the current corpus today; the guard is
+        // for the day one of them is split or retired, like v1's pw3.
+        if (!KNOWN_STATEMENT_IDS.has(statementIds[i])) continue;
+        answers[statementIds[i]] = CHAR_TO_VALUE[char];
     }
     return { country, answers };
 }
