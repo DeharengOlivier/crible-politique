@@ -17,6 +17,7 @@ import { computeProfile, computePartyMatches, PartyMatch } from '@/lib/scoringEn
 import { encodeAnswers } from '@/lib/profileCode';
 import { encodeBadge } from '@/lib/badgeCode';
 import { shareFragment } from '@/lib/shareLink';
+import SaveProfileCard from '@/components/profile/SaveProfileCard';
 import { ProfileIcon } from '@/lib/icons';
 import { Compass, Coins, Scale } from 'lucide-react';
 import MftModule from './MftModule';
@@ -446,6 +447,8 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                     Explorer l&apos;observatoire
                 </Link>
             </section>
+
+            <SaveProfileCard answers={answers} respondent={respondent} />
 
             <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-[var(--color-text-secondary)]">
                 <strong className="text-[var(--color-text)]">Transparence:</strong> le positionnement des

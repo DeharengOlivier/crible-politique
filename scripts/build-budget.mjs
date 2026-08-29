@@ -31,6 +31,7 @@ const EXPECTED_ROUTES = {
     '/p/[code]': 'dynamic',
     '/p/[code]/opengraph-image': 'dynamic',
     '/partners': 'static',
+    '/statistiques': 'static',
     '/test': 'static'
 };
 

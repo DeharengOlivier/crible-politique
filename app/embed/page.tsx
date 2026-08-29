@@ -10,6 +10,8 @@ import { COUNTRIES, COUNTRY_LABELS, expressStatementsFor, parseCountry } from '@
 import StatementSurvey from '@/components/test/StatementSurvey';
 import ClarifySurvey from '@/components/test/ClarifySurvey';
 import { nextClarifyingStatement } from '@/lib/adaptiveClarification';
+import { statEventOf } from '@/lib/analysisStatEvent';
+import { reportAnalysis } from '@/lib/cribleApi';
 
 /**
  * Embeddable widget for partner media: the express test (15 statements)
@@ -72,8 +74,9 @@ function EmbedResults({ answers, country }: { answers: AnswerRecord; country: Co
                 Affiner mon profil sur Le Crible Politique →
             </a>
             <p className="text-[10px] text-[var(--color-text-muted)]">
-                Calcul local et déterministe, aucune donnée collectée. Proximité n&apos;est pas
-                consigne de vote.
+                Calcul local et déterministe. Vos réponses ne quittent pas votre navigateur;
+                seul un compteur anonyme (pays, partis en tête) alimente les statistiques
+                publiques. Proximité n&apos;est pas consigne de vote.
             </p>
         </div>
     );
@@ -88,6 +91,17 @@ export default function EmbedPage() {
         if (typeof window === 'undefined') return null;
         return parseCountry(new URLSearchParams(window.location.search).get('pays'));
     });
+
+    // Same rule as the full test: one completed run, one anonymous event.
+    const finishAnalysis = (finalAnswers: AnswerRecord) => {
+        setAnswers(finalAnswers);
+        if (country !== null) {
+            reportAnalysis(
+                statEventOf(country, finalAnswers, computePartyMatches(finalAnswers, { country }))
+            );
+        }
+        setStage('results');
+    };
 
     return (
         <div className="px-4 py-6">
@@ -137,8 +151,12 @@ export default function EmbedPage() {
                     statements={expressStatementsFor(country)}
                     initialAnswers={answers}
                     onComplete={(a) => {
-                        setAnswers(a);
-                        setStage(nextClarifyingStatement(a, []) === null ? 'results' : 'clarify');
+                        if (nextClarifyingStatement(a, []) === null) {
+                            finishAnalysis(a);
+                        } else {
+                            setAnswers(a);
+                            setStage('clarify');
+                        }
                     }}
                 />
             )}
@@ -146,10 +164,7 @@ export default function EmbedPage() {
                 <ClarifySurvey
                     initialAnswers={answers}
                     initialAsked={[]}
-                    onComplete={(a) => {
-                        setAnswers(a);
-                        setStage('results');
-                    }}
+                    onComplete={(a) => finishAnalysis(a)}
                 />
             )}
             {stage === 'results' && country !== null && (

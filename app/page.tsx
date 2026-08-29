@@ -49,7 +49,7 @@ export default function Home() {
 
             <p className="inline-flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
               <ShieldCheck className="h-4 w-4 text-[var(--color-success)]" aria-hidden="true" />
-              Vos réponses ne quittent jamais votre appareil.
+              Vos réponses restent sur votre appareil (sauvegarde chiffrée en option).
             </p>
           </div>
         </div>
@@ -205,6 +205,7 @@ export default function Home() {
                 <li><Link href="/a-propos" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Qui sommes-nous</Link></li>
                 <li><Link href="/concepts" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Les profils &amp; concepts</Link></li>
                 <li><Link href="/confidentialite" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Confidentialité</Link></li>
+                <li><Link href="/statistiques" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Statistiques publiques</Link></li>
                 <li><Link href="/partners" className="inline-flex min-h-[44px] items-center text-[var(--color-primary)] transition-colors hover:text-[var(--color-primary-light)] sm:min-h-0">Médias &amp; partenaires</Link></li>
               </ul>
               <h3 className="mb-3 font-[family-name:var(--font-heading)] font-semibold text-[var(--color-text)]">Pays couverts</h3>

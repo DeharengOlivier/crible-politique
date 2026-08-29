@@ -12,6 +12,8 @@ import {
     statementsFor
 } from '@/lib/electoralScope';
 import { useShareCodes } from '@/lib/useShareCodes';
+import { statEventOf } from '@/lib/analysisStatEvent';
+import { reportAnalysis } from '@/lib/cribleApi';
 import RespondentPicker from '@/components/test/RespondentPicker';
 import StatementSurvey from '@/components/test/StatementSurvey';
 import ClarifySurvey from '@/components/test/ClarifySurvey';
@@ -20,6 +22,8 @@ import ResultsView from '@/components/test/ResultsView';
 import { ProfileIcon } from '@/lib/icons';
 import { Compass, Check, Mic } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
+import RestoreProfileCard from '@/components/profile/RestoreProfileCard';
+import type { VaultProfile } from '@/lib/profileVault';
 
 // Time-to-value optimized flow:
 // intro (1 screen) → country → express (15 statements, ~3 min) → clarify
@@ -205,7 +209,7 @@ function IntroView({
 
             <div className="mx-auto flex max-w-md flex-col gap-2 text-left text-sm text-[var(--color-text-secondary)]">
                 {[
-                    'Aucun compte, aucune donnée collectée: tout se calcule dans votre navigateur.',
+                    'Aucun compte requis: tout se calcule dans votre navigateur, aucune réponse transmise.',
                     'Résultats expliqués énoncé par énoncé, sources à l’appui.',
                     'Jamais de consigne de vote: un miroir, pas un juge.'
                 ].map((line, i) => (
@@ -301,8 +305,30 @@ function TestFlow() {
     // Atomic transition: a stage, its answer set and its respondent change
     // together. Nothing downstream of the country stage may run without one.
     const transition = (next: Stage, nextAnswers: AnswerRecord, nextRespondent = respondent) => {
+        // One completed run, one anonymous aggregate event. Only a transition
+        // into the results counts: restoring a share link or resuming a saved
+        // session re-displays an analysis, it does not perform one.
+        if (next === 'results' && stage !== 'results' && nextRespondent !== null) {
+            reportAnalysis(
+                statEventOf(
+                    nextRespondent.country,
+                    nextAnswers,
+                    computePartyMatches(nextAnswers, nextRespondent)
+                )
+            );
+        }
         setChosen({ stage: next, answers: nextAnswers, respondent: nextRespondent, saved });
         save({ stage: next, answers: nextAnswers, respondent: nextRespondent });
+    };
+
+    // A vault profile was sealed by this app, but it travelled through a
+    // server and a foreign device: its college is re-narrowed like any input.
+    const resumeFromVault = (profile: VaultProfile) => {
+        const college = profile.country === 'BE' ? parseBelgianCollege(profile.college) : null;
+        const vaultRespondent: Respondent =
+            college === null ? { country: profile.country } : { country: profile.country, college };
+        setChosen({ stage: 'results', answers: profile.answers, respondent: vaultRespondent, saved: null });
+        save({ stage: 'results', answers: profile.answers, respondent: vaultRespondent });
     };
 
     if (flow === null) return null;
@@ -322,6 +348,12 @@ function TestFlow() {
                         if (saved) setChosen({ ...saved, saved });
                     }}
                 />
+            )}
+
+            {stage === 'intro' && (
+                <div className="mt-8">
+                    <RestoreProfileCard onRestored={resumeFromVault} />
+                </div>
             )}
 
             {(stage === 'country' || needsRespondent) && (

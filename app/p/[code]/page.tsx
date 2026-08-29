@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const title = identity.syntheticProfile?.title ?? 'Profil singulier';
     return {
         title: `${title} - Le Crible Politique`,
-        description: `"${identity.syntheticProfile?.tagline ?? 'Un profil qui ne rentre dans aucune case.'}" Et toi, où te situes-tu ? Fais le test en 3 minutes: tes réponses ne quittent jamais ton appareil.`
+        description: `"${identity.syntheticProfile?.tagline ?? 'Un profil qui ne rentre dans aucune case.'}" Et toi, où te situes-tu ? Fais le test en 3 minutes: le calcul se fait dans ton navigateur.`
     };
 }
 

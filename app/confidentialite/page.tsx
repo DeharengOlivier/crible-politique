@@ -20,17 +20,43 @@ export default function ConfidentialitePage() {
                         </h2>
                         <p className="mt-2 text-lg text-[var(--color-text-secondary)]">
                             Les opinions politiques sont des données sensibles au sens de l&apos;article 9 du
-                            RGPD. Notre réponse: ne pas les collecter du tout.
+                            RGPD. Notre réponse: ne jamais pouvoir les lire, et faire reposer cette
+                            garantie sur l&apos;architecture plutôt que sur une promesse.
                         </p>
                     </div>
 
                     <div className="space-y-4 rounded-2xl border border-[var(--color-border-light)] bg-white p-6 text-sm leading-relaxed text-[var(--color-text-secondary)] sm:p-8">
                         <ul className="list-disc space-y-3 pl-5">
                             <li>
-                                <strong className="text-[var(--color-text)]">Aucun compte, aucun serveur de données.</strong>{' '}
+                                <strong className="text-[var(--color-text)]">Aucun compte requis, aucune réponse transmise.</strong>{' '}
                                 Vos réponses, votre profil, vos proximités partisanes: tout est calculé dans
-                                votre navigateur et n&apos;en sort jamais. Il n&apos;existe pas de base de
-                                données de profils, même anonymisés.
+                                votre navigateur. Par défaut, rien n&apos;en sort: le serveur sert des pages
+                                et ne reçoit jamais vos réponses.
+                            </li>
+                            <li>
+                                <strong className="text-[var(--color-text)]">La sauvegarde de profil est chiffrée avant de partir.</strong>{' '}
+                                Si vous choisissez de sauvegarder votre profil avec votre compte Google, il
+                                est chiffré dans votre navigateur (AES-256-GCM) avec une clé qui ne quitte
+                                jamais votre appareil. Le serveur ne stocke qu&apos;un bloc illisible,
+                                associé à une empreinte irréversible de votre compte: personne, ni nous, ni
+                                l&apos;hébergeur, ni quiconque accéderait à la base de données, ne peut lire
+                                vos réponses ni savoir ce que vous pensez. La contrepartie est réelle: si
+                                vous perdez à la fois votre code de récupération et l&apos;appareil qui le
+                                garde, votre profil est indéchiffrable, pour nous aussi. Vous pouvez le
+                                supprimer du serveur à tout moment depuis vos résultats.
+                            </li>
+                            <li>
+                                <strong className="text-[var(--color-text)]">Des statistiques publiques, anonymes par construction.</strong>{' '}
+                                À la fin d&apos;une analyse, le site incrémente un compteur: le pays, le
+                                nombre d&apos;énoncés répondus et le ou les partis arrivés en tête. Ni vos
+                                réponses, ni votre identité, ni votre adresse IP ne sont enregistrées: le
+                                serveur ne conserve que des totaux agrégés, sans ligne par événement ni
+                                horodatage individuel, donc sans rien à recouper. Le résultat est public:
+                                la page{' '}
+                                <Link href="/statistiques" className="font-semibold text-[var(--color-primary)] hover:underline">
+                                    statistiques
+                                </Link>{' '}
+                                montre à tout le monde, vous compris, la totalité de ce que nous voyons.
                             </li>
                             <li>
                                 <strong className="text-[var(--color-text)]">L&apos;IA n&apos;intervient jamais pendant l&apos;utilisation.</strong>{' '}
@@ -91,7 +117,10 @@ export default function ConfidentialitePage() {
                             . Vous pouvez y lire exactement ce que fait le site, et vous n&apos;avez même pas
                             besoin du code pour vérifier l&apos;essentiel: ouvrez les outils de développement de
                             votre navigateur (F12, onglet &quot;Réseau&quot;) pendant le test, et constatez
-                            qu&apos;aucune requête ne transmet vos réponses. N&apos;importe qui peut faire cette
+                            qu&apos;aucune requête ne transmet vos réponses. Vous y verrez au plus deux
+                            appels vers notre API: le compteur anonyme de fin d&apos;analyse (pays et
+                            partis en tête, jamais vos réponses) et, si vous sauvegardez votre profil,
+                            un bloc chiffré illisible. N&apos;importe qui peut faire cette
                             vérification, ou la demander à quelqu&apos;un de confiance. Et tout ce qui détermine
                             vos résultats (énoncés, positions des partis, formule) est publié:{' '}
                             <Link href="/methodology" className="font-semibold text-[var(--color-primary)] hover:underline">

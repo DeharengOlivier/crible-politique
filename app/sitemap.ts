@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         '/concepts',
         '/methodology',
         '/confidentialite',
+        '/statistiques',
         '/a-propos',
         '/partners',
         '/legal'

@@ -298,6 +298,23 @@ Types are in `types/`. The display strings in the data and type files
 (dimension labels, archetype names, Likert labels, statement text) are kept in
 French on purpose: they are the actual product copy.
 
+## Optional backend: encrypted vaults and public statistics
+
+The app is fully client-side by default. Two opt-in features share one tiny
+backend, a Cloudflare Worker + D1 in `api/` (see `api/README.md`):
+
+- **Save my profile**: Google sign-in, profile encrypted in the browser
+  (AES-256-GCM, key held by the user as a recovery code), server stores an
+  unreadable blob. Even a full database dump reveals nothing.
+- **Public statistics** (`/statistiques`): total analyses and weighted
+  leading-party distribution, kept as aggregate counters only (no per-event
+  rows, no IP, no identity). Weighting: `statements answered / 33`, ties
+  split equally (METHODOLOGY.md §8.1).
+
+Both features switch on only when `NEXT_PUBLIC_CRIBLE_API_URL` and (for the
+vault) `NEXT_PUBLIC_GOOGLE_CLIENT_ID` are set; without them the site behaves
+exactly as before.
+
 ## Tests
 
 ```sh

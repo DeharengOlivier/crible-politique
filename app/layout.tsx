@@ -19,11 +19,11 @@ export const metadata: Metadata = {
   // (criblepolitique.fr): used as the base for absolute OG image URLs.
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://criblepolitique.fr"),
   title: "Le Crible Politique — Un miroir, pas un juge",
-  description: "Vos convictions au crible, les programmes au crible du droit. Situez vos positions en 7 dimensions, comparez-les aux positions documentées des partis (FR/BE) et vérifiez ce que le droit permet vraiment. Sans compte, sans collecte de données.",
+  description: "Vos convictions au crible, les programmes au crible du droit. Situez vos positions en 7 dimensions, comparez-les aux positions documentées des partis (FR/BE) et vérifiez ce que le droit permet vraiment. Le calcul se fait dans votre navigateur; sauvegarde chiffrée facultative.",
   manifest: "/manifest.json",
   openGraph: {
     title: "Le Crible Politique — Quel est ton profil politique ?",
-    description: "12 énoncés, 3 minutes, méthodologie publique. Tes réponses ne quittent jamais ton appareil.",
+    description: "15 énoncés, 3 minutes, méthodologie publique. Le calcul se fait dans ton navigateur.",
     type: "website",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },

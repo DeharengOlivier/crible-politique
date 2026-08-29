@@ -53,7 +53,7 @@ export function statementsFor(country: Country): Statement[] {
     return STATEMENTS_BY_COUNTRY[country];
 }
 
-/** The 14 express statements of this country: 2 per dimension, in corpus order. */
+/** The 15 express statements: 2 per dimension, 3 for geopolitics, in corpus order. */
 export function expressStatementsFor(country: Country): Statement[] {
     return EXPRESS_BY_COUNTRY[country];
 }

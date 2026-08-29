@@ -371,15 +371,46 @@ une assistance IA importante: c'est dit, daté et tracé dans ce registre.
 Les opinions politiques sont des données sensibles (art. 9 RGPD). Architecture
 "privé par construction":
 
-- aucun compte, aucun serveur de données: tout se calcule dans le navigateur;
+- aucun compte requis, aucune réponse transmise: tout se calcule dans le
+  navigateur, et par défaut rien n'en sort;
 - la voix (mode entretien) est traitée par les API du navigateur, jamais transmise;
 - le lien de comparaison duo encode les réponses dans l'URL elle-même, stocké
   nulle part, partagé uniquement par choix explicite de l'utilisateur;
+- la sauvegarde de profil (facultative, compte Google) chiffre le profil dans
+  le navigateur (AES-256-GCM); la clé, remise à l'utilisateur sous forme de
+  code de récupération, ne quitte jamais son appareil. Le serveur stocke un
+  bloc illisible, indexé par une empreinte SHA-256 poivrée du compte: ni
+  l'opérateur du site, ni l'hébergeur, ni un accès complet à la base ne
+  permettent de lire les réponses. Perdre le code et l'appareil rend le profil
+  indéchiffrable pour tout le monde, opérateur compris: c'est le prix assumé
+  de la garantie;
 - aucun pisteur publicitaire, aucune monétisation des données, par principe.
 
 Vérifiable sans accès au code: les outils de développement de n'importe quel
 navigateur (onglet "Réseau") permettent de constater qu'aucune requête ne
 transmet les réponses pendant le test.
+
+### 8.1 Statistiques publiques
+
+À la fin d'une analyse, le site envoie un événement anonyme: pays, nombre
+d'énoncés ayant reçu une position, et parti(s) au premier rang. Jamais les
+réponses, jamais un identifiant, et le serveur n'en conserve aucune trace
+individuelle: il incrémente des totaux agrégés, sans ligne par événement, sans
+horodatage, sans adresse IP. La page /statistiques publie l'intégralité de ce
+que l'opérateur peut voir.
+
+Pondération: une analyse pèse sa part du corpus, soit `énoncés répondus / 33`.
+Une passe express (15 énoncés) compte pour 15/33 ≈ 0,45 d'une passe intégrale,
+et les clarifications adaptatives remontent le poids de la passe qu'elles
+affinent. En cas d'ex æquo au premier rang (cas structurel Ecolo/Groen, codés
+identiques), le poids se partage à parts égales entre les ex æquo: chaque
+analyse contribue exactement son poids, une égalité ne gonfle personne. Le
+compteur brut d'analyses (non pondéré) est publié à côté des poids. Modifier
+cette pondération est un changement de méthodologie, documenté ici, jamais un
+réglage silencieux. Limite assumée: l'événement n'est pas authentifié (les
+statistiques n'exigent pas de compte), il est validé et borné côté serveur
+mais reste falsifiable par un acteur outillé; les compteurs sont indicatifs,
+pas un sondage.
 
 ## 9. Limites connues
 
