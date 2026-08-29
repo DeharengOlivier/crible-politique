@@ -462,7 +462,7 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                 </h3>
                 <p className="mx-auto mt-1 max-w-xl text-sm text-[var(--color-text-secondary)]">
                     Retraite à 60 ans, quotas d&apos;immigration, sortie de l&apos;OTAN, déficit sous 3%...
-                    Les mesures phares du débat passées au crible: ce qui est établi, ce qui est débattu,
+                    Les mesures phares du débat, examinées norme par norme: ce qui est établi, ce qui est débattu,
                     sans verdict.
                 </p>
                 <Link

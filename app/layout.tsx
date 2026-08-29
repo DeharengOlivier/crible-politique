@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   // preview deployment overrides it with NEXT_PUBLIC_SITE_URL.
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://crible.eu"),
   title: "Le Crible Politique — Un miroir, pas un juge",
-  description: "Vos convictions au crible, les programmes au crible du droit. Situez vos positions en 7 dimensions, comparez-les aux positions documentées des partis (FR/BE) et vérifiez ce que le droit permet vraiment. Le calcul se fait dans votre navigateur; sauvegarde chiffrée facultative.",
+  description: "Situez vos positions en 7 dimensions, comparez-les aux positions documentées des partis (France et Belgique), et voyez ce que le droit permet ou empêche pour les mesures phares du débat. Le calcul se fait dans votre navigateur; sauvegarde chiffrée facultative.",
   manifest: "/manifest.json",
   openGraph: {
     title: "Le Crible Politique — Quel est ton profil politique ?",

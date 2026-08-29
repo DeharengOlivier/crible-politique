@@ -173,7 +173,7 @@ export default function Home() {
                 <Scale className="h-6 w-6" strokeWidth={1.5} aria-hidden="true" />
               </div>
               <h2 id="crible-title" className="mb-3 font-[family-name:var(--font-heading)] text-2xl font-bold text-[var(--color-primary)] md:text-3xl">
-                L&apos;observatoire&nbsp;: les programmes au crible du droit
+                L&apos;observatoire&nbsp;: ce que le droit permet, et à quelles conditions
               </h2>
               <p className="mb-6 max-w-xl text-[var(--color-text-secondary)]">
                 Retraite à 60 ans, quotas d&apos;immigration, sortie de l&apos;OTAN, déficit sous 3%...
@@ -197,7 +197,7 @@ export default function Home() {
                 </div>
                 <div>
                   <dt className="font-[family-name:var(--font-heading)] text-4xl font-bold text-[var(--color-primary)]">{MEASURES.length}</dt>
-                  <dd className="text-sm text-[var(--color-text-muted)]">mesures au crible du droit</dd>
+                  <dd className="text-sm text-[var(--color-text-muted)]">mesures examinées norme par norme</dd>
                 </div>
               </dl>
             </div>
@@ -212,8 +212,8 @@ export default function Home() {
             <div>
               <h3 className="mb-3 font-[family-name:var(--font-heading)] text-lg font-bold text-[var(--color-primary)]">Le Crible Politique</h3>
               <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
-                Initiative citoyenne indépendante. Vos convictions au crible, les programmes au
-                crible du droit. Méthodologie ouverte, aucune consigne de vote.
+                Initiative citoyenne indépendante. Vos positions face à celles des partis, et ce
+                que le droit permet mesure par mesure. Méthodologie ouverte, aucune consigne de vote.
               </p>
             </div>
             <div>

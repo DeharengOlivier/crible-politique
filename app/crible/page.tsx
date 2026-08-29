@@ -7,7 +7,7 @@ import PageHeader from '@/components/PageHeader';
 export const metadata: Metadata = {
     title: "L'observatoire - Le Crible Politique",
     description:
-        "Les mesures phares du débat politique au crible du droit: ce qui est établi, ce qui est débattu, les obstacles norme par norme et les voies possibles. Jamais de verdict."
+        "Les mesures phares du débat politique, examinées norme par norme: ce qui est établi, ce qui est débattu, les obstacles et les voies possibles. Jamais de verdict."
 };
 
 export default function CriblePage() {
@@ -18,7 +18,7 @@ export default function CriblePage() {
             <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
                 <div className="mb-8 space-y-3 text-center">
                     <h2 className="font-[family-name:var(--font-heading)] text-3xl font-bold text-[var(--color-primary)]">
-                        {MEASURES.length} mesures phares au crible du droit
+                        {MEASURES.length} mesures phares, examinées norme par norme
                     </h2>
                     <p className="mx-auto max-w-2xl text-[var(--color-text-secondary)]">
                         Pour chaque mesure emblématique, des oppositions comme du gouvernement: ce qui est
