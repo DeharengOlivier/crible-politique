@@ -1,3 +1,5 @@
+import { BelgianCollege, Country } from "@/types/positions";
+
 // Archetypes per dimension. The label values stay in French: they are the
 // user-facing political taxonomy displayed in results.
 // Naming rule (audited): each label must be one a sincere supporter of the
@@ -110,7 +112,11 @@ export enum MoralArchetype {
 export interface PoliticalParty {
     id: string;
     name: string;
-    country: "FR" | "BE";
+    country: Country;
+    // Belgian parties only: the electoral colleges whose ballot carries this
+    // list. A French party has none, because France has a single national
+    // party system.
+    colleges?: BelgianCollege[];
     // Reference to the manifesto used for coding the positions.
     program?: {
         label: string;

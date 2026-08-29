@@ -3,6 +3,30 @@
 // positions explicitly validated by the user. No opaque model decides the
 // profile.
 
+// The two political systems the tool covers. A respondent belongs to exactly
+// one of them: the statements they answer and the parties they are compared
+// against both follow from it.
+export type Country = "FR" | "BE";
+
+// Belgian federal elections are held in three electoral colleges, and a voter
+// only ever sees the lists of their own one. A Walloon cannot vote N-VA.
+export type BelgianCollege = "wallonie" | "bruxelles" | "flandre";
+
+// Where a statement applies. "common" statements are answered by everyone and
+// carry the same political meaning in both countries; a country-scoped one
+// exists because the cleavage it measures is specific to that country, or
+// because the common wording would not mean the same thing there.
+export type StatementScope = "common" | Country;
+
+// Who is answering: the country whose statements they see and whose parties
+// they are compared against, and for Belgium the electoral college whose
+// ballot they will actually face. An absent college means "show me every
+// Belgian party", which is a legitimate answer and the only one for France.
+export interface Respondent {
+    country: Country;
+    college?: BelgianCollege;
+}
+
 export type DimensionKey =
     | "power"
     | "economy"
@@ -26,14 +50,13 @@ export type AnswerRecord = Record<string, AnswerValue>;
 export interface Statement {
     id: string;
     dimension: DimensionKey;
+    scope: StatementScope;
     // A single affirmative statement (never two propositions in one question),
     // phrased to be acceptable both to a supporter and to an opponent.
     text: string;
     // What agreeing / disagreeing means (shown in the explanations).
     agreeLabel: string;
     disagreeLabel: string;
-    // Part of the express test (12 statements, first profile in ~3 minutes).
-    express?: boolean;
 }
 
 // Sourcing status of a position attributed to a party. The string literals are
