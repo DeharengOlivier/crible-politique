@@ -50,7 +50,9 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <head>
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        {/* The icon links are emitted from app/icon.svg, app/favicon.ico and
+            app/apple-icon.png: a hand-written one pointed at a file that had
+            never existed. */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN && (
           <script

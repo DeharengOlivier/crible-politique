@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "check:privacy": "node scripts/privacy-check.mjs",
     "check:build": "node scripts/build-budget.mjs",
-    "check:api": "tsc -p api/tsconfig.json --noEmit"
+    "check:api": "tsc -p api/tsconfig.json --noEmit",
+    "build:icons": "node scripts/build-icons.mjs"
   },
   "dependencies": {
     "jose": "^6.2.10",

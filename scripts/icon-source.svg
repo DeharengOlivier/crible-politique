@@ -1,0 +1,16 @@
+<!-- The application mark, and the single source every icon is generated from
+     (npm run build:icons). A sieve seen face-on: the white ring is the frame,
+     the two bars are the mesh, and the accent bar is what the tool keeps.
+     Brand colours are the site's own tokens: primary #1E3A8A, accent #D97706.
+
+     Two constraints shaped it. It has to survive a 16px browser tab, which
+     rules out fine meshes and lettering, and it has to read on a dark tab bar
+     as well as a light one, which is why the disc is a solid ring rather than
+     a thin outline. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"
+     role="img" aria-label="Le Crible Politique">
+    <rect width="64" height="64" rx="14" fill="#1E3A8A"/>
+    <circle cx="32" cy="32" r="19" fill="none" stroke="#FFFFFF" stroke-width="5"/>
+    <rect x="18" y="26" width="28" height="5" rx="2.5" fill="#FFFFFF"/>
+    <rect x="18" y="34.5" width="28" height="5" rx="2.5" fill="#D97706"/>
+</svg>
