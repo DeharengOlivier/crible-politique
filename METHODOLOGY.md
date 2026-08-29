@@ -37,11 +37,34 @@ ici, les deux le sont.
 
 ## 2. Les énoncés
 
-Le corpus compte 27 énoncés communs aux deux pays et 3 propres à chacun, soit
-30 énoncés par répondant, couvrant 7 dimensions: rapport au pouvoir, économie,
+Le corpus compte 30 énoncés communs aux deux pays et 3 propres à chacun, soit
+33 énoncés par répondant, couvrant 7 dimensions: rapport au pouvoir, économie,
 géopolitique, société, environnement, rapport à la connaissance, morale
-politique. La liste intégrale est visible dans l'application et publiée avec
+politique. Chaque dimension porte 4 énoncés communs, sauf la géopolitique qui
+en porte 7. La liste intégrale est visible dans l'application et publiée avec
 les données.
+
+Le déséquilibre géopolitique est un choix mesuré, pas un accident. Hors
+immigration, les quatre énoncés d'origine (UE, OTAN, immigration, intervention)
+séparaient le RN de LFI de 2 points sur 12 possibles: les deux partis votent
+pareil sur la souveraineté et l'OTAN, et les clivages qui les opposent
+réellement (l'Ukraine, la Russie, le Proche-Orient) étaient absents du corpus.
+Trois énoncés ont été ajoutés (soutien militaire à l'Ukraine, normalisation
+avec la Russie, alignement sur Israël), codés pour les 24 partis à partir de
+votes et de déclarations 2024-2026, tous au statut `a_verifier`.
+
+Ce que la mesure dit de ces trois énoncés, dit honnêtement: l'énoncé
+israélo-palestinien apporte un axe réellement nouveau (corrélation de 0,08 avec
+le clivage Est-Ouest sur les positions des 24 partis) et sépare fortement les
+partis dans les deux pays (écart-type 1,40 en France, 1,16 en Belgique). Les
+énoncés Ukraine et Russie sont, eux, fortement corrélés à l'axe OTAN existant
+(0,84 à 0,95 en valeur absolue): ils ajoutent du poids à ce clivage plus qu'un
+axe indépendant, et ce poids supplémentaire est assumé parce que ce débat
+structure le champ politique actuel. En Belgique, où le consensus sur l'Ukraine
+est large, ils séparent peu (écart-type 0,95 et 0,75); en France ils séparent
+beaucoup (1,70 et 1,41). Puisque la proximité est une moyenne sur les énoncés,
+la géopolitique pèse désormais 7 énoncés sur 33: quiconque juge ce poids
+excessif peut le constater, la formule est publique.
 
 Règles d'écriture auditables:
 
@@ -352,7 +375,7 @@ transmet les réponses pendant le test.
 
 ## 9. Limites connues
 
-- 30 énoncés ne couvrent pas tout le champ politique.
+- 33 énoncés ne couvrent pas tout le champ politique.
 - Les positions des partis évoluent; chaque codage référence un programme daté.
   Les 72 positions ajoutées avec les six énoncés propres à un pays sont au
   statut `a_verifier` et attendent le double codage contradictoire. Aucune
@@ -363,7 +386,7 @@ transmet les réponses pendant le test.
   exacte, l'ordre de lecture ne la montre pas encore.
 - Les profils synthétiques sont une simplification assumée, conçue pour la
   discussion, pas pour l'assignation.
-- Les signatures d'archétypes reposent sur 3 ou 4 énoncés par dimension: la
+- Les signatures d'archétypes reposent sur 3 à 7 énoncés par dimension: la
   granularité est limitée et le premier profil synthétique qui correspond est
   retenu (l'ordre de la liste fait partie des données publiées).
 - Le test express seul ne sépare pas tous les courants (35 archétypes sur 79 en

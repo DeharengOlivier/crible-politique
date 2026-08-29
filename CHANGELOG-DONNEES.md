@@ -11,6 +11,74 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-29 (nuit) - La géopolitique gagne trois clivages qui lui manquaient
+
+- **Motif, mesuré**: hors immigration, les quatre énoncés géopolitiques (UE,
+  OTAN, immigration, intervention extérieure) séparaient le RN de LFI de
+  **2 points sur 12 possibles**: les deux partis convergent sur la souveraineté
+  et la distance à l'OTAN. Les clivages qui les opposent réellement (Ukraine,
+  Russie, Proche-Orient) étaient absents du corpus. Un répondant aux positions
+  géopolitiques de LFI et neutre ailleurs obtenait RN 65 / LFI 68, quasi
+  indiscernables.
+
+### Énoncés ajoutés (communs aux deux pays)
+
+- **`ge5`** "Mon pays doit poursuivre son soutien militaire à l'Ukraine, même
+  si cela a un coût pour lui."
+- **`ge6`** "À terme, mon pays devra renouer des relations économiques et
+  diplomatiques normales avec la Russie."
+- **`ge7`** "Dans le conflit israélo-palestinien, mon pays doit soutenir en
+  priorité Israël."
+
+Le corpus passe à 30 énoncés communs + 3 par pays = 33 par répondant. La
+géopolitique porte désormais 7 énoncés là où les autres dimensions en portent
+4: la proximité étant une moyenne, ce poids accru de la dimension est un choix
+éditorial assumé et publié (METHODOLOGY.md §2).
+
+### Positions ajoutées: 72 (24 partis x 3 énoncés), toutes `a_verifier`
+
+Codées depuis des votes, communiqués et programmes 2024-2026, réunis par
+recherche documentaire le 29 août 2026. Les positions les plus tranchées
+portent une citation datée: adhésion officielle de LFI au BDS (3 décembre
+2024), votes du RN contre les résolutions ukrainiennes au Parlement européen
+(17 juillet 2024), reconnaissance de la Palestine par la France à l'ONU
+(22 septembre 2025), accord belge sanctions + reconnaissance (2 septembre
+2025), ligne Bouchez au MR, opposition du PTB aux livraisons d'armes. Les
+positions déduites d'une participation gouvernementale (partis de la coalition
+Arizona sur l'Ukraine) sont codées prudemment à ±1 et attendent le double
+codage. Ecolo et Groen restent codés à l'identique, conformément à leurs
+positions communes.
+
+### Signatures étendues
+
+Les 11 archétypes géopolitiques couvrent désormais ge5-ge7 (signatures
+complètes obligatoires). Codage éditorial publié, contestable énoncé par
+énoncé via GOVERNANCE.md.
+
+### Ce que la mesure dit après, redondance comprise
+
+- Écart RN-LFI en géopolitique: 6 -> **10 points** (l'énoncé israélo-palestinien
+  en apporte 4 à lui seul). Le répondant simulé "géopolitique LFI, neutre
+  ailleurs" obtient désormais LFI 70 / RN 65, et LFI premier en lecture
+  directionnelle.
+- **`ge7` est un axe réellement nouveau**: corrélation de 0,08 avec le clivage
+  Est-Ouest sur les positions des 24 partis; écarts-types 1,40 (FR) et
+  1,16 (BE).
+- **`ge5` et `ge6` sont fortement corrélés à l'axe OTAN existant** (0,84 à 0,95
+  en valeur absolue): ils ajoutent du poids à ce clivage plus qu'un axe
+  indépendant, et séparent peu les partis belges (écarts-types 0,95 et 0,75,
+  consensus ukrainien large). Dit tel quel plutôt que caché.
+- Coût du départage adaptatif inchangé (+0,49 énoncé par dimension en France,
+  +0,71 en Belgique, maximum 2), les 79 archétypes restent atteignables.
+
+### Liens partagés: version 3
+
+Le corpus ayant grandi, les codes passent en version 3 (même format, corpus de
+33). Les codes version 2 du 29 août restent lisibles pour toujours: leur corpus
+de 30 énoncés est gelé dans le décodeur, et les trois énoncés nouveaux sont
+simplement sans réponse pour eux. Vérifié par test et par le contrôle de
+confidentialité (6 générations de liens).
+
 ## 2026-08-29 (soir) - Correction d'un codage inventé, départage adaptatif
 
 ### Ecolo et Groen: la différenciation est retirée

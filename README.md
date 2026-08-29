@@ -263,7 +263,7 @@ it can be read, diffed and audited:
 
 | File | Contents |
 | --- | --- |
-| [`data/statements.ts`](data/statements.ts) | 27 statements common to both countries plus 3 specific to each, so 30 per respondent, 4 per dimension, with agree/disagree labels. Each country has its own 14-statement express subset. |
+| [`data/statements.ts`](data/statements.ts) | 30 statements common to both countries plus 3 specific to each, so 33 per respondent: 4 per dimension, except geopolitics which carries 7 (Ukraine, Russia and the Middle East were measured missing). Each country has its own 14-statement express subset. |
 | [`data/parties.ts`](data/parties.ts) | The 24 parties (12 French, 12 Belgian) with their reference manifesto, their country and, for the Belgian ones, the electoral colleges they run in. |
 | [`data/partyPositions.ts`](data/partyPositions.ts) | Each party's position on each statement (same Likert scale), with a sourcing status and citation. |
 | [`data/archetypeSignatures.ts`](data/archetypeSignatures.ts) | Expected answer patterns per archetype, used to identify a dominant archetype per dimension. Every archetype of a dimension is scored on exactly the same statements, so no current wins by having a shorter signature. |
@@ -308,7 +308,7 @@ The suite (Vitest, twenty-two files in `__tests__/`) locks the product's central
 promises: data integrity, determinism, external consistency, the honesty of what
 the result claims, and the privacy properties of the share links.
 
-- `__tests__/scoringEngine.test.ts`: the 30 statements of each country cover 7
+- `__tests__/scoringEngine.test.ts`: the 33 statements of each country cover 7
   dimensions, every party has a position on every statement of its country, the
   agreement formula holds, "no opinion" is never penalized, answering a party's
   exact positions yields 100%, the profile-code roundtrip is lossless, and the
