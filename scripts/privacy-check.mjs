@@ -29,9 +29,17 @@ const RENDER_TIMEOUT_MS = 60_000;
 // How long stdout must stay silent before the dump counts as finished.
 const QUIET_MS = 2_000;
 
-// A real answer code (28 statements) and the badge code it produces.
-const ANSWERS = '1eebaeedadaebedbeadaddbddabeb';
-const BADGE = '2046354a';
+// Real answer codes and the badge codes they produce. A v2 code names the
+// country it was taken in; a v1 one predates countries and is still in
+// people's messages.
+const ANSWERS = '2fdcbedcbbdddedcdcdbdedccdbebdecsy';
+const BADGE = '26111404';
+const ANSWERS_BE = '2bdcbeecbbddcedcdbdbdddcbdbebaaegx';
+const LEGACY_ANSWERS = '1eebaeedadaebedbeadaddbddabeb';
+
+// Every code that must never appear in a request line, whatever its generation
+// or country. Checking only one of them would let a leak through the others.
+const ANSWER_CODES = [ANSWERS, ANSWERS_BE, LEGACY_ANSWERS];
 
 const CASES = [
     {
@@ -40,9 +48,17 @@ const CASES = [
         why: 'a "keep my results" link restores the results'
     },
     {
-        url: `/compare#a=${ANSWERS}&b=${ANSWERS}`,
+        // A link minted before the country existed cannot name one, and the
+        // application asks rather than guessing. The answers must survive that
+        // question, and must still never reach the server.
+        url: `/test#p=${LEGACY_ANSWERS}`,
+        expect: 'Dans quel pays votez-vous',
+        why: 'a link older than the country asks for one instead of guessing'
+    },
+    {
+        url: `/compare#a=${ANSWERS}&b=${ANSWERS_BE}`,
         expect: 'de convergence globale',
-        why: 'a comparison link compares'
+        why: 'a comparison link compares, across the border too'
     },
     {
         url: `/p/${BADGE}#p=${ANSWERS}`,
@@ -267,7 +283,7 @@ async function main() {
             `http://127.0.0.1:${PROXY_PORT}${testCase.url}`
         );
 
-        const leaked = lines.filter((line) => line.includes(ANSWERS));
+        const leaked = lines.filter((line) => ANSWER_CODES.some((code) => line.includes(code)));
         if (leaked.length > 0) {
             failures.push(
                 `${testCase.url}\n    the server received the answer code in ${leaked.length} request line(s):\n      ${leaked.join('\n      ')}`

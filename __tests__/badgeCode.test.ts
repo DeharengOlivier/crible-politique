@@ -10,21 +10,16 @@ import { BADGE_ALPHABET } from '@/data/badgeAlphabet';
 import { encodeAnswers } from '@/lib/profileCode';
 import { computeProfile } from '@/lib/scoringEngine';
 import { STATEMENTS } from '@/data/statements';
-import { PARTY_POSITIONS } from '@/data/partyPositions';
 import { ARCHETYPE_SIGNATURES } from '@/data/archetypeSignatures';
 import { DIMENSION_ORDER } from '@/types/positions';
-import type { AnswerRecord } from '@/types/positions';
+import { answersLikeParty } from './support/respondents';
 
 // A badge code sits in the path of a shared profile URL, which means it
 // reaches the server, the access log and every link-preview crawler. It
 // therefore has exactly one job: say what the shared page displays, and be
 // unable to say anything more.
 
-function answersFromParty(partyId: string): AnswerRecord {
-  const answers: AnswerRecord = {};
-  for (const s of STATEMENTS) answers[s.id] = PARTY_POSITIONS[s.id][partyId].value;
-  return answers;
-}
+const answersFromParty = answersLikeParty;
 
 const PARTIES_UNDER_TEST = ['fr_lfi', 'fr_rn', 'fr_ps', 'fr_lr', 'fr_renaissance', 'fr_eelv'];
 
@@ -70,7 +65,7 @@ describe('encodeBadge', () => {
   it('is far shorter than the answer code it replaces', () => {
     const answers = answersFromParty('fr_ps');
     expect(encodeBadge(computeProfile(answers)).length).toBeLessThan(
-      encodeAnswers(answers).length / 3
+      encodeAnswers(answers, 'FR').length / 3
     );
   });
 
@@ -131,7 +126,7 @@ describe('decodeBadge', () => {
   });
 
   it('is not confused by an answer code', () => {
-    expect(decodeBadge(encodeAnswers(answersFromParty('fr_lfi')))).toBeNull();
+    expect(decodeBadge(encodeAnswers(answersFromParty('fr_lfi'), 'FR'))).toBeNull();
   });
 });
 
@@ -189,7 +184,7 @@ describe('identityFromShareCode, the /p/{code} boundary', () => {
     // Those links carry the full answer code in the path. They are in
     // people's messages and they must keep resolving to the same page.
     const profile = computeProfile(answersFromParty('fr_rn'));
-    const identity = identityFromShareCode(encodeAnswers(answersFromParty('fr_rn')));
+    const identity = identityFromShareCode(encodeAnswers(answersFromParty('fr_rn'), 'FR'));
     expect(identity?.syntheticProfile?.id).toBe(profile.syntheticProfile?.id);
     for (const dim of DIMENSION_ORDER) {
       expect(identity?.dimensionLabels[dim]).toBe(profile.dimensionArchetypes[dim]?.label);
