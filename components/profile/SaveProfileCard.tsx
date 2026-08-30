@@ -4,19 +4,23 @@ import { useState } from 'react';
 import type { AnswerRecord, Respondent } from '@/types/positions';
 import { deleteVault } from '@/lib/cribleApi';
 import { profileVaultEnabled } from '@/lib/optionalFeatures';
+import { currentIdToken } from '@/lib/googleSession';
 import { saveProfileToVault } from '@/lib/vaultClient';
-import GoogleSignInButton from '@/components/profile/GoogleSignInButton';
 
 // "Save my profile", with the opposite data deal from the usual one: the
 // profile is sealed in this browser before it is uploaded and opened in this
 // browser when it comes back, so the plaintext never crosses the network and
 // the database holds no name, no email and no readable answer.
 //
-// Signing in with Google is the whole credential. There is no code to write
-// down: the key is derived from the account by the API, which means the same
-// account opens the same vault on any device, and it also means our server
-// could derive that key. The privacy page says so in those words rather than
-// promising an impossibility.
+// Signing in with Google is the whole credential, and since 2026-08-30 it
+// happens in exactly one place: the bubble in the page corner. This card uses
+// the sign-in already made and never draws a Google button of its own. Three
+// Google buttons on three screens left a reader unable to tell whether they
+// were signing into three different things.
+//
+// The token lives in memory only, so a hard reload loses it and the card asks
+// for the bubble again. That is the price of keeping no credential on disk,
+// and the card says it rather than failing silently.
 
 type CardState =
     | { step: 'idle' }
@@ -24,6 +28,16 @@ type CardState =
     | { step: 'saved'; idToken: string }
     | { step: 'deleted' }
     | { step: 'failed'; reason: 'quota_exceeded' | 'unauthorized' | 'error' };
+
+function SignInFirst() {
+    return (
+        <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
+            Connectez-vous avec Google depuis la bulle en haut à droite de la page pour
+            sauvegarder ce profil et le retrouver sur un autre appareil. C&apos;est le seul endroit
+            du site où l&apos;on se connecte.
+        </p>
+    );
+}
 
 export default function SaveProfileCard({
     answers,
@@ -36,20 +50,24 @@ export default function SaveProfileCard({
 
     if (!profileVaultEnabled()) return null;
 
-    const handleIdToken = async (idToken: string) => {
+    const idToken = currentIdToken();
+
+    const handleSave = async (token: string) => {
         setState({ step: 'saving' });
-        const outcome = await saveProfileToVault(idToken, {
+        const outcome = await saveProfileToVault(token, {
             country: respondent.country,
             college: respondent.college ?? null,
             answers,
             savedAt: new Date().toISOString()
         });
-        setState(outcome === 'saved' ? { step: 'saved', idToken } : { step: 'failed', reason: outcome });
+        setState(
+            outcome === 'saved' ? { step: 'saved', idToken: token } : { step: 'failed', reason: outcome }
+        );
     };
 
-    const handleDelete = async (idToken: string) => {
+    const handleDelete = async (token: string) => {
         setState(
-            (await deleteVault(idToken)) ? { step: 'deleted' } : { step: 'failed', reason: 'error' }
+            (await deleteVault(token)) ? { step: 'deleted' } : { step: 'failed', reason: 'error' }
         );
     };
 
@@ -59,17 +77,26 @@ export default function SaveProfileCard({
                 Sauvegarder mon profil
             </h3>
 
-            {state.step === 'idle' && (
-                <div className="mt-3 space-y-4">
-                    <p className="text-sm text-[var(--color-text-secondary)]">
-                        Retrouvez ce profil plus tard ou sur un autre appareil, en vous
-                        reconnectant avec Google. Il est chiffré dans votre navigateur avant
-                        l&apos;envoi: le serveur ne garde qu&apos;un bloc illisible, sans votre
-                        nom, sans votre adresse e-mail et sans votre identifiant Google en clair.
-                    </p>
-                    <GoogleSignInButton onIdToken={(idToken) => void handleIdToken(idToken)} />
-                </div>
-            )}
+            {state.step === 'idle' &&
+                (idToken === null ? (
+                    <SignInFirst />
+                ) : (
+                    <div className="mt-3 space-y-4">
+                        <p className="text-sm text-[var(--color-text-secondary)]">
+                            Retrouvez ce profil plus tard ou sur un autre appareil, en vous
+                            reconnectant avec Google. Il est chiffré dans votre navigateur avant
+                            l&apos;envoi: le serveur ne garde qu&apos;un bloc illisible, sans votre
+                            nom, sans votre adresse e-mail et sans votre identifiant Google en clair.
+                        </p>
+                        <button
+                            type="button"
+                            onClick={() => void handleSave(idToken)}
+                            className="min-h-[44px] rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-primary-light)]"
+                        >
+                            Sauvegarder ce profil
+                        </button>
+                    </div>
+                ))}
 
             {state.step === 'saving' && (
                 <p className="mt-3 text-sm text-[var(--color-text-muted)]">
@@ -100,14 +127,22 @@ export default function SaveProfileCard({
             )}
 
             {state.step === 'failed' && (
-                <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
-                    {state.reason === 'quota_exceeded' &&
-                        'Trop de sauvegardes aujourd’hui pour ce compte. Réessayez demain.'}
-                    {state.reason === 'unauthorized' &&
-                        'La connexion Google n’a pas pu être vérifiée. Reconnectez-vous et réessayez.'}
-                    {state.reason === 'error' &&
-                        'La sauvegarde n’a pas abouti. Vos réponses restent dans ce navigateur; réessayez plus tard.'}
-                </p>
+                <>
+                    {state.reason === 'unauthorized' ? (
+                        <>
+                            <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
+                                La connexion Google n&apos;a pas pu être vérifiée, ou elle a expiré.
+                            </p>
+                            <SignInFirst />
+                        </>
+                    ) : (
+                        <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
+                            {state.reason === 'quota_exceeded'
+                                ? 'Trop de sauvegardes aujourd’hui pour ce compte. Réessayez demain.'
+                                : 'La sauvegarde n’a pas abouti. Vos réponses restent dans ce navigateur; réessayez plus tard.'}
+                        </p>
+                    )}
+                </>
             )}
         </section>
     );

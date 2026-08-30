@@ -70,6 +70,17 @@ export default function ConfidentialitePage() {
                                 rien à perdre.
                             </li>
                             <li>
+                                <strong className="text-[var(--color-text)]">Ce que la connexion laisse sur cet appareil.</strong>{' '}
+                                Quand vous vous connectez depuis la bulle en haut à droite, votre
+                                navigateur garde <strong className="text-[var(--color-text)]">votre prénom et votre photo Google</strong>,
+                                pour que la bulle affiche votre visage plutôt qu&apos;un logo. Il ne
+                                garde <strong className="text-[var(--color-text)]">jamais le jeton</strong>{' '}
+                                de connexion, qui est ce qui donne accès à votre sauvegarde: il sert le
+                                temps de l&apos;échange puis disparaît, y compris d&apos;un simple
+                                rechargement de page. &quot;Se déconnecter&quot; efface le prénom et la
+                                photo, et ne touche pas à vos réponses.
+                            </li>
+                            <li>
                                 <strong className="text-[var(--color-text)]">Ce que nous pourrions faire, et que nous ne faisons pas.</strong>{' '}
                                 La clé de votre sauvegarde est recalculée par notre API à partir de votre
                                 compte Google et d&apos;un secret serveur, puis remise à votre navigateur.

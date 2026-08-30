@@ -54,6 +54,23 @@ export function claimsFromIdToken(idToken: string): GoogleDisplayIdentity | null
     return { name: name ?? 'Mon compte Google', picture };
 }
 
+// The ID token of the current sign-in, in memory only.
+//
+// It is a bearer credential for the vault API, so it is never written to
+// localStorage or sessionStorage: a reload loses it, and the reader signs in
+// again from the bubble. That is the cost of not leaving a credential on disk,
+// and it is the whole reason there is exactly one place to sign in: the token
+// obtained there is the one every other screen uses.
+let idTokenInMemory: string | null = null;
+
+export function rememberIdToken(idToken: string): void {
+    idTokenInMemory = idToken;
+}
+
+export function currentIdToken(): string | null {
+    return idTokenInMemory;
+}
+
 const listeners = new Set<() => void>();
 
 function notify(): void {
@@ -109,6 +126,7 @@ export function saveGoogleIdentity(identity: GoogleDisplayIdentity): void {
 }
 
 export function forgetGoogleIdentity(): void {
+    idTokenInMemory = null;
     try {
         localStorage.removeItem(GOOGLE_IDENTITY_STORAGE_KEY);
     } catch {

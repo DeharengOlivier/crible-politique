@@ -2,10 +2,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import AccountBadge from '@/components/AccountBadge';
-import { claimsFromIdToken, loadGoogleIdentity } from '@/lib/googleSession';
+import { claimsFromIdToken, currentIdToken, loadGoogleIdentity } from '@/lib/googleSession';
 import { encryptProfile } from '@/lib/profileVault';
 import { statementsFor } from '@/lib/electoralScope';
-import { loadSavedSession } from '@/lib/testSession';
+import { TEST_SESSION_STORAGE_KEY, loadSavedSession } from '@/lib/testSession';
 import type { AnswerRecord, LikertValue } from '@/types/positions';
 
 // Requested 2026-08-29 (night): signing in lives in the top right corner of
@@ -128,10 +128,33 @@ describe('the account badge', () => {
         expect(screen.queryByRole('img')).toBeNull();
     });
 
-    it('stays off the test page, which has no chrome', () => {
+    it('stays off the questionnaire, which has no chrome', () => {
         pathname.current = '/test';
         const { container } = render(<AccountBadge />);
         expect(container.innerHTML).toBe('');
+    });
+
+    it('comes back on the results, the one screen of /test that offers to save', () => {
+        // Added 2026-08-30 with the removal of every other Google button: the
+        // save card no longer signs anyone in, so the bubble has to be reachable
+        // where saving is offered, and only there.
+        pathname.current = '/test';
+        localStorage.setItem(
+            TEST_SESSION_STORAGE_KEY,
+            JSON.stringify({ stage: 'results', answers: deterministicAnswers(), respondent: { country: 'FR' } })
+        );
+        render(<AccountBadge />);
+        expect(screen.getByText('FAKE_GOOGLE')).toBeTruthy();
+    });
+
+    it('remembers the token in memory so the results page can save, and never stores it', async () => {
+        await fakeServerWithVault(deterministicAnswers());
+        render(<AccountBadge />);
+        fireEvent.click(screen.getByText('FAKE_GOOGLE'));
+
+        await waitFor(() => expect(currentIdToken()).toBe(ID_TOKEN));
+        expect(JSON.stringify(localStorage)).not.toContain('fake-signature');
+        expect(sessionStorage.length).toBe(0);
     });
 
     it('stays away entirely when the deployment has no vault', () => {
@@ -183,7 +206,7 @@ describe('the account badge', () => {
         expect(screen.getByRole('button', { name: /Camille Réunion/ })).toBeTruthy();
     });
 
-    it('forgets the account on sign-out, and never kept the token', async () => {
+    it('forgets the account and the token on sign-out', async () => {
         await fakeServerWithVault(deterministicAnswers());
         render(<AccountBadge />);
         fireEvent.click(screen.getByText('FAKE_GOOGLE'));
@@ -196,6 +219,7 @@ describe('the account badge', () => {
         fireEvent.click(screen.getByRole('button', { name: /Se déconnecter/ }));
 
         expect(loadGoogleIdentity()).toBeNull();
+        expect(currentIdToken()).toBeNull();
         expect(screen.getByText('FAKE_GOOGLE')).toBeTruthy();
     });
 

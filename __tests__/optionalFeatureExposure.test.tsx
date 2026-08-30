@@ -7,7 +7,7 @@ import ConfidentialitePage from '@/app/confidentialite/page';
 import StatistiquesPage from '@/app/statistiques/page';
 import { EmbedResults } from '@/app/embed/page';
 import SaveProfileCard from '@/components/profile/SaveProfileCard';
-import RestoreProfileCard from '@/components/profile/RestoreProfileCard';
+import AccountBadge from '@/components/AccountBadge';
 import { profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
 // Found 2026-08-29 on the live site: https://crible.deploy-env.net/statistiques
@@ -29,7 +29,8 @@ vi.mock('next/navigation', () => ({
     notFound: () => {
         notFoundCalls.count += 1;
         throw new Error('NEXT_NOT_FOUND');
-    }
+    },
+    usePathname: () => '/'
 }));
 
 function enableStatistics(): void {
@@ -108,6 +109,18 @@ describe('the privacy page describes the deployment it runs in', () => {
         expect(linksTo(container, '/statistiques')).toBe(1);
     });
 
+    it('declares what signing in leaves in the browser, and what it does not', () => {
+        // Added 2026-08-30 with the account bubble: signing in now keeps the
+        // Google display name and picture URL in local storage, which is
+        // personal data at rest that the page had never mentioned. It also
+        // keeps no token, and that asymmetry is exactly what a reader
+        // auditing the site would want stated.
+        enableVault();
+        const text = render(<ConfidentialitePage />).container.textContent ?? '';
+        expect(text).toMatch(/votre prénom et votre photo Google/);
+        expect(text).toMatch(/jamais le jeton/);
+    });
+
     it('declares the counter alone when only the statistics are configured', () => {
         enableStatistics();
         const text = render(<ConfidentialitePage />).container.textContent ?? '';
@@ -173,11 +186,13 @@ describe('the vault needs both of its flags, and the neighbours stay gated', () 
         expect(profileVaultEnabled()).toBe(true);
     });
 
-    it('renders no profile card while the vault is closed', () => {
+    it('renders no profile card and no account bubble while the vault is closed', () => {
         enableStatistics(); // half-configured: still no vault
         const save = render(<SaveProfileCard answers={{ pw1: 1 }} respondent={{ country: 'FR' }} />);
         expect(save.container.innerHTML).toBe('');
-        const restore = render(<RestoreProfileCard onRestored={() => {}} />);
-        expect(restore.container.innerHTML).toBe('');
+        // The restore card was deleted on 2026-08-30: restoring a vault profile
+        // is the account bubble's job, the site's single sign-in point.
+        const badge = render(<AccountBadge />);
+        expect(badge.container.innerHTML).toBe('');
     });
 });

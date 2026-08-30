@@ -2,28 +2,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import SaveProfileCard from "@/components/profile/SaveProfileCard";
-import RestoreProfileCard from "@/components/profile/RestoreProfileCard";
-import type { VaultProfile } from "@/lib/profileVault";
+import { forgetGoogleIdentity, rememberIdToken } from "@/lib/googleSession";
 
-// The two faces of the vault as the user sees them. Google's real widget is
-// replaced by a plain button handing over a fake token: what is under test is
-// everything that happens after the token, with the real crypto. Whether the
-// cards appear at all is decided by the real flags, stubbed below like any
-// other configured deployment.
+// The vault as the user sees it. What is under test is everything that happens
+// after the Google token, with the real crypto.
 //
-// Since 2026-08-29 signing in is the whole interaction. The previous version of
+// Since 2026-08-30 there is exactly one place in the whole site where a reader
+// signs in: the bubble in the page corner. This card no longer draws a Google
+// button of its own; it uses the sign-in already made, and says where to sign
+// in when there is none. A reader who met three different Google buttons on
+// three screens could not tell whether they were three accounts.
+//
+// Since 2026-08-29 signing in is the whole credential: the previous version of
 // this file asserted a recovery code was shown, typed back in and kept in local
 // storage; that feature is gone rather than weakened, because a reader who had
-// to keep a 62-character key had a second thing to lose, and losing it lost
-// their profile.
-
-vi.mock("@/components/profile/GoogleSignInButton", () => ({
-    default: ({ onIdToken }: { onIdToken: (t: string) => void }) => (
-        <button type="button" onClick={() => onIdToken("fake-google-token")}>
-            FAKE_GOOGLE
-        </button>
-    )
-}));
+// to keep a 62-character key had a second thing to lose.
 
 const RESPONDENT = { country: "FR" as const };
 const ANSWERS = { pw1: 2 as const, ge7: -2 as const };
@@ -69,25 +62,34 @@ function fakeServer() {
     return { state, fetchMock };
 }
 
-const signIn = () => fireEvent.click(screen.getByText("FAKE_GOOGLE"));
+const save = () => fireEvent.click(screen.getByRole("button", { name: /Sauvegarder ce profil/ }));
 
 beforeEach(() => {
     vi.stubEnv("NEXT_PUBLIC_CRIBLE_API_URL", "https://api.example");
     vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "client-123.apps.googleusercontent.com");
+    rememberIdToken("fake-google-token");
 });
 
 afterEach(() => {
     cleanup();
+    forgetGoogleIdentity();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
     localStorage.clear();
 });
 
-describe("SaveProfileCard", () => {
-    it("saves with the Google sign-in alone, and asks for nothing else", async () => {
+describe("SaveProfileCard, with the reader already signed in", () => {
+    it("draws no Google button of its own", () => {
+        fakeServer();
+        const { container } = render(<SaveProfileCard answers={ANSWERS} respondent={RESPONDENT} />);
+        expect(container.querySelector('[data-google-signin]')).toBeNull();
+        expect(screen.queryByText(/Se connecter avec Google/)).toBeNull();
+    });
+
+    it("saves on demand, and asks for nothing else", async () => {
         const server = fakeServer();
         render(<SaveProfileCard answers={ANSWERS} respondent={RESPONDENT} />);
-        signIn();
+        save();
 
         await waitFor(() => expect(screen.getByText(/Profil chiffré et sauvegardé/)).toBeTruthy());
         expect(screen.queryByText(/code/i)).toBeNull();
@@ -97,7 +99,7 @@ describe("SaveProfileCard", () => {
     it("uploads ciphertext, never the answers", async () => {
         const server = fakeServer();
         render(<SaveProfileCard answers={ANSWERS} respondent={RESPONDENT} />);
-        signIn();
+        save();
 
         await waitFor(() => expect(server.state.sealed).not.toBeNull());
         const uploaded = JSON.stringify(server.state.sealed);
@@ -108,7 +110,7 @@ describe("SaveProfileCard", () => {
     it("writes nothing to local storage: there is no secret left to keep", async () => {
         fakeServer();
         render(<SaveProfileCard answers={ANSWERS} respondent={RESPONDENT} />);
-        signIn();
+        save();
 
         await waitFor(() => expect(screen.getByText(/Profil chiffré et sauvegardé/)).toBeTruthy());
         expect(localStorage.length).toBe(0);
@@ -118,26 +120,24 @@ describe("SaveProfileCard", () => {
         const server = fakeServer();
         render(<SaveProfileCard answers={ANSWERS} respondent={RESPONDENT} />);
         server.state.saveStatus = 429;
-        signIn();
+        save();
 
         await waitFor(() => expect(screen.getByText(/Trop de sauvegardes/)).toBeTruthy());
     });
 
-    it("says when the sign-in itself was refused", async () => {
+    it("sends the reader back to the bubble when the sign-in has expired", async () => {
         const server = fakeServer();
         render(<SaveProfileCard answers={ANSWERS} respondent={RESPONDENT} />);
         server.state.keyStatus = 401;
-        signIn();
+        save();
 
-        await waitFor(() =>
-            expect(screen.getByText(/connexion Google n’a pas pu être vérifiée/)).toBeTruthy()
-        );
+        await waitFor(() => expect(screen.getByText(/en haut à droite/)).toBeTruthy());
     });
 
     it("deletes the vault on request", async () => {
         const server = fakeServer();
         render(<SaveProfileCard answers={ANSWERS} respondent={RESPONDENT} />);
-        signIn();
+        save();
         await waitFor(() => expect(screen.getByText(/Supprimer ce profil/)).toBeTruthy());
         fireEvent.click(screen.getByText(/Supprimer ce profil/));
 
@@ -146,62 +146,23 @@ describe("SaveProfileCard", () => {
     });
 });
 
-describe("RestoreProfileCard", () => {
-    async function saveOnce() {
+describe("SaveProfileCard, with nobody signed in", () => {
+    it("points at the one place where signing in happens, and offers no second one", () => {
+        forgetGoogleIdentity();
+        fakeServer();
         render(<SaveProfileCard answers={ANSWERS} respondent={RESPONDENT} />);
-        signIn();
-        await waitFor(() => expect(screen.getByText(/Profil chiffré et sauvegardé/)).toBeTruthy());
-        cleanup();
-    }
 
-    it("restores on another device with nothing but the sign-in", async () => {
-        // The whole point of the change: this is a fresh render with empty
-        // local storage, standing in for a phone that never saw the profile.
-        fakeServer();
-        await saveOnce();
-        localStorage.clear();
-
-        const restored: VaultProfile[] = [];
-        render(<RestoreProfileCard onRestored={(profile) => restored.push(profile)} />);
-        signIn();
-
-        await waitFor(() => expect(restored).toHaveLength(1));
-        expect(restored[0]).toMatchObject({ country: "FR", answers: ANSWERS });
-    });
-
-    it("offers no code to type", async () => {
-        fakeServer();
-        render(<RestoreProfileCard onRestored={() => {}} />);
-        expect(screen.queryByRole("textbox")).toBeNull();
-        expect(screen.queryByText(/code/i)).toBeNull();
-    });
-
-    it("says when the account has no vault at all", async () => {
-        fakeServer();
-        render(<RestoreProfileCard onRestored={() => {}} />);
-        signIn();
-
-        await waitFor(() => expect(screen.getByText(/Aucun profil sauvegardé/)).toBeTruthy());
-    });
-
-    it("reports a failure rather than restoring something wrong", async () => {
-        const server = fakeServer();
-        render(<RestoreProfileCard onRestored={() => {}} />);
-        server.state.keyStatus = 500;
-        signIn();
-
-        await waitFor(() => expect(screen.getByText(/n'a pas abouti/)).toBeTruthy());
+        expect(screen.getByText(/en haut à droite/)).toBeTruthy();
+        expect(screen.queryByRole("button", { name: /Sauvegarder ce profil/ })).toBeNull();
     });
 });
 
 describe("a deployment without the vault configured", () => {
-    it("shows neither card", () => {
+    it("shows no card at all", () => {
         vi.stubEnv("NEXT_PUBLIC_GOOGLE_CLIENT_ID", "");
-        const { container: save } = render(
+        const { container } = render(
             <SaveProfileCard answers={ANSWERS} respondent={RESPONDENT} />
         );
-        const { container: restore } = render(<RestoreProfileCard onRestored={() => {}} />);
-        expect(save.textContent).toBe("");
-        expect(restore.textContent).toBe("");
+        expect(container.textContent).toBe("");
     });
 });

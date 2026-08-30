@@ -11,6 +11,22 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-30 - Un seul endroit pour se connecter
+
+- **Suppression de `RestoreProfileCard`** (la carte "Déjà un profil sauvegardé ?"
+  sur l'accueil du test) et **du bouton Google de la carte de sauvegarde**. La
+  connexion se fait désormais uniquement depuis la bulle en haut à droite.
+- **Motif**: demandé par un lecteur. Trois boutons Google sur trois écrans
+  laissent croire à trois comptes différents; un seul point de connexion rend
+  l'état "connecté / déconnecté" lisible d'un coup d'oeil.
+- **Conséquence technique**: le jeton d'identité Google est conservé en
+  mémoire, jamais dans le stockage du navigateur; la carte de sauvegarde
+  l'utilise et, s'il a expiré ou si la page a été rechargée, renvoie vers la
+  bulle. La bulle réapparaît sur l'écran de résultats de /test, seul écran de
+  cette adresse qui propose une sauvegarde.
+- **Ajout sur la page Confidentialité**: ce que la connexion laisse sur
+  l'appareil (prénom et photo Google) et ce qu'elle n'y laisse pas (le jeton).
+
 ## 2026-08-29 (nuit, 5) - Les combats déclarés, relus dans les programmes
 
 - **Retrait de la couche de saillance CHES 2024** (`data/partySalience.ts`,

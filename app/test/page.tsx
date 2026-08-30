@@ -14,7 +14,6 @@ import {
 import { nextClarifyingStatement } from '@/lib/adaptiveClarification';
 import {
     expressStatementsFor,
-    parseBelgianCollege,
     statementsFor
 } from '@/lib/electoralScope';
 import { useShareCodes } from '@/lib/useShareCodes';
@@ -29,8 +28,6 @@ import ResultsView from '@/components/test/ResultsView';
 import { ProfileIcon } from '@/lib/icons';
 import { Compass, Check, Mic } from 'lucide-react';
 import FloatingBackButton from '@/components/FloatingBackButton';
-import RestoreProfileCard from '@/components/profile/RestoreProfileCard';
-import type { VaultProfile } from '@/lib/profileVault';
 
 // Time-to-value optimized flow:
 // intro (1 screen) → country → express (15 statements, ~3 min) → clarify
@@ -306,16 +303,6 @@ function TestFlow() {
         saveSession({ stage: next, answers: nextAnswers, respondent: nextRespondent });
     };
 
-    // A vault profile was sealed by this app, but it travelled through a
-    // server and a foreign device: its college is re-narrowed like any input.
-    const resumeFromVault = (profile: VaultProfile) => {
-        const college = profile.country === 'BE' ? parseBelgianCollege(profile.college) : null;
-        const vaultRespondent: Respondent =
-            college === null ? { country: profile.country } : { country: profile.country, college };
-        setChosen({ stage: 'results', answers: profile.answers, respondent: vaultRespondent, saved: null });
-        saveSession({ stage: 'results', answers: profile.answers, respondent: vaultRespondent });
-    };
-
     if (flow === null) return null;
 
     // A stage past the country screen without a respondent is unreachable by
@@ -333,12 +320,6 @@ function TestFlow() {
                         if (saved) setChosen({ ...saved, saved });
                     }}
                 />
-            )}
-
-            {stage === 'intro' && (
-                <div className="mt-8">
-                    <RestoreProfileCard onRestored={resumeFromVault} />
-                </div>
             )}
 
             {(stage === 'country' || needsRespondent) && (

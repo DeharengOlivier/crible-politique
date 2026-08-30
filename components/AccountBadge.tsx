@@ -8,12 +8,13 @@ import GoogleSignInButton from '@/components/profile/GoogleSignInButton';
 import { profileVaultEnabled } from '@/lib/optionalFeatures';
 import { restoreProfileFromVault } from '@/lib/vaultClient';
 import { parseBelgianCollege } from '@/lib/electoralScope';
-import { saveSession } from '@/lib/testSession';
+import { loadSavedSession, rawStoredSession, saveSession, subscribeToSession } from '@/lib/testSession';
 import {
     claimsFromIdToken,
     forgetGoogleIdentity,
     loadGoogleIdentity,
     rawGoogleIdentity,
+    rememberIdToken,
     saveGoogleIdentity,
     subscribeToGoogleIdentity
 } from '@/lib/googleSession';
@@ -25,12 +26,18 @@ import type { VaultProfile } from '@/lib/profileVault';
 // pulls the saved profile down into this browser, so the rest of the site can
 // greet them without a second gesture.
 //
-// It is absent from the test page, which deliberately carries no chrome at all
-// (a floating back button and nothing else): that absence is also the reason
-// no "see my profile" entry has to be hidden, since the profile is read there.
+// It is the ONLY place in the whole site where a reader signs in (2026-08-30):
+// the save card on the results uses the sign-in made here rather than drawing a
+// second Google button, because three buttons on three screens leave a reader
+// unable to tell whether they are three accounts.
+//
+// It is absent from the questionnaire, which deliberately carries no chrome at
+// all (a floating back button and nothing else), and comes back on the results
+// screen of that same address, which is where saving is offered. That absence
+// is also the reason no "see my profile" entry has to be hidden.
 
-/** The page whose own content is the reader's profile. */
-const PROFILE_PATH = '/test';
+/** The address that carries both the questionnaire and the results. */
+const TEST_PATH = '/test';
 
 function respondentOf(profile: VaultProfile): Respondent {
     // A vault profile travelled through a server and a foreign device: its
@@ -46,6 +53,11 @@ export default function AccountBadge() {
     // keep in sync, and a sign-out in another tab lands here too.
     const raw = useSyncExternalStore(subscribeToGoogleIdentity, rawGoogleIdentity, () => null);
     const identity = useMemo(() => (raw === null ? null : loadGoogleIdentity()), [raw]);
+    const rawSession = useSyncExternalStore(subscribeToSession, rawStoredSession, () => null);
+    const savedStage = useMemo(
+        () => (rawSession === null ? null : loadSavedSession()?.stage ?? null),
+        [rawSession]
+    );
     const [menuOpen, setMenuOpen] = useState(false);
     const [message, setMessage] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -66,9 +78,13 @@ export default function AccountBadge() {
         };
     }, [menuOpen]);
 
-    if (pathname === PROFILE_PATH || !profileVaultEnabled()) return null;
+    // On /test the badge is chrome the questionnaire refuses, except on the
+    // results, the one screen of that address that offers to save.
+    const onQuestionnaire = pathname === TEST_PATH && savedStage !== 'results';
+    if (onQuestionnaire || !profileVaultEnabled()) return null;
 
     const signIn = async (idToken: string) => {
+        rememberIdToken(idToken);
         const claims = claimsFromIdToken(idToken);
         if (claims !== null) saveGoogleIdentity(claims);
         const result = await restoreProfileFromVault(idToken);
