@@ -87,6 +87,51 @@ Toutes ces affirmations sont désormais tenues par une batterie de tests qui
 échoue si une page nie un flux que le build réalise, ou en déclare un qu'il ne
 peut pas faire (`__tests__/statedDataFlowsAreReal.test.tsx`).
 
+### Passe d'alignement du dépôt
+
+Une fois les pages corrigées, tout ce qui décrit le système a été relu contre le
+système:
+
+- **Pondération des statistiques**: le diviseur 33 est plus petit que le corpus
+  français depuis le 30 août. Aucun poids ne dépassait 1 (la formule est bornée),
+  donc rien n'était faux dans les compteurs, mais la description l'était: ce 33
+  est une **longueur de référence fixe**, pas la taille du corpus. Un diviseur
+  par pays rendrait une passe express française plus légère qu'une belge, alors
+  que ces compteurs existent pour comparer les deux. Écrit tel quel dans
+  `lib/analysisStatEvent.ts` et METHODOLOGY.md §8.1, et tenu par un test qui
+  vérifie qu'une passe intégrale vaut exactement une analyse dans les deux pays.
+- **« 7 énoncés sur 33 »** (poids de la géopolitique, METHODOLOGY.md §4): c'est
+  7 sur 35 en France et 7 sur 33 en Belgique.
+- **« 33 énoncés par répondant »** et **« les 33 énoncés de chaque pays »**
+  (README): corrigés, avec le renvoi vers `announcedLength`, qui dérive le
+  chiffre du corpus au lieu de le coder en dur.
+- **« vingt-deux fichiers de test »** (README): il y en a 62.
+- **« Vos réponses ne quittent jamais votre appareil »**, sous chaque énoncé du
+  questionnaire: un absolu qui cesse d'être vrai trois écrans plus loin sur un
+  build qui propose de sauvegarder. La phrase était de plus recopiée dans deux
+  composants, ce qui est la façon dont une phrase dérive. Elle vit maintenant à
+  un seul endroit (`answersStayHereSentence`) et lit le drapeau: « rien n'est
+  envoyé tant que vous ne le demandez pas » quand la sauvegarde existe, l'absolu
+  quand rien ne peut jamais partir.
+- **« no IP »** (README, api/README): la nuance manquait. Aucune adresse n'est
+  stockée, mais le limiteur de débit en lit une par requête pour nommer un
+  compteur éphémère. C'est ce que dit déjà la page confidentialité.
+
+### Les liens de partage v3, et le silence qui les accompagnait
+
+Décision du propriétaire: **on laisse tomber** les liens créés avant le
+30 août 2026. L'outil avait quelques jours, ils étaient peu partagés, et figer
+une liste d'énoncés par génération de corpus serait un impôt permanent sur
+chaque énoncé ajouté ensuite. C'est consigné dans le test pour que la question
+ne soit pas rouverte comme un oubli.
+
+Ce qui n'était pas acceptable, en revanche, c'est que l'échec soit muet:
+`/test#p=<code périmé>` retombait sur l'écran d'accueil du questionnaire sans un
+mot. Quelqu'un qui suivait le lien d'un proche voyait la porte d'entrée et ne
+pouvait pas distinguer un lien mort d'une erreur de sa part. Le code reste
+refusé (le lire contre le corpus actuel afficherait un profil jamais calculé),
+mais le refus est maintenant annoncé, avec la raison et la marche à suivre.
+
 ---
 
 ## 2026-08-31 - Compte requis pour ouvrir ses résultats, et quatre chiffres faux corrigés

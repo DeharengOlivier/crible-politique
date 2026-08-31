@@ -8,6 +8,7 @@ import PrivacyPage from '@/app/confidentialite/page';
 import PartnersPage from '@/app/partners/page';
 import AboutPage from '@/app/a-propos/page';
 import MethodologyPage from '@/app/methodology/page';
+import { answersStayHereSentence } from '@/lib/resultsAccess';
 
 // Reported 2026-08-31 by the owner, about the site's own privacy discourse:
 // "j'ai l'impression que c'est un mensonge". It was, and the worst of it was on
@@ -223,6 +224,35 @@ describe('the privacy page counts the calls a reader can actually see', () => {
         enableVault();
         const text = textOf(PrivacyPage);
         expect(text).toMatch(/voient votre adresse IP/);
+    });
+});
+
+describe('the questionnaire footer promises no more than the build keeps', () => {
+    // "Vos réponses ne quittent jamais votre appareil" is a claim about the
+    // future, printed under every statement. It is true of the questionnaire
+    // and of a build with no vault, and it stops being true three screens
+    // later on a build that offers to save: the answers leave, sealed, when
+    // the reader asks. The same over-claim in miniature that made the legal
+    // page wrong, so it gets the same treatment.
+    it('drops the "jamais" once saving exists', () => {
+        const text = answersStayHereSentence(true);
+        expect(text).not.toMatch(/ne quittent jamais/);
+        expect(text).toMatch(/tant que vous ne le demandez pas/);
+    });
+
+    it('keeps it on a build where nothing can ever be sent', () => {
+        expect(answersStayHereSentence(false)).toMatch(/ne quittent jamais votre appareil/);
+    });
+
+    it.each([
+        ['components/test/StatementSurvey.tsx'],
+        ['components/test/ClarifySurvey.tsx']
+    ])('%s reads the sentence rather than carrying its own copy', (path) => {
+        // The two surveys held the same hard-coded line, which is how one of
+        // them would come to disagree with the other and with the build.
+        const source = readFileSync(path, 'utf8');
+        expect(source).toMatch(/answersStayHereSentence/);
+        expect(source).not.toMatch(/ne quittent jamais votre appareil/);
     });
 });
 

@@ -67,8 +67,9 @@ axe indépendant, et ce poids supplémentaire est assumé parce que ce débat
 structure le champ politique actuel. En Belgique, où le consensus sur l'Ukraine
 est large, ils séparent peu (écart-type 0,95 et 0,75); en France ils séparent
 beaucoup (1,70 et 1,41). Puisque la proximité est une moyenne sur les énoncés,
-la géopolitique pèse désormais 7 énoncés sur 33: quiconque juge ce poids
-excessif peut le constater, la formule est publique.
+la géopolitique pèse désormais 7 énoncés sur 35 en France et 7 sur 33 en
+Belgique: quiconque juge ce poids excessif peut le constater, la formule est
+publique.
 
 Règles d'écriture auditables:
 
@@ -554,10 +555,16 @@ individuelle: il incrémente des totaux agrégés, sans ligne par événement, s
 horodatage, sans adresse IP. La page /statistiques publie l'intégralité de ce
 que l'opérateur peut voir.
 
-Pondération: une analyse pèse sa part du corpus, soit `énoncés répondus / 33`.
-Une passe express (15 énoncés) compte pour 15/33 ≈ 0,45 d'une passe intégrale,
-et les clarifications adaptatives remontent le poids de la passe qu'elles
-affinent. En cas d'ex æquo au premier rang (cas structurel Ecolo/Groen, codés
+Pondération: une analyse pèse `énoncés répondus / 33`, borné à 1. Le 33 est une
+longueur de référence fixe et non la taille du corpus, qui n'est plus la même
+des deux côtés de la frontière depuis que la France est passée à 35 énoncés le
+30 août 2026. Un diviseur par pays rendrait une passe express française moins
+lourde qu'une belge, alors que ces compteurs existent précisément pour comparer
+les deux; avec une référence unique, une passe intégrale vaut une analyse dans
+les deux pays, la France atteignant simplement le plafond deux énoncés plus
+tôt. Une passe express (15 énoncés) compte pour 15/33 ≈ 0,45 d'une passe
+intégrale, dans les deux pays, et les clarifications adaptatives remontent le
+poids de la passe qu'elles affinent. En cas d'ex æquo au premier rang (cas structurel Ecolo/Groen, codés
 identiques), le poids se partage à parts égales entre les ex æquo: chaque
 analyse contribue exactement son poids, une égalité ne gonfle personne. Le
 compteur brut d'analyses (non pondéré) est publié à côté des poids. Modifier

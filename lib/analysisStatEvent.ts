@@ -17,10 +17,20 @@ export interface AnalysisStatEvent {
 }
 
 /**
- * A full run spans the whole corpus. An analysis weighs its share of it, so an
- * express run (15 statements) counts for 15/33 of a full one and adaptive
- * clarifications raise the weight of the run they refine. Published in
- * METHODOLOGY.md; changing it is a methodology change, not a tweak.
+ * The reference length one analysis is measured against, so that an express run
+ * (15 statements) counts for 15/33 of a complete one and adaptive
+ * clarifications raise the weight of the run they refine.
+ *
+ * It is a fixed reference, deliberately NOT "the size of the corpus": the two
+ * corpora stopped being the same size when France went to 35 statements on
+ * 2026-08-30, and a per-country divisor would make an express analysis worth
+ * less in France than in Belgium, which is exactly the comparison the public
+ * counters exist to support. With one reference and the clamp in
+ * analysisWeight, a complete run counts for one analysis on either side of the
+ * border; France simply reaches 1 two statements early.
+ *
+ * Published in METHODOLOGY.md; changing it is a methodology change, not a
+ * tweak. Pinned by __tests__/analysisStatEvent.test.ts.
  */
 export const ANALYSIS_CORPUS_SIZE = 33;
 

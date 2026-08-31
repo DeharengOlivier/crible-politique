@@ -18,10 +18,17 @@ The one server this project has, and the two things it is allowed to hold:
    code") described the design that preceded it and had stopped being true.
    `app/confidentialite/page.tsx` says the same thing to readers.
 2. **Anonymous public statistics** (`/analyses` in, `/stats` out): aggregate
-   counters only. No per-event rows, no timestamps, no IP, no identity: one
-   `UPDATE ... + 1` per completed analysis, weighted by
-   `statements answered / 33` and split equally among tied leading parties
-   (see METHODOLOGY.md §8.1).
+   counters only. No per-event rows, no timestamps, no identity, and no address
+   stored: one `UPDATE ... + 1` per completed analysis, weighted by
+   `statements answered / 33` (clamped to 1; the 33 is a fixed reference length,
+   not the corpus size, so a complete run counts as one analysis in both
+   countries) and split equally among tied leading parties (METHODOLOGY.md
+   §8.1).
+
+   The one nuance, because "no IP" flat would be too strong: the rate limiter
+   reads `cf-connecting-ip` to name an ephemeral per-minute counter in the edge.
+   It is never written to D1, and `observability.enabled = false` keeps it out
+   of the logs too.
 
 The site runs fully without this API: every client call is optional,
 feature-flagged on `NEXT_PUBLIC_CRIBLE_API_URL` and `NEXT_PUBLIC_GOOGLE_CLIENT_ID`.

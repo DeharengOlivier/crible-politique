@@ -24,7 +24,16 @@ import { statementsFor } from "@/lib/electoralScope";
 //      version 3 did not carry that lesson forward. Anyone who used "Garder mes
 //      résultats" or "Comparer avec un proche" before 2026-08-30 holds a dead
 //      link. Reviving them means freezing a list per corpus generation and
-//      deciding how many generations to carry; that decision is the owner's.
+//      deciding how many generations to carry.
+//
+//      DECIDED 2026-08-31, by the project owner: those links are let go. The
+//      tool was days old and barely shared, and carrying a frozen list per
+//      corpus generation is a permanent tax on every future statement added.
+//      This is recorded so the question is not reopened as an oversight.
+//      A version 3 code that no longer decodes is refused, which is the right
+//      behaviour: it would otherwise be read against the wrong statements and
+//      show a profile that was never computed. What is NOT accepted is the
+//      failure being silent, which is what the battery below exists for.
 
 const CHECK = "scripts/privacy-check.mjs";
 

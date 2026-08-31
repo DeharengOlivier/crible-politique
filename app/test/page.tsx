@@ -147,15 +147,36 @@ function IntroView({
     onStart,
     onStartVoice,
     hasSaved,
-    onResume
+    onResume,
+    staleShareLink
 }: {
     onStart: () => void;
     onStartVoice: () => void;
     hasSaved: boolean;
     onResume: () => void;
+    /** The address carried a share code this build cannot read. */
+    staleShareLink: boolean;
 }) {
     return (
         <div className="mx-auto w-full max-w-xl space-y-7 text-center">
+            {/* A reader who followed a friend's link and lands on the front door
+                with nothing said cannot tell a dead link from a wrong page. The
+                code is refused (it would otherwise be read against statements it
+                was never answered on), and the refusal is spoken. */}
+            {staleShareLink && (
+                <p
+                    role="status"
+                    /* mt-14 clears the floating back button, 44px tall from 12px
+                       down in the same corner. Measured at 375px without it: the
+                       notice ran underneath it. */
+                    className="mt-14 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-left text-sm leading-relaxed text-amber-900 sm:mt-8"
+                >
+                    Ce lien de partage n&apos;est plus lisible. Les liens créés avant le 30 août 2026
+                    sont attachés à une version du questionnaire qui a changé depuis, et les rouvrir
+                    afficherait un profil qui n&apos;a jamais été calculé. Demandez-en un nouveau à la
+                    personne qui vous l&apos;a envoyé, ou faites le test vous-même.
+                </p>
+            )}
             <div className="space-y-3">
                 <h2 className="font-[family-name:var(--font-heading)] text-3xl font-bold text-[var(--color-primary)] sm:text-4xl">
                     Où vous situez-vous, vraiment ?
@@ -233,6 +254,13 @@ interface FlowState {
      * apply to someone else's profile (lib/resultsAccess.ts).
      */
     fromSharedLink: boolean;
+    /**
+     * The address carried a share code and it could not be read. Version 3
+     * codes are decoded against the current corpus, so one minted before a
+     * statement was added no longer matches and is refused. Carried so the
+     * introduction can say that, instead of looking like an ordinary arrival.
+     */
+    staleShareLink: boolean;
 }
 
 function restoreFlow(code: string | null, door: AnalysisMode | null, resume: boolean): FlowState {
@@ -245,7 +273,8 @@ function restoreFlow(code: string | null, door: AnalysisMode | null, resume: boo
             answers: decoded.answers,
             respondent: { country: decoded.country },
             saved: null,
-            fromSharedLink: true
+            fromSharedLink: true,
+            staleShareLink: false
         };
     }
     if (decoded) {
@@ -254,23 +283,26 @@ function restoreFlow(code: string | null, door: AnalysisMode | null, resume: boo
             answers: decoded.answers,
             respondent: null,
             saved: null,
-            fromSharedLink: true
+            fromSharedLink: true,
+            staleShareLink: false
         };
     }
+    // Present but unreadable: refused, and said out loud on the introduction.
+    const staleShareLink = code !== null && decoded === null;
     const saved = loadSavedSession();
     // "Revoir mes résultats" from the home page carries its intent in the
     // address: the reader already chose to come back to their session, so the
     // introduction has nothing left to offer them. Without a resumable
     // session the address degrades to the ordinary introduction.
     if (resume && saved !== null && saved.respondent !== null && saved.stage !== 'intro') {
-        return { ...saved, saved, fromSharedLink: false };
+        return { ...saved, saved, fromSharedLink: false, staleShareLink };
     }
     // A reader who came through one of the two doors has already made the
     // choice the introduction screen exists to offer.
     if (door !== null) {
-        return { stage: 'country', answers: {}, respondent: null, saved, fromSharedLink: false };
+        return { stage: 'country', answers: {}, respondent: null, saved, fromSharedLink: false, staleShareLink };
     }
-    return { stage: 'intro', answers: {}, respondent: null, saved, fromSharedLink: false };
+    return { stage: 'intro', answers: {}, respondent: null, saved, fromSharedLink: false, staleShareLink };
 }
 
 function TestFlow() {
@@ -344,7 +376,11 @@ function TestFlow() {
             answers: nextAnswers,
             respondent: nextRespondent,
             saved,
-            fromSharedLink
+            fromSharedLink,
+            // The reader has moved on from the introduction, which is the only
+            // screen that reports a dead link: carrying it further would leave
+            // the warning standing over a test they have started.
+            staleShareLink: false
         });
         saveSession({ stage: next, answers: nextAnswers, respondent: nextRespondent });
     };
@@ -362,11 +398,12 @@ function TestFlow() {
                     onStart={() => transition('country', {}, null)}
                     onStartVoice={() => transition('country', {}, null)}
                     hasSaved={!!saved && saved.stage !== 'intro' && saved.respondent !== null}
+                    staleShareLink={flow?.staleShareLink ?? false}
                     onResume={() => {
                         // A resumed session is this reader's own, never a
                         // shared profile: the code path that carries one never
                         // reaches the introduction screen.
-                        if (saved) setChosen({ ...saved, saved, fromSharedLink: false });
+                        if (saved) setChosen({ ...saved, saved, fromSharedLink: false, staleShareLink: false });
                     }}
                 />
             )}
@@ -460,7 +497,8 @@ function TestFlow() {
                                 answers: {},
                                 respondent: null,
                                 saved: null,
-                                fromSharedLink: false
+                                fromSharedLink: false,
+                                staleShareLink: false
                             });
                         }}
                     />

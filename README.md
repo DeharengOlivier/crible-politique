@@ -266,7 +266,7 @@ it can be read, diffed and audited:
 
 | File | Contents |
 | --- | --- |
-| [`data/statements.ts`](data/statements.ts) | 30 statements common to both countries plus 3 specific to each, so 33 per respondent: 4 per dimension, except geopolitics which carries 7 (Ukraine, Russia and the Middle East were measured missing). Each country has its own 15-statement express subset (2 per dimension, 3 for geopolitics). |
+| [`data/statements.ts`](data/statements.ts) | 30 statements common to both countries plus the ones specific to each, so 35 per French respondent and 33 per Belgian one: 4 per dimension, except geopolitics which carries 7 (Ukraine, Russia and the Middle East were measured missing). Each country has its own 15-statement express subset (2 per dimension, 3 for geopolitics). No surface hard-codes either number: `announcedLength` in `lib/electoralScope.ts` derives what the site announces from the corpus itself. |
 | [`data/parties.ts`](data/parties.ts) | The 24 parties (12 French, 12 Belgian) with their reference manifesto, their country and, for the Belgian ones, the electoral colleges they run in. |
 | [`data/partyPositions.ts`](data/partyPositions.ts) | Each party's position on each statement (same Likert scale), with a sourcing status and citation. |
 | [`data/archetypeSignatures.ts`](data/archetypeSignatures.ts) | Expected answer patterns per archetype, used to identify a dominant archetype per dimension. Every archetype of a dimension is scored on exactly the same statements, so no current wins by having a shorter signature. |
@@ -305,12 +305,20 @@ The app is fully client-side by default. Two opt-in features share one tiny
 backend, a Cloudflare Worker + D1 in `api/` (see `api/README.md`):
 
 - **Save my profile**: Google sign-in, profile encrypted in the browser
-  (AES-256-GCM, key held by the user as a recovery code), server stores an
-  unreadable blob. Even a full database dump reveals nothing.
+  (AES-256-GCM) and decrypted in the browser on the way back, so plaintext
+  answers never cross the wire; the server stores an unreadable blob under a
+  peppered hash, and a database dump alone reveals neither identities nor
+  content. Stated exactly: since 2026-08-29 the key is derived by the Worker
+  from the Google subject and a server secret, so whoever held both the
+  database and the secrets could open a vault. Google's script is fetched only
+  when the reader presses the account bubble, never on page load.
 - **Public statistics** (`/statistiques`): total analyses and weighted
   leading-party distribution, kept as aggregate counters only (no per-event
-  rows, no IP, no identity). Weighting: `statements answered / 33`, ties
-  split equally (METHODOLOGY.md §8.1).
+  rows, no timestamps, no identity, and no IP stored). Weighting:
+  `statements answered / 33` clamped to 1, where 33 is a fixed reference length
+  rather than the corpus size, so a complete run counts as one analysis in both
+  countries (METHODOLOGY.md §8.1). The Worker does read the caller's address to
+  bound abuse, per request and in the edge, storing nothing.
 
 Both features switch on only when `NEXT_PUBLIC_CRIBLE_API_URL` and (for the
 vault) `NEXT_PUBLIC_GOOGLE_CLIENT_ID` are set; without them the site behaves
@@ -327,11 +335,11 @@ that both ways round.
 npm test
 ```
 
-The suite (Vitest, twenty-two files in `__tests__/`) locks the product's central
+The suite (Vitest, 61 files in `__tests__/`) locks the product's central
 promises: data integrity, determinism, external consistency, the honesty of what
 the result claims, and the privacy properties of the share links.
 
-- `__tests__/scoringEngine.test.ts`: the 33 statements of each country cover 7
+- `__tests__/scoringEngine.test.ts`: the statements of each country cover 7
   dimensions, every party has a position on every statement of its country, the
   agreement formula holds, "no opinion" is never penalized, answering a party's
   exact positions yields 100%, the profile-code roundtrip is lossless, and the

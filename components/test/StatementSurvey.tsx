@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { Statement, AnswerRecord, AnswerValue, DimensionKey, DIMENSION_LABELS } from '@/types/positions';
 import LikertScale from './LikertScale';
+import { answersStayHereSentence } from '@/lib/resultsAccess';
+import { profileVaultEnabled } from '@/lib/optionalFeatures';
 
 // Statement flow: ONE statement per screen, auto-advance on answer,
 // going back is possible. Mobile-first: time-to-value < 3 minutes in express mode.
@@ -98,7 +100,7 @@ export default function StatementSurvey({
                     ← Énoncé précédent
                 </button>
                 <p className="text-xs text-[var(--color-text-muted)]">
-                    Vos réponses ne quittent jamais votre appareil.
+                    {answersStayHereSentence(profileVaultEnabled())}
                 </p>
             </div>
         </div>

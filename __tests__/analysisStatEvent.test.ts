@@ -5,6 +5,7 @@ import {
     leaderShares,
     statEventOf
 } from "@/lib/analysisStatEvent";
+import { COUNTRIES, expressStatementsFor, statementsFor } from "@/lib/electoralScope";
 import type { PartyMatch } from "@/lib/scoringEngine";
 import type { AnswerRecord } from "@/types/positions";
 
@@ -52,6 +53,31 @@ describe("analysisWeight", () => {
         expect(analysisWeight(1000)).toBe(1);
         expect(analysisWeight(Number.NaN)).toBe(0);
         expect(analysisWeight(2.7)).toBeCloseTo(2 / 33, 10); // fractions are not a thing
+    });
+
+    // The constant is a fixed reference length, not "the size of the corpus":
+    // the two corpora stopped being the same size when France went to 35 on
+    // 2026-08-30, and this pins what it is actually for. A complete run counts
+    // for one analysis on either side of the border, which is what makes the
+    // public counters comparable between countries; France reaches 1 two
+    // statements early and the clamp holds it there.
+    //
+    // What this would catch: shrinking either corpus below the reference, after
+    // which a complete run would silently weigh less than one whole analysis.
+    it.each(COUNTRIES)("weighs a complete %s run exactly one analysis", (country) => {
+        const full = statementsFor(country).length;
+        expect(full).toBeGreaterThanOrEqual(ANALYSIS_CORPUS_SIZE);
+        expect(analysisWeight(full)).toBe(1);
+    });
+
+    it("weighs an express run the same on both sides of the border", () => {
+        // Same numerator, same reference: an express analysis is one comparable
+        // unit in the public counters whichever country answered it.
+        const [first, second] = COUNTRIES.map((country) =>
+            analysisWeight(expressStatementsFor(country).length)
+        );
+        expect(first).toBe(second);
+        expect(first).toBeLessThan(1);
     });
 });
 

@@ -50,3 +50,22 @@ export function answersKeptWhileGated(country: Country): string {
     const where = country === "FR" ? "France" : "Belgique";
     return `Vos réponses (${where}) restent sur cet appareil: elles ne sont pas perdues, et se déconnecter n'y touche pas.`;
 }
+
+/**
+ * The line under every statement of the questionnaire.
+ *
+ * It read "Vos réponses ne quittent jamais votre appareil" in both survey
+ * components until 2026-08-31. That is a claim about the future, and on a
+ * deployment offering the vault it stops being true three screens later, when
+ * the reader asks to save and the answers leave sealed. It was also copied out
+ * twice, which is how a sentence drifts from what the code does.
+ *
+ * Both problems have one fix: state it here, once, and let it read the flag.
+ * A build that can never send anything keeps the absolute wording, because
+ * there it is simply true.
+ */
+export function answersStayHereSentence(vaultOffered: boolean): string {
+    return vaultOffered
+        ? "Vos réponses restent sur cet appareil: rien n'est envoyé tant que vous ne le demandez pas."
+        : "Vos réponses ne quittent jamais votre appareil.";
+}

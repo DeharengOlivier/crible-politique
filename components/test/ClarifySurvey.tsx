@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { AnswerRecord, AnswerValue, DIMENSION_LABELS } from '@/types/positions';
 import { nextClarifyingStatement } from '@/lib/adaptiveClarification';
 import LikertScale from './LikertScale';
+import { answersStayHereSentence } from '@/lib/resultsAccess';
+import { profileVaultEnabled } from '@/lib/optionalFeatures';
 
 // Adaptive tie-break stage, between the express test and the teaser: one
 // statement at a time, each one chosen by nextClarifyingStatement because the
@@ -100,7 +102,7 @@ export default function ClarifySurvey({
                     ← Énoncé précédent
                 </button>
                 <p className="text-xs text-[var(--color-text-muted)]">
-                    Vos réponses ne quittent jamais votre appareil.
+                    {answersStayHereSentence(profileVaultEnabled())}
                 </p>
             </div>
         </div>
