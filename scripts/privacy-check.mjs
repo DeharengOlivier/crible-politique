@@ -33,15 +33,22 @@ const QUIET_MS = 2_000;
 // country it was taken in; a v2 one does too but over the frozen thirty
 // statement corpus of 2026-08-29; a v1 one predates countries. All three
 // generations are in people's messages.
-const ANSWERS = '3fdcbedcbbdddebbedcdcdbdedccdbebdec14';
-const BADGE = '26111404';
-const ANSWERS_BE = '3bdcbeecbbddcdbbedcdbdbdddcbdbebaaeo2';
+const ANSWERS = '3fbaacabbbcbbadeaabaceadecbdadeaecedeue';
+const BADGE = '26820308';
+const ANSWERS_BE = '3baeaaecddaeaaadaababddcdcabaccebdc4t';
 const LEGACY_ANSWERS_V2 = '2fdcbedcbbdddedcdcdbdedccdbebdecsy';
 const LEGACY_ANSWERS = '1eebaeedadaebedbeadaddbddabeb';
+// A version 3 code minted against the 33-statement French corpus of
+// 2026-08-29. It no longer decodes, because a version 3 code is read against
+// the CURRENT corpus and France now asks 35 (see the note in
+// __tests__/shareCodeFixturesAreCurrent.test.ts). Kept in the leak list below
+// and out of the render cases: it is still a real answer code that must never
+// reach a server, and it is no longer a code that renders a page.
+const STALE_ANSWERS_V3 = '3fdcbedcbbdddebbedcdcdbdedccdbebdec14';
 
 // Every code that must never appear in a request line, whatever its generation
 // or country. Checking only one of them would let a leak through the others.
-const ANSWER_CODES = [ANSWERS, ANSWERS_BE, LEGACY_ANSWERS_V2, LEGACY_ANSWERS];
+const ANSWER_CODES = [ANSWERS, ANSWERS_BE, LEGACY_ANSWERS_V2, LEGACY_ANSWERS, STALE_ANSWERS_V3];
 
 const CASES = [
     {

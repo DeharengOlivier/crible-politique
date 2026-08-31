@@ -28,6 +28,31 @@ export interface PublicStats {
     countries: Record<Country, CountryPublicStats>;
 }
 
+/**
+ * How long any call to the API may take before it is given up on.
+ *
+ * A connection that hangs is worse than one that fails: the reader waits at a
+ * spinner with nothing to cancel. Eight seconds leaves room for a phone on a
+ * poor connection and is still short enough that someone is plausibly still
+ * looking at the screen. Every call here is bounded by it (CODING-RULES.md 7).
+ */
+export const API_TIMEOUT_MS = 8000;
+
+/**
+ * fetch, with an end. Built on AbortController and setTimeout rather than
+ * AbortSignal.timeout so the budget is on the ordinary clock, which tests can
+ * advance instead of waiting out.
+ */
+async function apiFetch(url: string, init: RequestInit = {}): Promise<Response> {
+    const controller = new AbortController();
+    const expiry = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+    try {
+        return await fetch(url, { ...init, signal: controller.signal });
+    } finally {
+        clearTimeout(expiry);
+    }
+}
+
 export function cribleApiBaseUrl(): string | null {
     const url = process.env.NEXT_PUBLIC_CRIBLE_API_URL;
     if (url === undefined || url.length === 0) return null;
@@ -42,7 +67,7 @@ export function reportAnalysis(event: AnalysisStatEvent): void {
     const base = cribleApiBaseUrl();
     if (base === null) return;
     try {
-        void fetch(`${base}/analyses`, {
+        void apiFetch(`${base}/analyses`, {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify(event),
@@ -57,7 +82,7 @@ export async function fetchPublicStats(): Promise<PublicStats | null> {
     const base = cribleApiBaseUrl();
     if (base === null) return null;
     try {
-        const response = await fetch(`${base}/stats`);
+        const response = await apiFetch(`${base}/stats`);
         if (!response.ok) return null;
         return parsePublicStats(await response.json());
     } catch {
@@ -79,7 +104,7 @@ export async function fetchVaultKey(idToken: string): Promise<VaultKeyResult> {
     const base = cribleApiBaseUrl();
     if (base === null) return { outcome: "error" };
     try {
-        const response = await fetch(`${base}/vault/key`, {
+        const response = await apiFetch(`${base}/vault/key`, {
             headers: { authorization: `Bearer ${idToken}` }
         });
         if (response.status === 401) return { outcome: "unauthorized" };
@@ -111,7 +136,7 @@ export async function saveVault(idToken: string, sealed: SealedProfile): Promise
     const base = cribleApiBaseUrl();
     if (base === null) return "error";
     try {
-        const response = await fetch(`${base}/vault`, {
+        const response = await apiFetch(`${base}/vault`, {
             method: "PUT",
             headers: { authorization: `Bearer ${idToken}`, "content-type": "application/json" },
             body: JSON.stringify(sealed)
@@ -135,7 +160,7 @@ export async function loadVault(idToken: string): Promise<VaultLoadResult> {
     const base = cribleApiBaseUrl();
     if (base === null) return { outcome: "error" };
     try {
-        const response = await fetch(`${base}/vault`, {
+        const response = await apiFetch(`${base}/vault`, {
             headers: { authorization: `Bearer ${idToken}` }
         });
         if (response.status === 404) return { outcome: "empty" };
@@ -152,7 +177,7 @@ export async function deleteVault(idToken: string): Promise<boolean> {
     const base = cribleApiBaseUrl();
     if (base === null) return false;
     try {
-        const response = await fetch(`${base}/vault`, {
+        const response = await apiFetch(`${base}/vault`, {
             method: "DELETE",
             headers: { authorization: `Bearer ${idToken}` }
         });

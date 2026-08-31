@@ -1,6 +1,7 @@
 import type { Country } from "@/types/positions";
 import type {
     CountryStats,
+    OutcomeLog,
     StatsSnapshot,
     StatsStore,
     StoredVault,
@@ -125,6 +126,25 @@ export function d1StatsStore(db: D1Database): StatsStore {
                 });
             }
             return { totalAnalyses: countries.FR.analyses + countries.BE.analyses, countries };
+        }
+    };
+}
+
+/**
+ * One row per (day, route, outcome), incremented. The table's CHECK
+ * constraints refuse anything outside the two closed vocabularies, so this
+ * adapter can stay a single statement with no validation of its own.
+ */
+export function d1OutcomeLog(db: D1Database): OutcomeLog {
+    return {
+        async record(day: string, route: string, outcome: string): Promise<void> {
+            await db
+                .prepare(
+                    `INSERT INTO api_outcomes (day, route, outcome, count) VALUES (?1, ?2, ?3, 1)
+                     ON CONFLICT (day, route, outcome) DO UPDATE SET count = count + 1`
+                )
+                .bind(day, route, outcome)
+                .run();
         }
     };
 }

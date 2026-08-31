@@ -101,6 +101,10 @@ function ports(overrides: Partial<ApiPorts> = {}): ApiPorts {
     return {
         verifyIdentity: verifier(),
         vaults: new MemoryVaultStore(),
+        // Wide open: this file is about what the verifier derives, not about
+        // the bounds around it (apiAbuseBounds.test.ts).
+        rateLimiter: { allow: async () => true },
+        outcomes: null,
         stats: {
             recordAnalysis: async () => {},
             snapshot: async () => ({

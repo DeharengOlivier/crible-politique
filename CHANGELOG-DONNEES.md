@@ -11,6 +11,74 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-31 - Compte requis pour ouvrir ses résultats, et quatre chiffres faux corrigés
+
+### Une connexion Google avant d'afficher ses propres résultats
+
+- Sur un déploiement qui offre la sauvegarde de profil, l'analyse se fait sans
+  compte mais les résultats s'ouvrent après connexion depuis la bulle en haut à
+  droite. C'est **une décision de produit, pas un contrôle de sécurité**, et
+  c'est écrit tel quel dans le code, sur la page Confidentialité et dans la
+  méthodologie: le calcul est public et s'exécute dans le navigateur, donc la
+  porte ne garde aucun secret et n'empêche personne de recalculer le même
+  résultat.
+- **Ce que la porte ne touche pas**: un déploiement sans compte configuré ne
+  l'affiche jamais (sinon un mur que personne ne peut franchir), un profil reçu
+  par lien partagé reste lisible sans compte, le questionnaire n'est pas
+  concerné, et les réponses restent sur l'appareil, porte ouverte ou fermée.
+- La condition est annoncée **avant le premier énoncé**, sur l'écran
+  d'introduction, et non découverte au dernier écran.
+- Les pages qui promettaient "aucun compte requis" ne le promettent plus quand
+  c'est faux: page Confidentialité, écran d'introduction et METHODOLOGY.md §8
+  disent maintenant lequel des deux déploiements est servi.
+
+### Quatre affirmations chiffrées fausses
+
+Trouvées en auditant le site contre sa propre promesse ("vérifiez-nous plutôt
+que de nous croire"). Aucune ne changeait un résultat, toutes annonçaient au
+lecteur un questionnaire qui n'existe pas:
+
+| Où | Disait | Dit |
+|---|---|---|
+| Accueil, porte "Analyse complète" | 38 énoncés | 33 à 35 énoncés |
+| Accueil, bandeau de chiffres | 38 énoncés sur 7 dimensions | 38 énoncés **au catalogue**, 33 à 35 posés selon le pays |
+| Choix du pays, ligne France | 33 énoncés dont 3 propres au débat français | 35 énoncés dont 5 propres au débat français |
+| Méthodologie, §2 | sous-ensemble express de 12 | 15 |
+
+Personne ne répond 38: c'est l'union des deux corpus nationaux. Un répondant
+français en voit 35, un belge 33. Les compteurs sont désormais calculés depuis
+le corpus et non recopiés à la main, et une batterie de tests interdit
+d'annoncer une longueur que personne ne répond.
+
+### Ordre de sourçage mesuré
+
+- Nouveau document `docs/sourcing-priority.md`, généré par
+  `scripts/sourcing-priority.ts`: pour chacune des 816 positions codées, la part
+  d'un panel de 200 répondants dont le **groupe de tête change** si cette seule
+  position bouge d'un cran. Sourcer dans cet ordre change des résultats;
+  sourcer dans un autre ordre n'en change pas.
+- Résultat principal: les positions du MoDem et de Renaissance dominent la
+  liste française. Un parti codé au centre est proche du plus grand nombre de
+  répondants, donc c'est lui qui fait basculer le classement.
+- Un cliquet dans la suite de tests interdit désormais au nombre de positions
+  sourcées de diminuer (55 nomment une source, 8 la lient, mesuré le 30 août).
+
+### Liens de partage: une fixture périmée, et un défaut à trancher
+
+- L'intégration continue échouait depuis le 30 août sur deux cas du contrôle de
+  confidentialité. Cause mesurée: le code de partage français utilisé par le
+  contrôle avait été frappé quand la France comptait 33 énoncés, elle en compte
+  35, et un code v3 est relu **contre le corpus actuel**. Fixtures régénérées,
+  et un test les attache désormais au corpus pour qu'elles ne pourrissent plus
+  en silence.
+- **Défaut non corrigé, décision à prendre**: un lien "Garder mes résultats" au
+  format v3 meurt quand le corpus change. Les formats v1 et v2 avaient été gelés
+  contre leur propre liste d'énoncés précisément pour éviter cela; v3 n'a pas
+  repris la leçon. Les liens émis avant le 30 août 2026 sont donc morts. Les
+  ressusciter suppose de geler une liste par génération de corpus.
+
+---
+
 ## 2026-08-30 - Un seul endroit pour se connecter
 
 - **Suppression de `RestoreProfileCard`** (la carte "Déjà un profil sauvegardé ?"

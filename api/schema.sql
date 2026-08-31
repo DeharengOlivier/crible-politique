@@ -1,11 +1,13 @@
 -- Crible Politique API schema (Cloudflare D1 / SQLite).
 -- Apply with: npx wrangler d1 execute crible-politique --remote --file=api/schema.sql -c api/wrangler.toml
 --
--- Two families of data, deliberately unlinkable:
+-- Three families of data, deliberately unlinkable:
 --   vaults                 one sealed blob per account hash; the server cannot
 --                          read it and the hash names nobody without the pepper.
 --   analysis_totals /      anonymous aggregate counters; there is no per-event
 --   leading_party_weights  row, no timestamp, no IP, so nothing to correlate.
+--   api_outcomes           the operator's only view of what is failing, at the
+--                          same grain: a count per day, per route, per outcome.
 
 CREATE TABLE IF NOT EXISTS vaults (
     sub_hash     TEXT PRIMARY KEY CHECK (length(sub_hash) = 64),
@@ -30,4 +32,26 @@ CREATE TABLE IF NOT EXISTS leading_party_weights (
     weight_sum REAL NOT NULL DEFAULT 0 CHECK (weight_sum >= 0),
     times_led  INTEGER NOT NULL DEFAULT 0 CHECK (times_led >= 0),
     PRIMARY KEY (country, party_id)
+);
+
+-- Detection without collection (SECURITY-CHECKLIST.md 18). Workers
+-- observability is off on purpose, so this is the only place a failing API
+-- becomes visible. It holds counts and nothing else: no address, no identity,
+-- no body, no per-event row, so it is as anonymous as the tables above it and
+-- there is nothing in it to correlate with anyone.
+--
+-- The two CHECK constraints are the point: the route and the outcome are closed
+-- vocabularies, enforced here and not only in the handler, so a caller-supplied
+-- path can never end up in the operator's own table.
+--
+-- Read it with:
+--   npx wrangler d1 execute crible-politique --remote -c api/wrangler.toml \
+--     --command "SELECT * FROM api_outcomes ORDER BY day DESC, count DESC LIMIT 50"
+-- Retention: 90 days is enough to see a trend; older rows can be deleted.
+CREATE TABLE IF NOT EXISTS api_outcomes (
+    day     TEXT NOT NULL CHECK (length(day) = 10),
+    route   TEXT NOT NULL CHECK (route IN ('/stats', '/analyses', '/vault', '/vault/key', 'unknown')),
+    outcome TEXT NOT NULL CHECK (outcome IN ('server_error', 'unauthorized', 'rate_limited', 'quota_exceeded')),
+    count   INTEGER NOT NULL DEFAULT 0 CHECK (count >= 0),
+    PRIMARY KEY (day, route, outcome)
 );

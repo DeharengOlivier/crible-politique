@@ -33,6 +33,32 @@ ALLOWED_ORIGINS = "https://crible.eu,https://www.crible.eu,https://crible.deploy
 # other application is refused here.
 GOOGLE_CLIENT_ID = "206230920239-qog420lgsqev0q9earq6lgtrflj07no5.apps.googleusercontent.com"
 
+# Bounds on the two things a caller can make this API do that cost something
+# (SECURITY-CHECKLIST.md 18: "any operation that generates cost is bounded").
+# Both count per caller address, in the edge, storing nothing durable.
+#
+# Removing either one does not open the route: the Worker answers 503 on it,
+# because an unbounded write path is not an acceptable fallback for a missing
+# binding. api/README.md says how to read that failure.
+#
+# 10 analyses per minute per address: a completed analysis fires exactly one
+# event, so this is far above honest use even behind a shared connection, and
+# far below what a script needs to move a public counter. A refused event is
+# silently dropped by the browser and changes nothing for the reader.
+[[ratelimits]]
+name = "ANALYSES_LIMIT"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+# 20 authenticated calls per minute per address. Signing in costs two (the key
+# and the read), saving one; the limit exists because verifying a Google
+# signature is the expensive part of every one of them, and it is checked
+# before the verification rather than after.
+[[ratelimits]]
+name = "AUTH_LIMIT"
+namespace_id = "1002"
+simple = { limit = 20, period = 60 }
+
 [[d1_databases]]
 binding = "DB"
 database_name = "crible-politique"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { AnswerRecord, Respondent, Statement } from '@/types/positions';
 import { computeProfile, computePartyMatches } from '@/lib/scoringEngine';
 import { decodeProfile } from '@/lib/profileCode';
@@ -13,6 +13,7 @@ import {
 } from '@/lib/testSession';
 import { nextClarifyingStatement } from '@/lib/adaptiveClarification';
 import {
+    announcedLength,
     expressStatementsFor,
     statementsFor
 } from '@/lib/electoralScope';
@@ -25,6 +26,10 @@ import StatementSurvey from '@/components/test/StatementSurvey';
 import ClarifySurvey from '@/components/test/ClarifySurvey';
 import VoiceSurvey from '@/components/test/VoiceSurvey';
 import ResultsView from '@/components/test/ResultsView';
+import SignInToSeeResults from '@/components/test/results/SignInToSeeResults';
+import { resultsAccess } from '@/lib/resultsAccess';
+import { profileVaultEnabled } from '@/lib/optionalFeatures';
+import { rawGoogleIdentity, subscribeToGoogleIdentity } from '@/lib/googleSession';
 import { ProfileIcon } from '@/lib/icons';
 import { Compass, Check, Mic } from 'lucide-react';
 import FloatingBackButton from '@/components/FloatingBackButton';
@@ -164,7 +169,12 @@ function IntroView({
 
             <div className="mx-auto flex max-w-md flex-col gap-2 text-left text-sm text-[var(--color-text-secondary)]">
                 {[
-                    'Aucun compte requis: tout se calcule dans votre navigateur, aucune réponse transmise.',
+                    // Said before the first statement rather than discovered at
+                    // the last screen: a reader who would not sign in deserves
+                    // to know it now, not after answering everything.
+                    profileVaultEnabled()
+                        ? 'Un compte Google pour ouvrir vos résultats; le calcul, lui, se fait dans votre navigateur et aucune réponse n’est transmise.'
+                        : 'Aucun compte requis: tout se calcule dans votre navigateur, aucune réponse transmise.',
                     'Résultats expliqués énoncé par énoncé, sources à l’appui.',
                     'Jamais de consigne de vote: un miroir, pas un juge.'
                 ].map((line, i) => (
@@ -198,7 +208,8 @@ function IntroView({
                     className="inline-flex min-h-[44px] items-center justify-center gap-2 text-sm text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-primary)] hover:underline"
                 >
                     <Mic className="h-4 w-4" aria-hidden="true" />
-                    Préférer l&apos;entretien vocal (33 énoncés lus à voix haute, ~10 min)
+                    Préférer l&apos;entretien vocal ({announcedLength(statementsFor)} énoncés lus à
+                    voix haute selon le pays, ~10 min)
                 </button>
             </div>
         </div>
@@ -216,6 +227,12 @@ interface FlowState {
     answers: AnswerRecord;
     respondent: Respondent | null;
     saved: SavedSession | null;
+    /**
+     * These answers arrived in a shared link rather than from this reader.
+     * Carried because the sign-in gate on the results deliberately does not
+     * apply to someone else's profile (lib/resultsAccess.ts).
+     */
+    fromSharedLink: boolean;
 }
 
 function restoreFlow(code: string | null, door: AnalysisMode | null, resume: boolean): FlowState {
@@ -227,22 +244,33 @@ function restoreFlow(code: string | null, door: AnalysisMode | null, resume: boo
             stage: 'results',
             answers: decoded.answers,
             respondent: { country: decoded.country },
-            saved: null
+            saved: null,
+            fromSharedLink: true
         };
     }
-    if (decoded) return { stage: 'country', answers: decoded.answers, respondent: null, saved: null };
+    if (decoded) {
+        return {
+            stage: 'country',
+            answers: decoded.answers,
+            respondent: null,
+            saved: null,
+            fromSharedLink: true
+        };
+    }
     const saved = loadSavedSession();
     // "Revoir mes résultats" from the home page carries its intent in the
     // address: the reader already chose to come back to their session, so the
     // introduction has nothing left to offer them. Without a resumable
     // session the address degrades to the ordinary introduction.
     if (resume && saved !== null && saved.respondent !== null && saved.stage !== 'intro') {
-        return { ...saved, saved };
+        return { ...saved, saved, fromSharedLink: false };
     }
     // A reader who came through one of the two doors has already made the
     // choice the introduction screen exists to offer.
-    if (door !== null) return { stage: 'country', answers: {}, respondent: null, saved };
-    return { stage: 'intro', answers: {}, respondent: null, saved };
+    if (door !== null) {
+        return { stage: 'country', answers: {}, respondent: null, saved, fromSharedLink: false };
+    }
+    return { stage: 'intro', answers: {}, respondent: null, saved, fromSharedLink: false };
 }
 
 function TestFlow() {
@@ -283,6 +311,18 @@ function TestFlow() {
     const answers = flow?.answers ?? {};
     const respondent = flow?.respondent ?? null;
     const saved = flow?.saved ?? null;
+    const fromSharedLink = flow?.fromSharedLink ?? false;
+
+    // Who is signed in, read from the same store the account bubble writes, so
+    // signing in there opens the results here with no reload. The stored
+    // identity rather than the in-memory token is what "signed in" means for
+    // this gate: the token is deliberately lost on reload, and a reader whose
+    // own face is in the corner would not understand a wall coming back.
+    const googleIdentity = useSyncExternalStore(
+        subscribeToGoogleIdentity,
+        rawGoogleIdentity,
+        () => null
+    );
 
     // Atomic transition: a stage, its answer set and its respondent change
     // together. Nothing downstream of the country stage may run without one.
@@ -299,7 +339,13 @@ function TestFlow() {
                 )
             );
         }
-        setChosen({ stage: next, answers: nextAnswers, respondent: nextRespondent, saved });
+        setChosen({
+            stage: next,
+            answers: nextAnswers,
+            respondent: nextRespondent,
+            saved,
+            fromSharedLink
+        });
         saveSession({ stage: next, answers: nextAnswers, respondent: nextRespondent });
     };
 
@@ -317,7 +363,10 @@ function TestFlow() {
                     onStartVoice={() => transition('country', {}, null)}
                     hasSaved={!!saved && saved.stage !== 'intro' && saved.respondent !== null}
                     onResume={() => {
-                        if (saved) setChosen({ ...saved, saved });
+                        // A resumed session is this reader's own, never a
+                        // shared profile: the code path that carries one never
+                        // reaches the introduction screen.
+                        if (saved) setChosen({ ...saved, saved, fromSharedLink: false });
                     }}
                 />
             )}
@@ -388,20 +437,34 @@ function TestFlow() {
                 />
             )}
 
-            {stage === 'results' && respondent && (
-                <ResultsView
-                    answers={answers}
-                    respondent={respondent}
-                    onRestart={() => {
-                        try {
-                            localStorage.removeItem(TEST_SESSION_STORAGE_KEY);
-                        } catch {
-                            // ignore
-                        }
-                        setChosen({ stage: 'intro', answers: {}, respondent: null, saved: null });
-                    }}
-                />
-            )}
+            {stage === 'results' &&
+                respondent &&
+                (resultsAccess({
+                    accountsOffered: profileVaultEnabled(),
+                    signedIn: googleIdentity !== null,
+                    fromSharedLink
+                }) === 'sign_in_required' ? (
+                    <SignInToSeeResults country={respondent.country} />
+                ) : (
+                    <ResultsView
+                        answers={answers}
+                        respondent={respondent}
+                        onRestart={() => {
+                            try {
+                                localStorage.removeItem(TEST_SESSION_STORAGE_KEY);
+                            } catch {
+                                // ignore
+                            }
+                            setChosen({
+                                stage: 'intro',
+                                answers: {},
+                                respondent: null,
+                                saved: null,
+                                fromSharedLink: false
+                            });
+                        }}
+                    />
+                ))}
         </>
     );
 }

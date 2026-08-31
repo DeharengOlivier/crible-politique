@@ -46,10 +46,40 @@ verification is never hand-rolled), `wrangler` (deploy tool),
   concurrent requests cannot both pass), 12 leaders max per event.
 - The stats weight is computed server-side from the statement count; whatever
   weight a client claims is ignored.
+- Rate limiting on both cost-bearing paths (since 2026-08-31): 10 anonymous
+  analyses per address per minute, 20 authenticated calls per address per
+  minute, checked **before** the Google signature is verified, since verifying
+  is the expensive part. The bindings live in `wrangler.toml`; without them the
+  bounded routes answer **503**, never unbounded traffic.
 - Observability is off in wrangler.toml: tokens and bodies must never be logged.
+  Detection comes from the `api_outcomes` table instead, which counts refusals
+  per day, per route and per outcome, and holds nothing else (see below).
 - Assumed limit: `/analyses` is unauthenticated (statistics must not require
-  an account), so a determined actor can skew counters. Validation bounds the
-  damage; the public methodology says the counters are indicative.
+  an account), so a determined actor can still skew counters within the rate
+  limit. Validation and the limiter bound the damage; the public methodology
+  says the counters are indicative.
+
+## Reading what is failing
+
+Workers logs are deliberately off, so this is the operator's view:
+
+```bash
+npx wrangler d1 execute crible-politique --remote -c api/wrangler.toml \
+  --command "SELECT * FROM api_outcomes ORDER BY day DESC, count DESC LIMIT 50"
+```
+
+| outcome | what it means | when to worry |
+|---|---|---|
+| `server_error` | an unexpected failure, answered as a bodyless 500 | any sustained count: nothing else reports this |
+| `unauthorized` | a token was refused | a spike without a matching `rate_limited` |
+| `rate_limited` | a caller hit a limit, **or** a limit binding is missing | a flat wall of these right after a deploy means the bindings were dropped |
+| `quota_exceeded` | one account passed 100 vault writes in a day | rarely, and it is per account |
+
+There is no alerting on this table, and that is the honest state of it: a
+count nobody reads is a count nobody reads. Cloudflare's dashboard can send an
+error-rate notification on the Worker with no code, and that is the missing
+half. Rows older than 90 days can be deleted; nothing in the table identifies
+anyone, so retention is a housekeeping question, not a privacy one.
 
 ## Deploy runbook
 

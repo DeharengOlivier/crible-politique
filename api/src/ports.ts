@@ -67,10 +67,50 @@ export interface VerifiedIdentity {
 
 export type IdentityVerifier = (authorization: string | null) => Promise<VerifiedIdentity | null>;
 
+/**
+ * The two things a caller can make this API do that cost something.
+ *
+ * `analyses` is an unauthenticated write: it must be bounded or the public
+ * counters are whatever the loudest script says they are. `authenticated` is
+ * every route that verifies a Google token, which is an RS256 signature check
+ * per call and therefore free CPU for anyone sending garbage.
+ */
+export type RateLimitBucket = "analyses" | "authenticated";
+
+export interface RateLimiter {
+    /** false means over the limit. Never throws: a limiter that errors denies. */
+    allow(bucket: RateLimitBucket, key: string): Promise<boolean>;
+}
+
+/**
+ * A refusal worth counting. Successes are not counted: the point is to see
+ * what is failing, not to build a traffic log.
+ */
+export type ApiOutcome = "server_error" | "unauthorized" | "rate_limited" | "quota_exceeded";
+
+/**
+ * Detection without collection. Workers observability is off on purpose (a
+ * request body must never reach a log), so the operator's only view of the API
+ * is this: a count per day, per route, per outcome. No address, no identity, no
+ * body, no per-event row, so it stays as anonymous as the analysis counters
+ * next to it, and a spike is still visible the next morning.
+ */
+export interface OutcomeLog {
+    record(day: string, route: string, outcome: ApiOutcome): Promise<void>;
+}
+
 export interface ApiPorts {
     verifyIdentity: IdentityVerifier;
     vaults: VaultStore;
     stats: StatsStore;
+    /**
+     * null means this deployment configured none, and the bounded routes then
+     * refuse (503) rather than serving unbounded. Secure by default: the safe
+     * configuration is the one you get by doing nothing.
+     */
+    rateLimiter: RateLimiter | null;
+    /** null means no counters: a blind spot, not an open door, so it serves. */
+    outcomes: OutcomeLog | null;
     partyIdsOf(country: Country): ReadonlySet<string>;
     allowedOrigins: ReadonlySet<string>;
     now(): Date;

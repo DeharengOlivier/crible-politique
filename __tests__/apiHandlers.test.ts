@@ -93,6 +93,11 @@ function portsWith(identity: Omit<VerifiedIdentity, "vaultKey"> | null): ApiPort
                 : null,
         vaults,
         stats,
+        // This file is about authorization and validation, so the bounds are
+        // wide open here on purpose; what the limiter and the counters do is
+        // in apiAbuseBounds.test.ts.
+        rateLimiter: { allow: async () => true },
+        outcomes: null,
         partyIdsOf: (country) =>
             country === "FR" ? new Set(["fr_lfi", "fr_rn", "fr_eelv"]) : new Set(["be_ptb", "be_ecolo", "be_groen"]),
         allowedOrigins: new Set([ORIGIN, "http://localhost:3000"]),

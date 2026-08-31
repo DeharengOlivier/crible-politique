@@ -48,12 +48,28 @@ export default function ConfidentialitePage() {
 
                     <div className="space-y-4 rounded-2xl border border-[var(--color-border-light)] bg-white p-6 text-sm leading-relaxed text-[var(--color-text-secondary)] sm:p-8">
                         <ul className="list-disc space-y-3 pl-5">
+                            {profileVaultEnabled() ? (
+                            <li>
+                                <strong className="text-[var(--color-text)]">Un compte Google pour ouvrir vos résultats, aucune réponse transmise.</strong>{' '}
+                                Vos réponses, votre profil, vos proximités partisanes: tout est calculé dans
+                                votre navigateur, et rien n&apos;en sort: le serveur sert des pages et ne
+                                reçoit jamais vos réponses. Depuis le 31 août 2026, ce déploiement demande
+                                en revanche une connexion Google avant d&apos;afficher vos propres
+                                résultats. Disons-le franchement: c&apos;est une décision de produit, pas
+                                une protection. Le calcul est public et se fait chez vous, donc cette
+                                connexion ne garde aucun secret et n&apos;empêche personne de recalculer la
+                                même chose. Ce qu&apos;elle change: notre serveur apprend qu&apos;un compte
+                                a demandé sa clé, jamais ce que vous avez répondu. Un profil que
+                                quelqu&apos;un partage avec vous reste lisible sans aucun compte.
+                            </li>
+                            ) : (
                             <li>
                                 <strong className="text-[var(--color-text)]">Aucun compte requis, aucune réponse transmise.</strong>{' '}
                                 Vos réponses, votre profil, vos proximités partisanes: tout est calculé dans
                                 votre navigateur. Par défaut, rien n&apos;en sort: le serveur sert des pages
                                 et ne reçoit jamais vos réponses.
                             </li>
+                            )}
                             {profileVaultEnabled() && (
                             <>
                             <li>

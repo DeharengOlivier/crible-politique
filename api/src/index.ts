@@ -2,8 +2,8 @@ import type { Country } from "@/types/positions";
 import { partiesFor } from "@/lib/electoralScope";
 import { handleApiRequest } from "./handlers";
 import { googleIdentityVerifier } from "./googleIdentity";
-import { d1StatsStore, d1VaultStore } from "./d1Stores";
-import type { ApiPorts } from "./ports";
+import { d1OutcomeLog, d1StatsStore, d1VaultStore } from "./d1Stores";
+import type { ApiPorts, RateLimitBucket, RateLimiter } from "./ports";
 
 // Cloudflare Workers entry point. Everything testable lives behind
 // handleApiRequest; this file only wires the real adapters to the bindings
@@ -22,6 +22,29 @@ interface Env {
     VAULT_KEY_PEPPER: string;
     /** Comma-separated list of origins allowed to call the writing endpoints. */
     ALLOWED_ORIGINS: string;
+    /**
+     * Rate limit bindings (wrangler.toml). Optional in the type and required
+     * in practice: without them the bounded routes answer 503 rather than
+     * serving unbounded, so a deployment that drops them notices immediately
+     * instead of silently opening a write path.
+     */
+    ANALYSES_LIMIT?: RateLimit;
+    AUTH_LIMIT?: RateLimit;
+}
+
+/**
+ * Cloudflare's rate limiter, one binding per bucket. The binding counts in the
+ * edge and stores nothing durable, so bounding by address costs no record of
+ * anyone's address.
+ */
+function rateLimiterOf(env: Env): RateLimiter | null {
+    const { ANALYSES_LIMIT, AUTH_LIMIT } = env;
+    if (ANALYSES_LIMIT === undefined || AUTH_LIMIT === undefined) return null;
+    const buckets: Record<RateLimitBucket, RateLimit> = {
+        analyses: ANALYSES_LIMIT,
+        authenticated: AUTH_LIMIT
+    };
+    return { allow: async (bucket, key) => (await buckets[bucket].limit({ key })).success };
 }
 
 // The party lists are the same single source of truth the site scores with,
@@ -44,6 +67,8 @@ function portsOf(env: Env): ApiPorts {
         ),
         vaults: d1VaultStore(env.DB),
         stats: d1StatsStore(env.DB),
+        rateLimiter: rateLimiterOf(env),
+        outcomes: d1OutcomeLog(env.DB),
         partyIdsOf: (country) => PARTY_IDS[country],
         allowedOrigins: new Set(
             env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim()).filter((origin) => origin.length > 0)

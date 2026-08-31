@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ArrowRight, ShieldCheck, Eye, GitBranch, Scale } from 'lucide-react';
 import { SYNTHETIC_PROFILES } from '@/data/syntheticProfiles';
 import { STATEMENTS } from '@/data/statements';
-import { expressStatementsFor } from '@/lib/electoralScope';
+import { announcedLength, expressStatementsFor, statementsFor } from '@/lib/electoralScope';
 import { PARTIES } from '@/data/parties';
 import { MEASURES } from '@/data/measures';
 import ProfileGallery from '@/components/home/ProfileGallery';
@@ -10,9 +10,12 @@ import HomeStatsBand from '@/components/home/HomeStatsBand';
 import HomeIdentity from '@/components/home/HomeIdentity';
 import { publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
-// Both countries answer the same number of express statements, so the hero can
-// name it without asking the reader where they vote.
-const EXPRESS_STATEMENT_COUNT = expressStatementsFor('FR').length;
+// The home page speaks before the reader has said where they vote, so both
+// doors announce what each country actually answers. The express corpus has the
+// same length on both sides and collapses to one number; the complete one does
+// not, and saying the catalogue size instead promised a test nobody takes.
+const EXPRESS_STATEMENT_COUNT = announcedLength(expressStatementsFor);
+const COMPLETE_STATEMENT_COUNT = announcedLength(statementsFor);
 
 export default function Home() {
   return (
@@ -65,7 +68,7 @@ export default function Home() {
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </span>
                 <span className="text-sm text-[var(--color-text-secondary)]">
-                  {STATEMENTS.length} énoncés, 10 minutes
+                  {COMPLETE_STATEMENT_COUNT} énoncés, 10 minutes
                 </span>
               </Link>
             </div>
@@ -193,7 +196,9 @@ export default function Home() {
               <dl className="space-y-6">
                 <div>
                   <dt className="font-[family-name:var(--font-heading)] text-4xl font-bold text-[var(--color-primary)]">{STATEMENTS.length}</dt>
-                  <dd className="text-sm text-[var(--color-text-muted)]">énoncés sur 7 dimensions</dd>
+                  <dd className="text-sm text-[var(--color-text-muted)]">
+                    énoncés au catalogue, sur 7 dimensions ({COMPLETE_STATEMENT_COUNT} posés selon le pays)
+                  </dd>
                 </div>
                 <div>
                   <dt className="font-[family-name:var(--font-heading)] text-4xl font-bold text-[var(--color-primary)]">{PARTIES.length}</dt>

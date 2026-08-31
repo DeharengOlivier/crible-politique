@@ -512,8 +512,15 @@ une assistance IA importante: c'est dit, daté et tracé dans ce registre.
 Les opinions politiques sont des données sensibles (art. 9 RGPD). Architecture
 "privé par construction":
 
-- aucun compte requis, aucune réponse transmise: tout se calcule dans le
-  navigateur, et par défaut rien n'en sort;
+- aucune réponse transmise: tout se calcule dans le navigateur, et rien n'en
+  sort;
+- un compte Google est demandé pour ouvrir ses propres résultats sur les
+  déploiements qui offrent la sauvegarde de profil (depuis le 31 août 2026).
+  C'est une décision de produit et non un contrôle de sécurité, et le dire
+  ainsi est la seule position tenable: le calcul est public et s'exécute chez
+  le lecteur, donc la porte ne garde aucun secret et n'empêche personne de
+  recalculer le même résultat. Elle ne s'applique ni à un déploiement sans
+  compte configuré, ni à un profil reçu par lien partagé;
 - la voix (mode entretien) est traitée par les API du navigateur, jamais transmise;
 - le lien de comparaison duo encode les réponses dans l'URL elle-même, stocké
   nulle part, partagé uniquement par choix explicite de l'utilisateur;

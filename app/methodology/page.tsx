@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { STATEMENTS } from '@/data/statements';
+import { expressStatementsFor, statementsFor } from '@/lib/electoralScope';
 import { PARTIES } from '@/data/parties';
 import { MEASURES } from '@/data/measures';
 import { DATA_VERSIONS, DATA_LAST_REVIEW } from '@/data/versions';
@@ -55,9 +56,13 @@ export default function MethodologyPage() {
 
                     <Section title="2. Les énoncés">
                         <p>
-                            {STATEMENTS.length} énoncés couvrent 7 dimensions (pouvoir, économie,
-                            géopolitique, société, environnement, connaissance, morale politique), dont un
-                            sous-ensemble express de 12 couvrant les 7 dimensions. Trois règles
+                            {STATEMENTS.length} énoncés au catalogue couvrent 7 dimensions (pouvoir,
+                            économie, géopolitique, société, environnement, connaissance, morale
+                            politique). Un questionnaire n&apos;en pose jamais autant: il en pose{' '}
+                            {statementsFor('FR').length} en France et {statementsFor('BE').length} en
+                            Belgique, le reste étant propre à l&apos;autre pays, et le sous-ensemble
+                            express en pose {expressStatementsFor('FR').length}, couvrant les 7
+                            dimensions. Trois règles
                             d&apos;écriture auditables, inspirées de la recherche sur les outils d&apos;aide
                             au vote (Garzia &amp; Marschall):
                         </p>
@@ -109,7 +114,7 @@ score(parti)   = moyenne des accords sur les énoncés où
                             dans l&apos;ordre où ce programme les présente, avec le document en lien. Un
                             combat déclaré dit de quoi un parti parle, jamais quel camp il défend, et
                             n&apos;entre pas dans le calcul des scores. Tous les partis sont traités de la
-                            même façon, et un combat que les {STATEMENTS.length} énoncés ne posent pas
+                            même façon, et un combat que les énoncés ne posent pas
                             (le logement, l&apos;école) est marqué &quot;hors questionnaire&quot; plutôt
                             que rattaché de force à une dimension.
                         </p>
@@ -215,7 +220,11 @@ score(parti)   = moyenne des accords sur les énoncés où
 
                     <Section title="9. Limites connues">
                         <ul className="list-disc space-y-1 pl-5">
-                            <li>{STATEMENTS.length} énoncés ne couvrent pas tout le champ politique.</li>
+                            <li>
+                                {statementsFor('FR').length} énoncés en France et{' '}
+                                {statementsFor('BE').length} en Belgique ne couvrent pas tout le champ
+                                politique.
+                            </li>
                             <li>
                                 Les positions des partis évoluent; chaque codage référence un programme daté
                                 et peut être périmé.

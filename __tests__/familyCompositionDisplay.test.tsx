@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import ResultsView from '@/components/test/ResultsView';
+import IdentitySection from '@/components/test/results/IdentitySection';
 import ConceptsPage from '@/app/concepts/page';
 import { computeProfile } from '@/lib/scoringEngine';
 import { encodeBadge } from '@/lib/badgeCode';
@@ -40,10 +41,18 @@ function deterministicAnswers(): AnswerRecord {
 afterEach(cleanup);
 
 describe('the results explain what the named family is made of', () => {
+    // Rendered on the identity section alone since 2026-08-31, not on the whole
+    // results page: the triple loop below runs a regex over the entire DOM per
+    // label, which on the full page (24 party rows, every panel unfolded) took
+    // a second on an idle machine and timed out at five under a loaded one. The
+    // section is the surface that names families, so this is also the narrower
+    // claim. That the section is actually mounted in the results is held by the
+    // next test, which still renders the whole page and counts its output.
     it('shows the expected currents of every family in the leading group', () => {
         const answers = deterministicAnswers();
-        const { leadingGroup } = computeProfile(answers).syntheticProfileFit;
-        render(<ResultsView answers={answers} respondent={RESPONDENT} onRestart={() => {}} />);
+        const profile = computeProfile(answers);
+        const { leadingGroup } = profile.syntheticProfileFit;
+        render(<IdentitySection profile={profile} />);
 
         for (const family of leadingGroup) {
             for (const reading of familyCompositionOf(family).constrained) {

@@ -38,6 +38,11 @@ const STATEMENTS_BY_COUNTRY: Record<Country, Statement[]> = {
     BE: STATEMENTS.filter((s) => s.scope === "common" || s.scope === "BE")
 };
 
+const NATIONAL_BY_COUNTRY: Record<Country, Statement[]> = {
+    FR: STATEMENTS.filter((s) => s.scope === "FR"),
+    BE: STATEMENTS.filter((s) => s.scope === "BE")
+};
+
 const EXPRESS_BY_COUNTRY: Record<Country, Statement[]> = {
     FR: EXPRESS_IDS_BY_COUNTRY.FR.map((id) => STATEMENTS_BY_ID[id]),
     BE: EXPRESS_IDS_BY_COUNTRY.BE.map((id) => STATEMENTS_BY_ID[id])
@@ -51,6 +56,31 @@ const PARTIES_BY_COUNTRY: Record<Country, PoliticalParty[]> = {
 /** The statements a respondent of this country answers, in corpus order. */
 export function statementsFor(country: Country): Statement[] {
     return STATEMENTS_BY_COUNTRY[country];
+}
+
+/**
+ * The statements that exist only in this country's debate, the rest of its
+ * corpus being shared with the other. Announced to the reader when they choose
+ * a country, so it is computed from the corpus rather than written down twice:
+ * the two numbers differ (5 and 3) and a hand-kept copy of them had drifted.
+ */
+export function nationalStatementsFor(country: Country): Statement[] {
+    return NATIONAL_BY_COUNTRY[country];
+}
+
+/**
+ * How long a questionnaire is, said before the reader has chosen a country.
+ *
+ * The two corpora differ, so the only honest answer at that moment names both
+ * bounds. The catalogue size is neither of them and is never what anyone
+ * answers: announcing it read as a promise of a longer test than exists.
+ * Collapses to a single number the day the two corpora have the same length.
+ */
+export function announcedLength(statementsOf: (country: Country) => Statement[]): string {
+    const lengths = COUNTRIES.map((country) => statementsOf(country).length);
+    const low = Math.min(...lengths);
+    const high = Math.max(...lengths);
+    return low === high ? `${low}` : `${low} à ${high}`;
 }
 
 /** The 15 express statements: 2 per dimension, 3 for geopolitics, in corpus order. */

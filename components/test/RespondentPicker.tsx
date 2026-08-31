@@ -1,8 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { BELGIAN_COLLEGES, COLLEGE_LABELS, partiesFor } from '@/lib/electoralScope';
-import type { BelgianCollege, Respondent } from '@/types/positions';
+import {
+    BELGIAN_COLLEGES,
+    COLLEGE_LABELS,
+    nationalStatementsFor,
+    partiesFor,
+    statementsFor
+} from '@/lib/electoralScope';
+import type { BelgianCollege, Country, Respondent } from '@/types/positions';
 
 // The first question, and the only one that is not political.
 //
@@ -13,16 +19,24 @@ import type { BelgianCollege, Respondent } from '@/types/positions';
 // wording at all. Mixing them also put a party the respondent cannot vote for
 // at the top of their result roughly half the time.
 
+// Counted from the corpus rather than written out, because the two countries
+// do not have the same length and a hand-written copy said otherwise: the
+// French row announced the Belgian numbers until 2026-08-30.
+function detailFor(country: Country, debate: string): string {
+    const national = nationalStatementsFor(country).length;
+    return `${partiesFor(country).length} partis, ${statementsFor(country).length} énoncés dont ${national} propres au débat ${debate}`;
+}
+
 const CHOICES = [
     {
         country: 'FR' as const,
         title: 'France',
-        detail: '12 partis, 33 énoncés dont 3 propres au débat français'
+        detail: detailFor('FR', 'français')
     },
     {
         country: 'BE' as const,
         title: 'Belgique',
-        detail: '12 partis, 33 énoncés dont 3 propres au débat belge'
+        detail: detailFor('BE', 'belge')
     }
 ];
 
@@ -67,7 +81,7 @@ export default function RespondentPicker({ onChoose }: { onChoose: (r: Responden
                         onClick={() => onChoose({ country: 'BE' })}
                         className="inline-flex min-h-[44px] w-full items-center justify-center text-sm text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-primary)] hover:underline"
                     >
-                        Je préfère voir les 12 partis belges
+                        Je préfère voir les {partiesFor('BE').length} partis belges
                     </button>
                 </div>
 
