@@ -8,7 +8,7 @@ import { MEASURES } from '@/data/measures';
 import ProfileGallery from '@/components/home/ProfileGallery';
 import HomeStatsBand from '@/components/home/HomeStatsBand';
 import HomeIdentity from '@/components/home/HomeIdentity';
-import { publicStatisticsEnabled } from '@/lib/optionalFeatures';
+import { profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
 // The home page speaks before the reader has said where they vote, so both
 // doors announce what each country actually answers. The express corpus has the
@@ -38,7 +38,14 @@ export default function Home() {
             <p className="mx-auto mb-10 max-w-2xl text-pretty text-lg leading-relaxed text-[var(--color-text-secondary)] md:text-xl">
               {SYNTHETIC_PROFILES.length} grands profils, 7 dimensions. Situez vos convictions
               en 3 minutes et découvrez les courants de pensée et les partis les plus proches
-              de vous. Sans compte, sans collecte de données, jamais de consigne de vote.
+              de vous.{' '}
+              {/* The hero promised "sans compte, sans collecte de données" for two
+                  days after signing in became required to read results, which is
+                  the first sentence a reader sees and the first one they can
+                  catch us on. It now says what the build in front of them does. */}
+              {profileVaultEnabled()
+                ? 'Vos réponses ne quittent pas votre navigateur; un compte Google ouvre vos résultats. Jamais de consigne de vote.'
+                : 'Sans compte, sans collecte de données, jamais de consigne de vote.'}
             </p>
 
             {/* A returning respondent sees their own profile before any door. */}

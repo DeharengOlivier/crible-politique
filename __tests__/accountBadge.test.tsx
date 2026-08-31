@@ -239,3 +239,62 @@ describe('the account badge', () => {
         expect(loadSavedSession()?.stage).toBe('results');
     });
 });
+
+describe('what the badge says after a sign-in that found no vault', () => {
+    // Reported 2026-08-31 by a reader who had results on the device: signing in
+    // answered "Aucun profil sauvegardé sur ce compte. Faites le test, puis
+    // sauvegardez-le depuis vos résultats." They had just done the test. The
+    // message was true of the server and false of the screen it appeared on, and
+    // it became the common case the day signing in was required to read results.
+    //
+    // The invariant: a message about the server never makes a claim about what
+    // is on this device. The badge knows both, so it says which is which.
+    async function signInFindingNothing(): Promise<void> {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(async (url: string) =>
+                String(url).endsWith('/vault/key')
+                    ? new Response(JSON.stringify({ key: KEY_B64 }), {
+                          status: 200,
+                          headers: { 'content-type': 'application/json' }
+                      })
+                    : new Response(null, { status: 404 })
+            )
+        );
+        render(<AccountBadge />);
+        fireEvent.click(screen.getByText('FAKE_GOOGLE'));
+    }
+
+    it('never tells a reader with results on the device to go and take the test', async () => {
+        localStorage.setItem(
+            TEST_SESSION_STORAGE_KEY,
+            JSON.stringify({
+                stage: 'results',
+                answers: deterministicAnswers(),
+                respondent: { country: 'FR' }
+            })
+        );
+        await signInFindingNothing();
+
+        const message = await screen.findByText(/sauvegard/i);
+        expect(message.textContent).not.toMatch(/Faites le test/);
+        // And it says what is actually true of this device.
+        expect(message.textContent).toMatch(/sur cet appareil/i);
+    });
+
+    it('still tells a reader with nothing on the device to take the test', async () => {
+        await signInFindingNothing();
+        expect((await screen.findByText(/Faites le test/)).textContent).toMatch(/aucune analyse/i);
+    });
+
+    it('leaves the answers on the device untouched either way', async () => {
+        const answers = deterministicAnswers();
+        localStorage.setItem(
+            TEST_SESSION_STORAGE_KEY,
+            JSON.stringify({ stage: 'results', answers, respondent: { country: 'FR' } })
+        );
+        await signInFindingNothing();
+        await screen.findByText(/sauvegard/i);
+        expect(loadSavedSession()?.answers).toEqual(answers);
+    });
+});

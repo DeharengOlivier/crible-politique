@@ -41,6 +41,14 @@ export default function SignInToSeeResults({ country }: { country: Country }) {
                     page pour l&apos;ouvrir, la retrouver sur un autre appareil et la comparer plus
                     tard. C&apos;est le seul endroit du site où l&apos;on se connecte.
                 </p>
+                {/* Two presses, and the first one has to be announced or it reads
+                    as a dead button: our own control comes first because Google's
+                    script is not fetched until someone asks for it. */}
+                <p className="text-xs text-[var(--color-text-muted)]">
+                    Deux appuis: la bulle d&apos;abord, puis le bouton Google qui s&apos;y affiche.
+                    Nous ne chargeons le code de Google qu&apos;à ce moment-là, pour que votre visite
+                    ici ne lui soit pas signalée si vous ne vous connectez pas.
+                </p>
             </div>
 
             <div className="space-y-2 rounded-xl bg-[var(--color-bg-elevated)] p-4 text-left text-xs leading-relaxed text-[var(--color-text-secondary)]">

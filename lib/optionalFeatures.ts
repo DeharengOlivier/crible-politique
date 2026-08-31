@@ -25,3 +25,15 @@ export function publicStatisticsEnabled(): boolean {
 export function profileVaultEnabled(): boolean {
     return cribleApiBaseUrl() !== null && googleClientId() !== null;
 }
+
+/**
+ * Cookieless audience measurement. Unset means the script is never injected,
+ * and therefore that no analytics processor may be declared: /legal listed
+ * Plausible for two days on a production deployment that had never set this
+ * (measured 2026-08-31), which announces a transfer that does not happen.
+ */
+export function analyticsDomain(): string | null {
+    const domain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
+    if (domain === undefined || domain.length === 0) return null;
+    return domain;
+}

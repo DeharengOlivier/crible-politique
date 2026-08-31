@@ -16,12 +16,18 @@ import { profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeat
 // The page invites the reader to open the network tab and count the calls, so
 // the number it announces has to be the number this build can make. Promising
 // two calls where none exist would fail the check it asks the reader to run.
+//
+// It said "au plus deux appels" until 2026-08-31 and there were three: the
+// statistics read fires on the home page, before anything is clicked, and had
+// never been counted. A reader following the instructions would have found one
+// more call than announced, on the page whose whole argument is that they do
+// not have to take our word for it.
 function expectedApiCallsSentence(): string {
     if (profileVaultEnabled()) {
-        return "Vous y verrez au plus deux appels vers notre API: le compteur anonyme de fin d'analyse (pays et partis en tête, jamais vos réponses) et, si vous sauvegardez votre profil, un bloc chiffré illisible.";
+        return "Vous y verrez au plus trois appels vers notre API: la lecture des statistiques publiques au chargement de l'accueil, le compteur anonyme de fin d'analyse (pays et partis en tête, jamais vos réponses) et, si vous sauvegardez votre profil, un bloc chiffré illisible.";
     }
     if (publicStatisticsEnabled()) {
-        return "Vous y verrez au plus un appel vers notre API: le compteur anonyme de fin d'analyse (pays et partis en tête, jamais vos réponses).";
+        return "Vous y verrez au plus deux appels vers notre API: la lecture des statistiques publiques au chargement de l'accueil, et le compteur anonyme de fin d'analyse (pays et partis en tête, jamais vos réponses).";
     }
     return "Vous n'y verrez aucun appel vers une API: ce déploiement n'en a aucune, le site n'est que des pages.";
 }
@@ -84,6 +90,43 @@ export default function ConfidentialitePage() {
                                 n&apos;importe quel appareil, et vous retrouvez votre profil:{' '}
                                 <strong className="text-[var(--color-text)]">aucun code à conserver</strong>,
                                 rien à perdre.
+                            </li>
+                            <li>
+                                <strong className="text-[var(--color-text)]">Ce que notre serveur reçoit vraiment quand vous vous connectez.</strong>{' '}
+                                Il faut le dire précisément, parce que le code est public et que
+                                n&apos;importe qui peut le vérifier. Le jeton que Google remet à
+                                votre navigateur est un JWT signé qui{' '}
+                                <strong className="text-[var(--color-text)]">contient votre adresse e-mail</strong>,
+                                votre nom, votre photo et votre identifiant Google. Ce jeton part tel
+                                quel vers notre API, dans l&apos;en-tête{' '}
+                                <code className="rounded bg-[var(--color-bg-elevated)] px-1">Authorization</code>,
+                                parce que c&apos;est lui qui prouve que le compte est le vôtre:{' '}
+                                <strong className="text-[var(--color-text)]">notre API reçoit donc</strong>{' '}
+                                votre adresse e-mail et votre nom à chaque connexion. Ce qu&apos;elle
+                                en fait: elle vérifie la signature de Google, ne lit que
+                                l&apos;identifiant de compte, en dérive deux empreintes, répond, et
+                                oublie le reste. Rien de tout cela n&apos;est écrit: ni dans la base,
+                                ni dans les journaux, qui sont désactivés côté serveur
+                                (<code className="rounded bg-[var(--color-bg-elevated)] px-1">observability.enabled = false</code>).
+                                Vous pouvez le constater vous-même: copiez cet en-tête depuis
+                                l&apos;onglet Réseau et collez-le dans n&apos;importe quel décodeur
+                                de JWT. Dire seulement &laquo;&nbsp;la base ne contient pas votre
+                                e-mail&nbsp;&raquo; était vrai et incomplet.
+                            </li>
+                            <li>
+                                <strong className="text-[var(--color-text)]">Google n&apos;apprend rien avant que vous ne le décidiez.</strong>{' '}
+                                Le script de connexion de Google n&apos;est chargé qu&apos;au moment
+                                où vous appuyez sur la bulle de compte:{' '}
+                                <strong className="text-[var(--color-text)]">tant que vous ne cliquez pas</strong>,
+                                votre navigateur ne contacte pas Google, et Google ne sait pas que
+                                vous avez ouvert un outil de positionnement politique. Ce
+                                n&apos;était pas le cas jusqu&apos;au 31 août 2026: le script était
+                                chargé à l&apos;ouverture de chaque page, pour tout le monde, y
+                                compris pour ceux qui ne se connectaient jamais. C&apos;est
+                                exactement le genre de détail qui rend une promesse fausse sans
+                                qu&apos;elle soit mensongère, et il est corrigé. À partir de votre
+                                clic, Google sait que vous vous connectez à cette application, et sa
+                                propre politique s&apos;applique.
                             </li>
                             <li>
                                 <strong className="text-[var(--color-text)]">Ce que la connexion laisse sur cet appareil.</strong>{' '}
@@ -157,6 +200,18 @@ export default function ConfidentialitePage() {
                                 Si vous utilisez le module &quot;impact sur mon portefeuille&quot;, votre
                                 situation (revenu, patrimoine) est utilisée localement pour le calcul puis
                                 oubliée. Elle n&apos;est ni transmise, ni stockée.
+                            </li>
+                            <li>
+                                <strong className="text-[var(--color-text)]">Les adresses IP, puisqu&apos;il faut en parler.</strong>{' '}
+                                Aucun site ne peut vous répondre sans recevoir votre adresse IP: nos
+                                hébergeurs{' '}
+                                <strong className="text-[var(--color-text)]">voient votre adresse IP</strong>{' '}
+                                à chaque requête, comme partout ailleurs sur le web.
+                                {publicStatisticsEnabled()
+                                    ? " Notre API s'en sert pour une seule chose, le temps de la requête: compter combien d'appels viennent de la même adresse dans la minute, pour qu'un script ne puisse pas gonfler les compteurs publics ni nous coûter cher. Ce compteur vit dans la mémoire du réseau de diffusion et n'est jamais rangé nulle part. Les journaux de l'API sont désactivés, il n'y a donc pas de registre où votre adresse pourrait rester."
+                                    : ' Nous n’en conservons rien, et ce déploiement n’a aucun serveur applicatif où ce serait même possible.'}{' '}
+                                Nous ne les croisons avec rien, et aucune mesure d&apos;audience ne
+                                tourne sur ce site.
                             </li>
                             <li>
                                 <strong className="text-[var(--color-text)]">Sauvegarde locale, effaçable.</strong>{' '}

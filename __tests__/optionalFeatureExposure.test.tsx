@@ -130,6 +130,14 @@ describe('the privacy page describes the deployment it runs in', () => {
 
     // The page tells the reader to open the network tab and count the calls.
     // That count is a falsifiable claim, so it follows the deployment.
+    //
+    // The numbers went up by one on 2026-08-31, and this is a specification
+    // change stated out loud rather than a test bent to fit a build: the count
+    // had never included the statistics read that HomeStatsBand fires when the
+    // home page loads. Measured on a production build the same day, a reader
+    // following these instructions saw GET /stats before clicking anything, so
+    // the announced two were three. The claim was wrong; this test was pinning
+    // the wrong claim.
     it('announces the exact number of API calls the build can make', () => {
         expect(render(<ConfidentialitePage />).container.textContent).toContain(
             "aucun appel vers une API"
@@ -137,11 +145,11 @@ describe('the privacy page describes the deployment it runs in', () => {
         cleanup();
 
         enableStatistics();
-        expect(render(<ConfidentialitePage />).container.textContent).toContain('au plus un appel');
+        expect(render(<ConfidentialitePage />).container.textContent).toContain('au plus deux appels');
         cleanup();
 
         enableVault();
-        expect(render(<ConfidentialitePage />).container.textContent).toContain('au plus deux appels');
+        expect(render(<ConfidentialitePage />).container.textContent).toContain('au plus trois appels');
     });
 });
 

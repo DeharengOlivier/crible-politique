@@ -3,11 +3,20 @@
 The one server this project has, and the two things it is allowed to hold:
 
 1. **Encrypted profile vaults** (`/vault`): one sealed blob per account. The
-   profile is encrypted in the browser (AES-256-GCM) before upload; the key
-   never leaves the user (recovery code). The storage key is a peppered
-   SHA-256 of the Google subject, so a full database dump reveals neither
-   identities nor content. The server cannot read what it stores, which is the
-   product's central privacy claim.
+   profile is encrypted in the browser (AES-256-GCM) before upload and opened
+   in the browser on the way back, so plaintext answers never cross the wire.
+   The storage key is a peppered SHA-256 of the Google subject, so a full
+   database dump reveals neither identities nor content.
+
+   Stated exactly, because the honest version is the only one worth writing:
+   since 2026-08-29 the encryption key is **derived by this Worker** from the
+   Google subject and `VAULT_KEY_PEPPER`, and handed to the browser
+   (`/vault/key`). It is answered only to a caller holding a valid Google ID
+   token for this client, and it is never stored. But whoever holds both the
+   database and the server secrets could open a vault. The description this
+   file carried until 2026-08-31 ("the key never leaves the user, recovery
+   code") described the design that preceded it and had stopped being true.
+   `app/confidentialite/page.tsx` says the same thing to readers.
 2. **Anonymous public statistics** (`/analyses` in, `/stats` out): aggregate
    counters only. No per-event rows, no timestamps, no IP, no identity: one
    `UPDATE ... + 1` per completed analysis, weighted by
@@ -95,6 +104,19 @@ npx wrangler deploy -c api/wrangler.toml
 
 Then set `NEXT_PUBLIC_CRIBLE_API_URL` (the worker URL) and
 `NEXT_PUBLIC_GOOGLE_CLIENT_ID` in the Vercel project and redeploy the site.
+
+Two origin lists have to agree with each other, and neither failure is loud:
+
+- `ALLOWED_ORIGINS` in `wrangler.toml` gates CORS on the API. A missing origin
+  shows up as a CORS error in the browser console and a silently dropped
+  counter.
+- **Authorized JavaScript origins** on the Google OAuth client gate the sign-in
+  button. A missing origin renders an *empty* account bubble: the script loads,
+  `renderButton` inserts a node, and nothing is painted. The only clue is
+  `[GSI_LOGGER]: The given origin is not allowed for the given client ID` in
+  the console. Measured 2026-08-31 while validating a build on port 3111, which
+  is registered nowhere. Every origin the site is served from needs to be in
+  both lists, preview deployments included.
 
 **Both peppers are set once, never rotated casually, and never equal to each
 other.** SUB_PEPPER is part of every vault's storage key, so rotating it orphans

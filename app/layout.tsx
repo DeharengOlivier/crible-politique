@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Lexend, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import AccountBadge from "@/components/AccountBadge";
+import { analyticsDomain } from "@/lib/optionalFeatures";
 
 const lexend = Lexend({
   variable: "--font-heading",
@@ -56,10 +57,12 @@ export default function RootLayout({
             app/apple-icon.png: a hand-written one pointed at a file that had
             never existed. */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN && (
+        {/* Read through the same helper /legal declares the processor from, so
+            the script and the declaration cannot disagree. */}
+        {analyticsDomain() !== null && (
           <script
             defer
-            data-domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN}
+            data-domain={analyticsDomain() ?? undefined}
             src="https://plausible.io/js/script.js"
           />
         )}

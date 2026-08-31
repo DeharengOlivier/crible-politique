@@ -11,6 +11,84 @@ valeur, motif, source.
 
 ---
 
+## 2026-08-31 - Audit d'honnêteté: ce que le site disait de vos données, et ce qu'il en faisait
+
+Le propriétaire du projet a mis en doute le discours du site sur les données
+("j'ai l'impression que c'est un mensonge"). Vérification faite, ligne par
+ligne et navigateur ouvert. Il avait raison sur plusieurs points, dont le plus
+grave était sur la page dont c'est précisément la fonction d'être exacte.
+
+### Google était prévenu de chaque visite, avant tout clic
+
+- **Mesuré** sur l'accueil en production: une simple visite, sans rien cliquer,
+  déclenchait `GET accounts.google.com/gsi/client` et `/gsi/style`, avec
+  `referer: https://crible.eu/`. Tout visiteur était donc signalé à Google
+  comme ayant ouvert un outil de positionnement politique, y compris ceux qui
+  ne se connectaient jamais, et un navigateur connecté à Google y joignait ses
+  cookies Google.
+- Le déclarer aurait été le minimum. **Ne plus le faire est mieux**: le script
+  de Google n'est plus chargé qu'au moment où le lecteur appuie sur la bulle de
+  compte. Le site dessine d'abord son propre bouton, et cède la place au bouton
+  officiel de Google une fois celui-ci chargé. Le coût est un appui de plus,
+  que le lecteur avait décidé de faire de toute façon; il est annoncé sur
+  l'écran de connexion.
+- **Vérifié après correction**, sur un build de production: zéro requête vers
+  Google au chargement de l'accueil, une seule après l'appui.
+
+### La page « mentions légales » décrivait un site qui n'existe plus
+
+Elle affirmait, sur un déploiement qui a un compte Google, une API et une base
+de données: *« Données collectées: Aucune. Le site n'a ni compte, ni base de
+données, ni API »*, puis *« Sans collecte, il n'y a pas de traitement de
+données personnelles au sens du RGPD, donc pas de base légale à invoquer »*, et
+enfin, sur vos droits, *« Il n'y en a aucune ici »*. Le texte avait été écrit
+pour le site sans serveur et n'avait pas suivi les fonctionnalités ajoutées.
+
+- Réécrite entièrement, et **branchée sur la configuration réelle**: elle
+  énumère ce qui est enregistré (compteur agrégé, profil chiffré), la base
+  légale (consentement explicite, article 9.2.a, les opinions politiques étant
+  des données sensibles), la durée de conservation, les droits et le bouton qui
+  les exerce, les transferts hors UE, et ce que voient les hébergeurs.
+- Le tableau des sous-traitants nommait **Plausible**, que ce déploiement ne
+  charge pas, et omettait **Cloudflare** et **Google**, qu'il contacte. Corrigé,
+  et chaque ligne est désormais liée au drapeau qui l'active.
+- Un déploiement sans serveur, lui, continue de dire qu'il ne collecte rien:
+  c'est vrai, et il ne doit pas s'excuser d'une base qu'il n'a pas.
+
+### Trois autres affirmations rendues exactes
+
+- **« Au plus deux appels vers notre API »**: il y en a trois. La lecture des
+  statistiques publiques part au chargement de l'accueil, avant tout clic, et
+  n'avait jamais été comptée. Un lecteur suivant nos propres instructions
+  ("ouvrez l'onglet Réseau") en trouvait un de plus qu'annoncé.
+- **Ce que le serveur reçoit à la connexion**: le jeton Google est un JWT qui
+  contient votre adresse e-mail, votre nom et votre photo. Il part vers l'API
+  dans l'en-tête `Authorization`. Le serveur n'en garde rien (il ne lit que
+  l'identifiant de compte, les journaux sont désactivés), mais il **le reçoit**.
+  Dire seulement « la base ne contient pas votre e-mail » était vrai et
+  incomplet. C'est maintenant écrit, avec le moyen de le vérifier soi-même.
+- **Les adresses IP**: elles sont vues par les hébergeurs à chaque requête, et
+  l'API en fait une utilisation éphémère (compter les appels par minute, pour
+  borner les abus). Rien n'est stocké. La page ne parlait que de ce qui n'est
+  pas enregistré.
+
+### Ailleurs
+
+- L'accroche de l'accueil promettait « sans compte, sans collecte de données »
+  sur un build qui demande un compte pour lire ses résultats.
+- La page partenaires terminait sa section données ouvertes sur « sans collecte
+  de données », et un partenaire le répétait à ses propres lecteurs.
+- `README.md` et `.env.local.example` annonçaient à un développeur qu'il n'y a
+  « pas de base de données » et « aucun appel à une API tierce ».
+- `api/README.md` décrivait encore le modèle de clé abandonné le 29 août (« la
+  clé ne quitte jamais l'utilisateur, code de récupération »).
+
+Toutes ces affirmations sont désormais tenues par une batterie de tests qui
+échoue si une page nie un flux que le build réalise, ou en déclare un qu'il ne
+peut pas faire (`__tests__/statedDataFlowsAreReal.test.tsx`).
+
+---
+
 ## 2026-08-31 - Compte requis pour ouvrir ses résultats, et quatre chiffres faux corrigés
 
 ### Une connexion Google avant d'afficher ses propres résultats

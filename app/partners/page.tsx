@@ -58,8 +58,14 @@ export default function PartnersPage() {
             les énoncés du questionnaire, les positions des partis avec sources et statuts,
             la formule de calcul (recalculable à la main) et les fiches de faisabilité.
             Il n&apos;existe volontairement aucune API d&apos;analyse côté serveur: les calculs
-            sont déterministes et s&apos;exécutent dans le navigateur de l&apos;utilisateur,
-            sans collecte de données.
+            sont déterministes et s&apos;exécutent dans le navigateur de l&apos;utilisateur.
+            {/* This paragraph ended on "sans collecte de données" until
+                2026-08-31, and a partner embedding the widget was repeating it
+                to their own readers. What the site collects is one page away
+                and stated exactly, rather than summarised into a promise. */}
+            {' '}Ce que le site enregistre par ailleurs, et ce qu&apos;il ne fait pas, est
+            détaillé dans les{' '}
+            <Link href="/legal" className="text-blue-600">mentions légales</Link>.
           </p>
           <p className="text-sm text-gray-600">
             Chercheurs et rédactions: contactez-nous pour les exports structurés et la

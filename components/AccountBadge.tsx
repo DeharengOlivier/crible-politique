@@ -97,10 +97,18 @@ export default function AccountBadge() {
             setMessage(null);
             return;
         }
+        if (result.outcome !== 'empty') {
+            setMessage("La connexion n'a pas abouti. Réessayez dans un instant.");
+            return;
+        }
+        // Nothing on the server is not nothing at all: this device may well
+        // hold an analysis, and told a reader who had just finished one to go
+        // and take it (reported 2026-08-31). The server and the device are two
+        // different places, so the sentence names which one it is talking about.
         setMessage(
-            result.outcome === 'empty'
-                ? 'Aucun profil sauvegardé sur ce compte. Faites le test, puis sauvegardez-le depuis vos résultats.'
-                : "La connexion n'a pas abouti. Réessayez dans un instant."
+            savedStage === null
+                ? 'Aucun profil sauvegardé sur ce compte, et aucune analyse sur cet appareil. Faites le test pour commencer.'
+                : "Aucun profil n'était sauvegardé sur ce compte. Votre analyse sur cet appareil est intacte: sauvegardez-la depuis le bas de vos résultats pour la retrouver ailleurs."
         );
     };
 

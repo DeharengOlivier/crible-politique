@@ -243,14 +243,18 @@ npm start
 
 ### Environment variables
 
-The app runs without any external service. All environment variables are
-optional and only affect SEO/analytics metadata; there is no database and no
-Supabase connection in the current code.
+The app runs without any external service: with none of these set, it is the
+client-only tool, every calculation happens in the browser and no request
+leaves it. Two optional features turn on from here, and each one adds a real
+data flow that `/legal` and `/confidentialite` then declare. Those pages read
+the same flags, so a feature cannot be enabled without being disclosed.
 
 | Variable | Purpose |
 | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Public base URL used for canonical links, sitemap, robots and OG images. Falls back to the production domain. |
-| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Cookieless Plausible analytics domain. If unset, the analytics script is not injected. |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Cookieless Plausible analytics domain. If unset, the analytics script is not injected and no analytics processor is declared. |
+| `NEXT_PUBLIC_CRIBLE_API_URL` | Base URL of the Cloudflare Worker in [`api/`](api/). Turns on the anonymous aggregate counters, its D1 database and the `/statistiques` page. |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth web client id. With the URL above, turns on sign-in and the encrypted profile vault. Its script is fetched only when the reader presses the account bubble. |
 
 Keep `.env.local.example` placeholder-only. Never commit a real `.env.local`:
 it is ignored by [`.gitignore`](.gitignore).
