@@ -16,13 +16,13 @@ import type { Country } from '@/types/positions';
 // itself reads as a trick: the answers are computed and kept on this device,
 // nothing was sent anywhere to produce them, and signing out gives them back.
 
-// mt-14 clears the two floating controls this screen shares its top edge with:
-// the back button on the left and the account bubble on the right, both 44px
-// tall from 12px down. Measured at 375px without it, the card's top border ran
-// underneath both.
+// This card carried its own top margin to clear the two floating controls it
+// shares its top edge with. It no longer needs one: the page reserves that
+// strip for every screen it hosts (app/test/page.tsx), which is where the
+// collision comes from and the only place that knows how tall the chrome is.
 export default function SignInToSeeResults({ country }: { country: Country }) {
     return (
-        <section className="mx-auto mt-14 w-full max-w-xl space-y-5 rounded-2xl border-2 border-[var(--color-border)] bg-white p-6 text-center sm:mt-8 sm:p-8">
+        <section className="mx-auto w-full max-w-xl space-y-5 rounded-2xl border-2 border-[var(--color-border)] bg-white p-6 text-center sm:p-8">
             <div className="flex justify-center">
                 <LockKeyhole
                     className="h-12 w-12 text-[var(--color-primary)]"

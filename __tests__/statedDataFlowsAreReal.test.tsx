@@ -9,6 +9,7 @@ import PartnersPage from '@/app/partners/page';
 import AboutPage from '@/app/a-propos/page';
 import MethodologyPage from '@/app/methodology/page';
 import { answersStayHereSentence } from '@/lib/resultsAccess';
+import { TEST_SESSION_STORAGE_KEY } from '@/lib/testSession';
 
 // Reported 2026-08-31 by the owner, about the site's own privacy discourse:
 // "j'ai l'impression que c'est un mensonge". It was, and the worst of it was on
@@ -253,6 +254,25 @@ describe('the questionnaire footer promises no more than the build keeps', () =>
         const source = readFileSync(path, 'utf8');
         expect(source).toMatch(/answersStayHereSentence/);
         expect(source).not.toMatch(/ne quittent jamais votre appareil/);
+    });
+});
+
+describe('the storage key a reader is told to look for is the one that is there', () => {
+    it('names the key the code actually writes', () => {
+        // It said crible_test_v1 on a build storing crible_test_v2 (found
+        // 2026-09-01). Of every claim on that page it is the cheapest for a
+        // reader to falsify, and a falsified detail discredits the paragraphs
+        // around it that they cannot check as easily.
+        enableVault();
+        expect(textOf(LegalPage)).toContain(TEST_SESSION_STORAGE_KEY);
+    });
+
+    it('reads it from the code rather than retyping it', () => {
+        const source = readFileSync('app/legal/page.tsx', 'utf8');
+        expect(source).toMatch(/TEST_SESSION_STORAGE_KEY/);
+        // The literal may appear in a comment recording what went wrong; what
+        // must never come back is a hand-typed copy in the markup.
+        expect(source).not.toMatch(/<code>crible_test_v/);
     });
 });
 

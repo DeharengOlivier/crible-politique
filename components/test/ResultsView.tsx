@@ -14,6 +14,7 @@ import CompassSection from './results/CompassSection';
 import DuoInvitationBanner from './results/DuoInvitationBanner';
 import FurtherModules from './results/FurtherModules';
 import IdentitySection from './results/IdentitySection';
+import AnalysisPrecision from './results/AnalysisPrecision';
 import LeadingGroupSummary from './results/LeadingGroupSummary';
 import PartyRanking from './results/PartyRanking';
 import PriorityPicker from './results/PriorityPicker';
@@ -35,9 +36,17 @@ interface ResultsViewProps {
     answers: AnswerRecord;
     respondent: Respondent;
     onRestart: () => void;
+    /**
+     * Continues an unfinished analysis with the statements left to answer.
+     *
+     * Optional, and its absence is meaningful rather than a default: a profile
+     * that arrived in a shared link is someone else's answers, and finishing
+     * them would mean answering in their name.
+     */
+    onContinue?: () => void;
 }
 
-export default function ResultsView({ answers, respondent, onRestart }: ResultsViewProps) {
+export default function ResultsView({ answers, respondent, onRestart, onContinue }: ResultsViewProps) {
     const profile = useMemo(() => computeProfile(answers), [answers]);
     // The reader's fights: dimensions whose statements count double in the
     // displayed ranking (METHODOLOGY.md 3.4). Display-only and session-local;
@@ -102,6 +111,15 @@ export default function ResultsView({ answers, respondent, onRestart }: ResultsV
                 <PartyFightsPanel
                     parties={matches.map((match) => match.party)}
                     priorities={priorities}
+                />
+
+                {/* Before any percentage: how much of the corpus this rests
+                    on, and the way to make it rest on more. */}
+                <AnalysisPrecision
+                    answers={answers}
+                    country={respondent.country}
+                    matches={matches}
+                    onContinue={onContinue}
                 />
 
                 <LeadingGroupSummary matches={matches} perimeter={perimeter} />

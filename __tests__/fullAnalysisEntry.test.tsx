@@ -14,7 +14,11 @@ import { statementsFor, expressStatementsFor } from '@/lib/electoralScope';
 // all" is the introduction screen, not an error the reader has to understand.
 
 vi.mock('next/navigation', () => ({
-    useRouter: () => ({ push: () => {}, replace: () => {}, refresh: () => {}, back: () => {}, prefetch: () => {} })
+    useRouter: () => ({ push: () => {}, replace: () => {}, refresh: () => {}, back: () => {}, prefetch: () => {} }),
+    // On a direct load the router's params are the URL's, which is what
+    // this models. doorSurvivesClientNavigation.test.tsx covers the case
+    // where the two disagree, which is every click from the home page.
+    useSearchParams: () => new URLSearchParams(window.location.search)
 }));
 
 afterEach(cleanup);

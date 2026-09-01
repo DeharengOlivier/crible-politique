@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { Suspense, useMemo, useState, useSyncExternalStore } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { AnswerRecord, Respondent, Statement } from '@/types/positions';
 import { computeProfile, computePartyMatches } from '@/lib/scoringEngine';
 import { decodeProfile } from '@/lib/profileCode';
@@ -166,10 +167,7 @@ function IntroView({
             {staleShareLink && (
                 <p
                     role="status"
-                    /* mt-14 clears the floating back button, 44px tall from 12px
-                       down in the same corner. Measured at 375px without it: the
-                       notice ran underneath it. */
-                    className="mt-14 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-left text-sm leading-relaxed text-amber-900 sm:mt-8"
+                    className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-left text-sm leading-relaxed text-amber-900"
                 >
                     Ce lien de partage n&apos;est plus lisible. Les liens créés avant le 30 août 2026
                     sont attachés à une version du questionnaire qui a changé depuis, et les rouvrir
@@ -312,21 +310,18 @@ function TestFlow() {
     // "keep my results" link, and local storage. Neither exists during the
     // server render, so the hook reports null until mount and this stays
     // null with it, which renders nothing rather than a wrong first frame.
-    // The door is in the query string, which the server does see, unlike the
-    // fragment. It says which analysis was asked for and nothing about anyone.
-    const door = useMemo(
-        () =>
-            typeof window === 'undefined'
-                ? null
-                : requestedAnalysis(new URLSearchParams(window.location.search).get('analyse')),
-        []
-    );
-    const resume = useMemo(
-        () =>
-            typeof window !== 'undefined' &&
-            new URLSearchParams(window.location.search).get('reprendre') === '1',
-        []
-    );
+    //
+    // The door and the resume flag are in the query string, which the server
+    // does see, unlike the fragment. They are read from the router rather than
+    // from window.location: on a client-side navigation the new route renders
+    // before the history entry is committed, so window.location still holds the
+    // page the reader came from. Read that way (2026-09-01), pressing "Analyse
+    // complète" on the home page found no door and dropped the reader into the
+    // introduction, whose button starts the express analysis: the complete one
+    // was unreachable by the only route anyone actually takes.
+    const query = useSearchParams();
+    const door = useMemo(() => requestedAnalysis(query.get('analyse')), [query]);
+    const resume = query.get('reprendre') === '1';
 
     const restored = useMemo(
         () => (shared === null ? null : restoreFlow(shared.p, door, resume)),
@@ -486,6 +481,12 @@ function TestFlow() {
                     <ResultsView
                         answers={answers}
                         respondent={respondent}
+                        // Only for the reader's own analysis: a shared profile
+                        // is someone else's answers, and the refine stage would
+                        // continue it in their name.
+                        onContinue={
+                            fromSharedLink ? undefined : () => transition('refine', answers)
+                        }
                         onRestart={() => {
                             try {
                                 localStorage.removeItem(TEST_SESSION_STORAGE_KEY);
@@ -511,8 +512,21 @@ export default function TestPage() {
     return (
         <div className="min-h-screen bg-[var(--color-bg)]">
             <FloatingBackButton />
-            <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-                <TestFlow />
+            {/* The two floating controls of this page, the back button on the
+                left and the account bubble on the right, both sit 12px down and
+                are 44px tall, so they occupy the strip up to y=56. The page
+                reserves it here rather than leaving every screen to discover
+                the collision on its own: measured at 375px, the questionnaire's
+                "Énoncé 1 / 35" ran underneath the back button. */}
+            <main className="mx-auto max-w-4xl px-4 pb-10 pt-16 sm:px-6 sm:pt-10">
+                {/* useSearchParams needs a boundary for the shell to stay
+                    statically prerendered. The fallback is empty on purpose:
+                    the flow already renders nothing until it knows which
+                    screen it owes the reader, and a spinner here would flash
+                    on every arrival. */}
+                <Suspense fallback={null}>
+                    <TestFlow />
+                </Suspense>
             </main>
         </div>
     );

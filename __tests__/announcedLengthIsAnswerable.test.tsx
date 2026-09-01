@@ -20,7 +20,11 @@ import RespondentPicker from '@/components/test/RespondentPicker';
 
 vi.mock('next/navigation', () => ({
     useRouter: () => ({ push: () => {}, replace: () => {}, refresh: () => {}, back: () => {}, prefetch: () => {} }),
-    usePathname: () => '/'
+    usePathname: () => '/',
+    // On a direct load the router's params are the URL's, which is what
+    // this models. doorSurvivesClientNavigation.test.tsx covers the case
+    // where the two disagree, which is every click from the home page.
+    useSearchParams: () => new URLSearchParams(window.location.search)
 }));
 
 /** What a respondent can actually be asked, whichever country and door. */

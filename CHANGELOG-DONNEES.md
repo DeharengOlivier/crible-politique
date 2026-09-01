@@ -11,6 +11,77 @@ valeur, motif, source.
 
 ---
 
+## 2026-09-01 - L'analyse complète était inatteignable, et rien ne disait la précision d'un résultat
+
+### Le mode long renvoyait au mode court
+
+Signalé par le propriétaire: *« quand on sélectionne le mode long on est poussé
+vers le mode rapide et donc au final il est impossible de faire le mode long »*.
+
+Reproduit, et les deux cas se séparent nettement:
+
+- ouvrir directement `crible.eu/test?analyse=complete`: le choix du pays
+  apparaît, et l'on répond bien aux 35 énoncés. Correct;
+- cliquer « Analyse complète » sur l'accueil: la barre d'adresse affiche
+  `?analyse=complete` et c'est l'**écran d'introduction** qui s'affiche. Son
+  bouton « Commencer le test » lance l'analyse express. Quinze énoncés, soit
+  exactement ce que ce lecteur avait choisi de ne pas faire.
+
+**Cause**: la porte était lue avec `useMemo(() => window.location.search, [])`,
+qui s'exécute au premier rendu. Lors d'une navigation côté client, le routeur
+affiche la nouvelle page **avant** de valider l'entrée d'historique: ce premier
+rendu voit donc encore l'adresse de la page précédente, ne trouve aucune porte,
+et la liste de dépendances vide fait qu'il ne regardera plus jamais. La porte
+express avait le même défaut, invisible parce qu'aucune porte mène de toute
+façon à l'express. Le seul chemin que prennent les lecteurs était donc le seul
+qui ne marchait pas.
+
+**Correctif**: la porte est lue dans l'état du routeur (`useSearchParams`) et
+non dans `window.location`. Une batterie modélise la navigation côté client (le
+routeur connaît la nouvelle requête, le document affiche encore l'ancienne
+adresse); l'ancienne batterie ne pouvait pas voir le défaut, car elle
+positionnait l'adresse **avant** le rendu, ce qui est le cas du chargement
+direct, le seul qui fonctionnait.
+
+### Un résultat ne disait pas sur quoi il reposait
+
+Demandé dans la foulée: *« il faut que la réponse en long form soit bcp plus
+précise que celle en form court »*.
+
+Mesuré sur cinq répondants français: le calcul faisait déjà sa part. Sur le
+parti de tête, l'intervalle de confiance mesure 16 à 26 points après les quinze
+énoncés express, et 13 à 18 après le corpus entier; le groupe des partis que
+les réponses ne départagent pas passe de 4-12 à 3-8. Ce qui manquait était
+autour:
+
+- rien ne disait sur combien d'énoncés un classement reposait, ni qu'un
+  résultat express est un premier tri;
+- l'offre de compléter n'existait que sur l'écran d'aperçu, une étape plus tôt,
+  et disparaissait définitivement une fois passée. Un lecteur arrivé aux
+  résultats en express n'avait **aucun moyen** d'aller plus loin.
+
+Les résultats ouvrent désormais sur ce qu'ils valent: le nombre d'énoncés
+utilisés sur le corpus, la largeur de l'intervalle sur le parti de tête, et,
+quand l'analyse est inachevée, le bouton qui pose les énoncés restants. Une
+analyse complète dit qu'il n'y a plus rien à répondre. Un profil reçu par lien
+partagé n'offre pas ce bouton: ce sont les réponses de quelqu'un d'autre, les
+compléter reviendrait à répondre à sa place. La comparaison express/complet est
+tenue par un test qui échoue si le mode long cesse d'être le plus précis.
+
+### Aussi
+
+- La clé de stockage annoncée dans les mentions légales était `crible_test_v1`
+  alors que le code écrit `crible_test_v2`. C'est, de toute la page, ce qu'un
+  lecteur peut infirmer le plus vite, et un détail infirmé décrédibilise les
+  paragraphes qu'il ne peut pas vérifier aussi facilement. La page lit
+  maintenant la constante du code.
+- À 375px, « Énoncé 1 / 35 » passait sous le bouton retour flottant. La bande
+  occupée par les deux contrôles flottants de la page est désormais réservée
+  une fois, par la page elle-même, au lieu que chaque écran redécouvre la
+  collision.
+
+---
+
 ## 2026-08-31 - Audit d'honnêteté: ce que le site disait de vos données, et ce qu'il en faisait
 
 Le propriétaire du projet a mis en doute le discours du site sur les données

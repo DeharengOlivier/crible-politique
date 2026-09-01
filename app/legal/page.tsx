@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { analyticsDomain, profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
+import { TEST_SESSION_STORAGE_KEY } from '@/lib/testSession';
 
 // The one page whose entire purpose is to be exact, so it describes the
 // deployment it is served from and nothing else.
@@ -245,9 +246,13 @@ export default function LegalPage() {
 
             <h3 className="mt-4 text-lg font-semibold">Ce qui est stocké sur votre appareil</h3>
             <ul className="text-sm">
+              {/* The key is read from the code rather than retyped here: it
+                  said crible_test_v1 until 2026-09-01, on a build storing
+                  crible_test_v2, and it is the one claim on this page a reader
+                  can falsify in ten seconds with their developer tools. */}
               <li><strong>Réponses en cours</strong> (<code>localStorage</code>, clé
-              <code>crible_test_v1</code>) : pour reprendre un test interrompu et revoir vos
-              résultats.</li>
+              <code>{TEST_SESSION_STORAGE_KEY}</code>) : pour reprendre un test interrompu et
+              revoir vos résultats.</li>
               <li><strong>Invitation à comparer</strong> (<code>sessionStorage</code>) : le profil
               d&apos;un proche qui vous a envoyé un lien de comparaison, le temps de l&apos;onglet.</li>
               {profileVaultEnabled() && (
