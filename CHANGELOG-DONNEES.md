@@ -11,6 +11,70 @@ valeur, motif, source.
 
 ---
 
+## 2026-09-01 - Départager les partis: ce que la version longue peut et ne peut pas faire
+
+Demandé par le propriétaire: *« il faudrait faire en sorte que si on fait la
+partie longue, ça soit beaucoup plus tranché, au niveau des différents partis,
+peut-être rajouter des questions qui permettraient de départager plus
+nettement »*.
+
+**Aucune donnée n'a été modifiée.** Ni énoncé ajouté, ni position recodée. La
+mesure faite avant toute modification explique pourquoi, et pourquoi en ajouter
+n'aurait pas produit l'effet demandé.
+
+### La mesure
+
+`scripts/party-separation.ts`, 300 répondants tirés par graine et par pays,
+sortie complète dans `docs/party-separation.md`. Trois causes étaient possibles.
+
+1. **Le groupe de tête est déjà de 1 parti** pour un répondant cohérent, même
+   avec 30 % de ses réponses retirées au hasard, et le parti visé arrive premier
+   dans 100 % des cas en France. Le chiffre de « 3 à 8 partis à égalité » obtenu
+   la veille venait d'un panel uniformément aléatoire, donc incohérent par
+   construction et inséparable pour de bonnes raisons. C'était le mauvais
+   instrument de mesure, pas un défaut de l'outil. Corrigé ici à voix haute.
+2. **L'écart entre le 1er et le 2e ne dépend pas de la longueur du test**: 5,3
+   points après les quinze énoncés express, 5,6 après le corpus entier. Le score
+   est une moyenne sur les énoncés: en ajouter le fait converger et resserre son
+   intervalle de confiance, mais ne l'écarte pas du parti suivant. Ajouter des
+   énoncés de pouvoir discriminant ordinaire ne pouvait donc pas répondre à la
+   demande.
+3. **Il n'y avait pas non plus d'énoncé mort à remplacer**: aucun des 35 énoncés
+   français n'a un écart-type de positions partisanes inférieur à 0,75.
+   Repondérer le corpus par le pouvoir discriminant de chaque énoncé, la façon
+   mécanique d'élargir l'écart, le déplace de 0,2 point (10,6 -> 10,4). Piste
+   mesurée, puis abandonnée plutôt que livrée.
+4. **Les partis de tête sont proches parce qu'ils le sont dans la table codée**:
+   Renaissance et Horizons portent la même valeur sur 26 des 35 énoncés
+   français, Ecolo et Groen sur 33 des 33 énoncés belges. Ce dernier couple
+   explique à lui seul 50 des 66 ex aequo du panel belge. Aucun énoncé ajouté ne
+   les départagera tant que leurs positions sont codées de la même façon.
+
+### Ce qui a changé
+
+Élargir l'écart affiché aurait voulu dire fabriquer une différence que les
+données ne portent pas. L'écran de résultats montre à la place **où la
+séparation se trouve réellement**: les énoncés sur lesquels les deux premiers
+partis divergent d'au moins deux crans Likert, la position codée de chacun, et
+le côté que le répondant a pris.
+
+Le seuil de deux crans est motivé: toute la table est au statut `a_verifier`,
+et un cran d'écart entre deux partis est à l'intérieur de ce dont deux codeurs
+honnêtes peuvent discuter. Un écart d'un cran présenté comme ce qui sépare deux
+partis serait du bruit de codage habillé en fait politique.
+
+C'est ce nombre qui grandit avec la version longue: mesuré de 2,3 à 3,8 énoncés
+séparateurs en France, de 2,2 à 4,4 en Belgique. Et quand il tombe à zéro, le
+panneau le dit en toutes lettres plutôt que de laisser lire un écart de
+pourcentage: ce questionnaire ne peut pas départager ces deux partis.
+
+Méthodologie publique: METHODOLOGY.md 3.7. Code: `lib/partySeparation.ts`,
+`components/test/results/WhatSeparatesTheTopTwo.tsx`. Batteries:
+`__tests__/partySeparation.test.ts`, `__tests__/whatSeparatesTheTopTwo.test.tsx`,
+`__tests__/resultsShowWhatSeparatesParties.test.tsx`.
+
+---
+
 ## 2026-09-01 - L'analyse complète était inatteignable, et rien ne disait la précision d'un résultat
 
 ### Le mode long renvoyait au mode court

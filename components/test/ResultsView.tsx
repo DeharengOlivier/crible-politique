@@ -8,6 +8,7 @@ import { computeProfile, computePartyMatches } from '@/lib/scoringEngine';
 import { MAX_PRIORITY_DIMENSIONS, weightsForPriorities } from '@/lib/priorityWeights';
 import { encodeAnswers } from '@/lib/profileCode';
 import { encodeBadge } from '@/lib/badgeCode';
+import { topPairSeparation } from '@/lib/partySeparation';
 import SaveProfileCard from '@/components/profile/SaveProfileCard';
 import PartyFightsPanel from './PartyFightsPanel';
 import CompassSection from './results/CompassSection';
@@ -17,6 +18,7 @@ import IdentitySection from './results/IdentitySection';
 import AnalysisPrecision from './results/AnalysisPrecision';
 import LeadingGroupSummary from './results/LeadingGroupSummary';
 import PartyRanking from './results/PartyRanking';
+import WhatSeparatesTheTopTwo from './results/WhatSeparatesTheTopTwo';
 import PriorityPicker from './results/PriorityPicker';
 import ShareActions from './results/ShareActions';
 
@@ -62,6 +64,12 @@ export default function ResultsView({ answers, respondent, onRestart, onContinue
                         : undefined
             }),
         [answers, respondent, priorities]
+    );
+
+    // O(statements) over the corpus, recomputed only when the ranking moves.
+    const topSeparation = useMemo(
+        () => topPairSeparation(matches, answers, respondent.country),
+        [matches, answers, respondent.country]
     );
 
     const togglePriority = (dimension: DimensionKey) =>
@@ -123,6 +131,13 @@ export default function ResultsView({ answers, respondent, onRestart, onContinue
                 />
 
                 <LeadingGroupSummary matches={matches} perimeter={perimeter} />
+
+                {/* The percentage cannot be made more clear-cut by a longer
+                    analysis: it is a mean, so more statements narrow its
+                    interval without widening the gap. What separates the top
+                    two is the statements they actually disagree on, and that
+                    list is what grows with the complete run. */}
+                {topSeparation !== null && <WhatSeparatesTheTopTwo separation={topSeparation} />}
 
                 <p className="mb-4 text-sm text-[var(--color-text-secondary)]">
                     Proximité n&apos;est pas consigne de vote. Dépliez chaque parti pour voir exactement

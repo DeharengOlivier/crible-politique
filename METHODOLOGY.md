@@ -338,6 +338,48 @@ lecteur l'a signalé, et la règle du traitement identique a tranché.
 donc aussi le nombre d'énoncés où le répondant et le parti sont du même côté et
 du côté opposé, la neutralité n'étant d'aucun côté.
 
+### 3.7 Ce qui départage les deux premiers
+
+Un lecteur a demandé le 1er septembre 2026 que la version longue soit "beaucoup
+plus tranchée" entre les partis, en ajoutant au besoin des énoncés qui
+départagent plus nettement. La mesure a été faite avant toute modification
+(`scripts/party-separation.ts`, 300 répondants par pays, résultats complets dans
+`docs/party-separation.md`), et elle dit que ce n'est pas possible par cette
+voie:
+
+- **L'écart entre le 1er et le 2e ne dépend pas de la longueur du test.** Il est
+  de 5,3 points après les quinze énoncés express et de 5,6 points après le
+  corpus entier. Le score est une moyenne sur les énoncés: en ajouter le fait
+  converger vers sa vraie valeur et resserre son intervalle de confiance, mais
+  ne l'écarte pas de celui du parti suivant. Ce que la version longue achète est
+  de la **certitude**, pas de la **séparation**.
+- **Il n'y a pas d'énoncé mort à remplacer.** Aucun des 35 énoncés français n'a
+  un écart-type de positions partisanes inférieur à 0,75. Repondérer le corpus
+  par le pouvoir discriminant de chaque énoncé, ce qui serait la façon
+  mécanique d'élargir l'écart, le déplace de 0,2 point. Cette piste a été
+  mesurée puis abandonnée plutôt que livrée.
+- **Les partis de tête sont proches parce qu'ils le sont dans la table codée.**
+  Renaissance et Horizons portent la même valeur sur 26 des 35 énoncés français;
+  Ecolo et Groen sur 33 des 33 énoncés belges. Aucun énoncé ajouté ne les
+  départagera tant que leurs positions restent codées de la même façon.
+
+Gonfler l'écart aurait donc voulu dire fabriquer une différence que les données
+ne portent pas. L'écran de résultats montre à la place **où la séparation se
+trouve réellement**: les énoncés sur lesquels les deux premiers partis divergent
+d'au moins deux crans Likert, avec la position codée de chacun et le côté que le
+répondant a pris.
+
+Le seuil de deux crans n'est pas cosmétique. Toute la table est encore au statut
+`a_verifier` (codage préliminaire à partir des programmes), et un cran d'écart
+entre deux partis est à l'intérieur de ce dont deux codeurs honnêtes peuvent
+discuter. Présenter un écart d'un cran comme ce qui sépare deux partis
+habillerait du bruit de codage en fait politique.
+
+C'est ce nombre-là qui grandit avec la version longue: mesuré de 2,3 à 3,8
+énoncés séparateurs en France, de 2,2 à 4,4 en Belgique. Et quand il tombe à
+zéro, le panneau le dit: ce questionnaire ne peut pas départager ces deux
+partis, et l'écart de pourcentage affiché ne se lit pas.
+
 ## 4. Les archétypes et profils synthétiques
 
 Chaque dimension est associée à des "courants de pensée" (archétypes). Chaque
