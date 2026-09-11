@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import ClearLocalDataButton from '@/components/ClearLocalDataButton';
 import PageHeader from '@/components/PageHeader';
-import { profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
+import { analyticsWebsiteId, profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
 // Privacy as an architectural property, not as a promise.
 // Political opinions are sensitive data (art. 9 GDPR):
@@ -22,6 +22,11 @@ import { profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeat
 // never been counted. A reader following the instructions would have found one
 // more call than announced, on the page whose whole argument is that they do
 // not have to take our word for it.
+//
+// Audience measurement, added 2026-09-12, is counted the same way: it is two
+// more requests the reader will see, so it is announced rather than left for
+// them to find. What it may carry is bounded by /mesure-audience.js, which the
+// sentence names because this page's whole method is that the reader checks.
 function expectedApiCallsSentence(): string {
     if (profileVaultEnabled()) {
         return "Vous y verrez au plus trois appels vers notre API: la lecture des statistiques publiques au chargement de l'accueil, le compteur anonyme de fin d'analyse (pays et partis en tête, jamais vos réponses) et, si vous sauvegardez votre profil, un bloc chiffré illisible.";
@@ -30,6 +35,14 @@ function expectedApiCallsSentence(): string {
         return "Vous y verrez au plus deux appels vers notre API: la lecture des statistiques publiques au chargement de l'accueil, et le compteur anonyme de fin d'analyse (pays et partis en tête, jamais vos réponses).";
     }
     return "Vous n'y verrez aucun appel vers une API: ce déploiement n'en a aucune, le site n'est que des pages.";
+}
+
+// Deliberately a separate sentence, and not folded into the count above: the
+// measurement is not an API of ours that holds your answers, and stating it
+// apart is what keeps the first sentence exactly as verifiable as it was.
+function measurementSentence(): string | null {
+    if (analyticsWebsiteId() === null) return null;
+    return "S'y ajoute la mesure d'audience, que nous hébergeons nous-mêmes: le script /_v/script.js au chargement, puis une balise par page lue. Elle ne dépose aucun cookie, et elle ne transporte pas vos réponses: sur un profil partagé, le code est remplacé par /p/[code] avant même que la requête existe, et vous pouvez lire ce qui l'enlève dans /mesure-audience.js.";
 }
 
 export default function ConfidentialitePage() {
@@ -241,6 +254,7 @@ export default function ConfidentialitePage() {
                             besoin du code pour vérifier l&apos;essentiel: ouvrez les outils de développement de
                             votre navigateur (F12, onglet &quot;Réseau&quot;) pendant le test, et constatez
                             qu&apos;aucune requête ne transmet vos réponses. {expectedApiCallsSentence()}
+                            {measurementSentence() !== null ? ` ${measurementSentence()}` : ''}
                             {' '}N&apos;importe qui peut faire cette
                             vérification, ou la demander à quelqu&apos;un de confiance. Et tout ce qui détermine
                             vos résultats (énoncés, positions des partis, formule) est publié:{' '}

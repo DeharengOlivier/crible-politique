@@ -67,11 +67,18 @@ export default function RootLayout({
           // /_v/ prefix is rewritten in next.config.ts, and covers the beacon
           // too: the Umami tracker derives its collection URL from the
           // directory of its own currentScript.src.
-          <script
-            defer
-            data-website-id={analyticsWebsiteId() ?? undefined}
-            src="/_v/script.js"
-          />
+          <>
+            {/* Loaded first, and deferred like the tracker, so the redaction
+                below is defined by the time the tracker fires: deferred
+                scripts run in document order. */}
+            <script defer src="/mesure-audience.js" />
+            <script
+              defer
+              data-website-id={analyticsWebsiteId() ?? undefined}
+              data-before-send="cribleMesureAudience"
+              src="/_v/script.js"
+            />
+          </>
         )}
       </head>
       <body

@@ -107,10 +107,18 @@ describe('HomeStatsBand', () => {
         expect(screen.getByText(/Parti retiré du corpus/)).toBeTruthy();
     });
 
-    it('never counts a visit, because visits are not counted', async () => {
-        // The site sends nothing when it is read: a reader who never completes
-        // an analysis makes no request to us at all. Any beacon added here
-        // would break that, so this test stands guard over the promise.
+    it('never counts a visit itself, whatever the page measures', async () => {
+        // This band reads the public counters and writes nothing: a reader who
+        // never completes an analysis never increments anything here. Any
+        // beacon added to this component would break that, so this test stands
+        // guard over it.
+        //
+        // The site as a whole stopped being silent on 2026-09-12, when audience
+        // measurement was added in app/layout.tsx: reading a page now sends one
+        // cookieless beacon to our own instance. That is announced on
+        // /confidentialite and bounded by /mesure-audience.js, and it is a
+        // different thing from the counters this band displays, which still
+        // move only at the end of an analysis.
         const fetchSpy = vi.fn().mockResolvedValue(statsResponse(SNAPSHOT));
         vi.stubGlobal('fetch', fetchSpy);
         render(<HomeStatsBand />);
