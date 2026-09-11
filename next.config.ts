@@ -27,7 +27,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/_v/:path*",
-        destination: "https://stats.deploy-env.net/:path*",
+        destination: "https://analytics.aurelona.com/:path*",
       },
     ];
   },
