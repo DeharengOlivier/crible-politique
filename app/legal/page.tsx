@@ -104,8 +104,9 @@ function Processors() {
                     <tr className="border-b">
                         <td className="py-2">Contabo</td>
                         <td>
-                            Héberge le serveur de mesure d&apos;audience, sans cookie ni
-                            identifiant
+                            Héberge le serveur de mesure d&apos;audience. Aucun cookie ; un
+                            identifiant de visite recalculé chaque jour, l&apos;adresse IP
+                            n&apos;étant pas conservée
                         </td>
                         <td>UE</td>
                     </tr>
