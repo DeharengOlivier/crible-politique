@@ -19,6 +19,19 @@ const BASE_SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    // Audience measurement, proxied through this origin. See the script tag in
+    // app/layout.tsx for why it is not loaded from the measurement host
+    // directly. One prefix is enough for both halves of the tracker, the
+    // script and the beacon it posts to.
+    return [
+      {
+        source: "/_v/:path*",
+        destination: "https://stats.deploy-env.net/:path*",
+      },
+    ];
+  },
+
   async redirects() {
     // Routes from before the merge into "Le Crible Politique". Kept because
     // links to them are in the wild; they are redirects, not pages.

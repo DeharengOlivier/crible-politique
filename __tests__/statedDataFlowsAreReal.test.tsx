@@ -40,6 +40,7 @@ import { TEST_SESSION_STORAGE_KEY } from '@/lib/testSession';
 
 const API = 'https://api.example';
 const GOOGLE_CLIENT = 'client-123.apps.googleusercontent.com';
+const UMAMI_SITE = 'fba45ae4-7b42-48db-a4fe-c1373091e10b';
 
 vi.mock('next/navigation', () => ({
     notFound: () => {
@@ -135,17 +136,27 @@ describe('the legal page under the configuration production actually runs', () =
 
 describe('the analytics row is tied to the flag that injects the script', () => {
     it('lists no analytics processor while the script is not injected', () => {
-        // NEXT_PUBLIC_PLAUSIBLE_DOMAIN is unset in production (measured
-        // 2026-08-31), so app/layout.tsx renders no Plausible script, and
-        // declaring the processor announced a transfer that never happens.
+        // NEXT_PUBLIC_UMAMI_WEBSITE_ID is what app/layout.tsx reads to decide
+        // whether the tracker is rendered at all. Declaring the processor with
+        // it unset announces a transfer that never happens, which is what
+        // /legal did for two days (measured 2026-08-31).
         enableVault();
-        expect(textOf(LegalPage)).not.toMatch(/Plausible/);
+        expect(textOf(LegalPage)).not.toMatch(/Contabo/);
     });
 
-    it('lists it once the domain is configured', () => {
+    it('names the host of the measurement server once the site id is set', () => {
         enableVault();
-        vi.stubEnv('NEXT_PUBLIC_PLAUSIBLE_DOMAIN', 'crible.eu');
-        expect(textOf(LegalPage)).toMatch(/Plausible/);
+        vi.stubEnv('NEXT_PUBLIC_UMAMI_WEBSITE_ID', UMAMI_SITE);
+        expect(textOf(LegalPage)).toMatch(/Contabo/);
+    });
+
+    it('never names Plausible, which no longer receives anything', () => {
+        // The measurement moved to a self-hosted Umami on 2026-09-12. A row
+        // left behind would name a processor that receives nothing: the same
+        // defect as the one above, with the sign reversed.
+        enableVault();
+        vi.stubEnv('NEXT_PUBLIC_UMAMI_WEBSITE_ID', UMAMI_SITE);
+        expect(textOf(LegalPage)).not.toMatch(/Plausible/);
     });
 });
 

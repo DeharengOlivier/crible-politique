@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { analyticsDomain, profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
+import { analyticsWebsiteId, profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
 import { TEST_SESSION_STORAGE_KEY } from '@/lib/testSession';
 
 // The one page whose entire purpose is to be exact, so it describes the
@@ -100,10 +100,13 @@ function Processors() {
                         <td>USA</td>
                     </tr>
                 )}
-                {analyticsDomain() !== null && (
+                {analyticsWebsiteId() !== null && (
                     <tr className="border-b">
-                        <td className="py-2">Plausible</td>
-                        <td>Mesure d&apos;audience sans cookie ni identifiant</td>
+                        <td className="py-2">Contabo</td>
+                        <td>
+                            Héberge le serveur de mesure d&apos;audience, sans cookie ni
+                            identifiant
+                        </td>
                         <td>UE</td>
                     </tr>
                 )}

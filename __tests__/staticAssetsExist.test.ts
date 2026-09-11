@@ -53,6 +53,23 @@ async function isShipped(assetPath: string): Promise<boolean> {
     return exists(join('public', assetPath));
 }
 
+// A path can also be served by a rewrite, which proxies a prefix to another
+// origin. Added 2026-09-12 for /_v/, the audience-measurement prefix: the files
+// behind it are real, they just live on the measurement host, so public/ will
+// never hold them. The prefixes are read out of next.config.ts rather than
+// listed here, so deleting the rewrite puts the reference back under this test
+// instead of leaving a hole someone has to remember to close.
+async function rewrittenPrefixes(): Promise<string[]> {
+    const config = await readFile('next.config.ts', 'utf8');
+    const start = config.indexOf('async rewrites()');
+    if (start === -1) return [];
+    const end = config.indexOf('async redirects()', start);
+    const block = config.slice(start, end === -1 ? undefined : end);
+    return [...block.matchAll(/source:\s*['"`](\/[A-Za-z0-9._-]+)\/:path\*['"`]/g)].map(
+        (match) => match[1]
+    );
+}
+
 async function referencedAssets(files: string[]): Promise<Map<string, string[]>> {
     const references = new Map<string, string[]>();
     for (const file of files) {
@@ -71,8 +88,10 @@ describe('every static asset the site references is shipped', () => {
         const references = await referencedAssets(files);
         expect(references.size).toBeGreaterThan(0); // the scan itself must not go blind
 
+        const prefixes = await rewrittenPrefixes();
         const missing: string[] = [];
         for (const [asset, sources] of references) {
+            if (prefixes.some((prefix) => asset.startsWith(`${prefix}/`))) continue;
             if (!(await isShipped(asset))) missing.push(`${asset} (from ${sources.join(', ')})`);
         }
         expect(missing).toEqual([]);

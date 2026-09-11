@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Lexend, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import AccountBadge from "@/components/AccountBadge";
-import { analyticsDomain } from "@/lib/optionalFeatures";
+import { analyticsWebsiteId } from "@/lib/optionalFeatures";
 
 const lexend = Lexend({
   variable: "--font-heading",
@@ -59,11 +59,18 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         {/* Read through the same helper /legal declares the processor from, so
             the script and the declaration cannot disagree. */}
-        {analyticsDomain() !== null && (
+        {analyticsWebsiteId() !== null && (
+          // Served from this origin, not from the measurement host. Ad
+          // blockers filter on the third-party hostname rather than on the
+          // path, so a first-party script is the difference between counting
+          // visits and counting the visits of people without a blocker. The
+          // /_v/ prefix is rewritten in next.config.ts, and covers the beacon
+          // too: the Umami tracker derives its collection URL from the
+          // directory of its own currentScript.src.
           <script
             defer
-            data-domain={analyticsDomain() ?? undefined}
-            src="https://plausible.io/js/script.js"
+            data-website-id={analyticsWebsiteId() ?? undefined}
+            src="/_v/script.js"
           />
         )}
       </head>

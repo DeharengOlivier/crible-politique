@@ -252,7 +252,7 @@ the same flags, so a feature cannot be enabled without being disclosed.
 | Variable | Purpose |
 | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Public base URL used for canonical links, sitemap, robots and OG images. Falls back to the production domain. |
-| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | Cookieless Plausible analytics domain. If unset, the analytics script is not injected and no analytics processor is declared. |
+| `NEXT_PUBLIC_UMAMI_WEBSITE_ID` | Site identifier on the self-hosted, cookieless [Umami](https://umami.is) instance. If unset, the analytics script is not injected and no analytics processor is declared. The script is served from this origin under `/_v/`, rewritten in `next.config.ts`. |
 | `NEXT_PUBLIC_CRIBLE_API_URL` | Base URL of the Cloudflare Worker in [`api/`](api/). Turns on the anonymous aggregate counters, its D1 database and the `/statistiques` page. |
 | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth web client id. With the URL above, turns on sign-in and the encrypted profile vault. Its script is fetched only when the reader presses the account bubble. |
 

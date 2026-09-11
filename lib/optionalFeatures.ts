@@ -31,9 +31,14 @@ export function profileVaultEnabled(): boolean {
  * and therefore that no analytics processor may be declared: /legal listed
  * Plausible for two days on a production deployment that had never set this
  * (measured 2026-08-31), which announces a transfer that does not happen.
+ *
+ * The measurement moved off Plausible on 2026-09-12 to a self-hosted Umami,
+ * which is why this is now a website id and no longer a domain: Umami names
+ * the site by an opaque identifier issued by the instance. The processor row
+ * on /legal moved with it, from Plausible to the host of that instance.
  */
-export function analyticsDomain(): string | null {
-    const domain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN;
-    if (domain === undefined || domain.length === 0) return null;
-    return domain;
+export function analyticsWebsiteId(): string | null {
+    const websiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+    if (websiteId === undefined || websiteId.length === 0) return null;
+    return websiteId;
 }
