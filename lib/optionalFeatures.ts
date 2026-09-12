@@ -42,3 +42,18 @@ export function analyticsWebsiteId(): string | null {
     if (websiteId === undefined || websiteId.length === 0) return null;
     return websiteId;
 }
+
+/**
+ * What our hosts' sight of an IP address is used for. Two pages state it, so it
+ * lives here: they must never disagree, and neither may contradict the running
+ * configuration. /legal once listed Plausible on a deployment that measured
+ * nothing; on 2026-09-12 the opposite happened, and the flat denial below
+ * stayed on /confidentialite while the measurement was switched on in
+ * production. Both are the same defect, in opposite directions.
+ */
+export function ipUsageSentence(): string {
+    if (analyticsWebsiteId() === null) {
+        return "Nous ne les croisons avec rien, et aucune mesure d'audience ne tourne sur ce site.";
+    }
+    return "Nous ne les croisons avec rien. La mesure d'audience s'en sert le temps de la requête pour calculer un identifiant de visite, recalculé chaque jour, et l'adresse elle-même n'est conservée nulle part.";
+}

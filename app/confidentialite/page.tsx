@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import ClearLocalDataButton from '@/components/ClearLocalDataButton';
 import PageHeader from '@/components/PageHeader';
-import { analyticsWebsiteId, profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
+import { analyticsWebsiteId, ipUsageSentence, profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
 
 // Privacy as an architectural property, not as a promise.
 // Political opinions are sensitive data (art. 9 GDPR):
@@ -223,8 +223,7 @@ export default function ConfidentialitePage() {
                                 {publicStatisticsEnabled()
                                     ? " Notre API s'en sert pour une seule chose, le temps de la requête: compter combien d'appels viennent de la même adresse dans la minute, pour qu'un script ne puisse pas gonfler les compteurs publics ni nous coûter cher. Ce compteur vit dans la mémoire du réseau de diffusion et n'est jamais rangé nulle part. Les journaux de l'API sont désactivés, il n'y a donc pas de registre où votre adresse pourrait rester."
                                     : ' Nous n’en conservons rien, et ce déploiement n’a aucun serveur applicatif où ce serait même possible.'}{' '}
-                                Nous ne les croisons avec rien, et aucune mesure d&apos;audience ne
-                                tourne sur ce site.
+                                {ipUsageSentence()}
                             </li>
                             <li>
                                 <strong className="text-[var(--color-text)]">Sauvegarde locale, effaçable.</strong>{' '}

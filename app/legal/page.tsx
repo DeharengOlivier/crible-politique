@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { analyticsWebsiteId, profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
+import { analyticsWebsiteId, ipUsageSentence, profileVaultEnabled, publicStatisticsEnabled } from '@/lib/optionalFeatures';
 import { TEST_SESSION_STORAGE_KEY } from '@/lib/testSession';
 
 // The one page whose entire purpose is to be exact, so it describes the
@@ -282,8 +282,7 @@ export default function LegalPage() {
               {publicStatisticsEnabled() ? ', Cloudflare pour répondre à l’API' : ''}. Nous
               n&apos;en gardons rien: les journaux de l&apos;API sont désactivés côté serveur
               (<code>observability.enabled = false</code>, visible dans le dépôt), précisément pour
-              qu&apos;une adresse ou un jeton ne puisse pas s&apos;y retrouver. Nous ne les croisons
-              avec rien et ne les utilisons pour aucune mesure d&apos;audience.
+              qu&apos;une adresse ou un jeton ne puisse pas s&apos;y retrouver. {ipUsageSentence()}
             </p>
 
             {profileVaultEnabled() && (
